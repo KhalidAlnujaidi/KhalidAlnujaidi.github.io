@@ -21,7 +21,7 @@ Currently finishing my undergraduate degree studying computer science at PMU. Ex
 
 I am enthusiastic and a fanatic about the field of AI. After finishing an internship as a researh assistnat, i have continued to independently learn about the vast world of and AI technology.
 
-Since the best way to learn is by doing, i have gone on to build several passion projects (My one winning a TesorFlow Community Award). One project turned into a full fledged research topic.
+Since the best way to learn is by doing, i have gone on to build several passion projects (My best one winning a TensorFlow Community Award). One project turned into a full fledged research topic.
 
 Looking to persue a graduate program after comleting BCs.
 
