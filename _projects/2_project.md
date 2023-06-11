@@ -4,7 +4,7 @@ title: Spot-The-Camel
 description: Web App for Live Camel Detection
 img: assets\img\cmlapp.png
 importance: 2
-category: work
+category: ""
 ---
 
 Live Detection of Camels through a web browser UI developed using Flask and a custom trained Yolov5 model.

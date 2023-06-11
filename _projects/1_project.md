@@ -4,7 +4,7 @@ title: ConvNet Runner
 description: No Code image classifier trainer
 img: assets\img\covnetrunner.png
 importance: 1
-category: work
+category: ""
 ---
 
 Passion project that that came to be after struggling to train a custom image classifier. At that time of the project i had just completed my research internship at PMU and was new to machine learning. 
