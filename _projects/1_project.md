@@ -18,6 +18,7 @@ Technology used for this project was:
 - PyQt5 for the UI. This was a great [crouse](https://www.udemy.com/course/pyqt5-from-a-z/) that helped
 - TensorFlow for all the ML related work
 
+[Try it out](https://github.com/KhalidAlnujaidi/ConvNet-Runner)
 
 <div class="row">
     <div class="col-sm mt-3 mt-md-0">
