@@ -86,7 +86,9 @@ blockquote {
 .card {
   background-color: var(--global-card-bg-color);
 
+  // here is margin around images of each card display for projects or all
   img {
+    margin: 10px;
     width: 100%;
   }
 
@@ -508,8 +510,9 @@ footer.sticky-bottom {
       }
     }
   }
-
+  // Here individual project card height
   .card {
+    height: 175px;
     img {
       width: 100%;
     }
