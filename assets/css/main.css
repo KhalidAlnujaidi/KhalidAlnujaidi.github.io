@@ -200,6 +200,7 @@ blockquote {
   background-color: var(--global-card-bg-color);
 }
 .card img {
+  margin: 10px;
   width: 100%;
 }
 .card .card-title {
@@ -514,6 +515,9 @@ footer.sticky-bottom {
 }
 .projects a:hover .card-title {
   color: var(--global-theme-color);
+}
+.projects .card {
+  height: 175px;
 }
 .projects .card img {
   width: 100%;
