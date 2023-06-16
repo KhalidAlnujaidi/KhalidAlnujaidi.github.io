@@ -17,11 +17,11 @@ selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true  # includes social icons at the bottom of the page
 ---
 
-Currently finishing my undergraduate degree studying computer science at PMU. Expected to graduates May/June 2024.
+I am currently completing my undergraduate degree in computer science at PMU, with an expected graduation date of May/June 2024.
 
-I am an enthusiast and a fanatic about the field of AI. After finishing an internship as a researh assistnat, i have continued to independently learn about the vast world of AI technology.
+Driven by curiosity, I once landed an internship as a research assistant, which sparked my fascination and fueled my independent exploration of the vast world of AI technology.
 
-Since the best way to learn is by doing, i have gone on to build several passion projects. My best one winning a [TensorFlow Community Award](https://twitter.com/TensorFlow/status/1616147733903024129). Another project turned into a full fledged [research topic](https://arxiv.org/abs/2304.00757).
+Recognizing that hands-on experience is the best way to learn, I have undertaken several passion projects, one of which earned me a [TensorFlow Community Award](https://twitter.com/TensorFlow/status/1616147733903024129). Additionally, another project evolved into a full-fledged [research topic](https://arxiv.org/abs/2304.00757).
 
-Looking to persue a graduate program after comleting BCs. Intrested to go on to research the current state-of-art systems and try and push the boundries of what computers can do.
+Motivated by my passion for research and development, I am eagerly preparing to pursue a graduate program upon completing my Bachelor's degree. My ultimate goal is to immerse myself in cutting-edge research on state-of-the-art systems, continuously pushing the boundaries of what computers can achieve.
 
