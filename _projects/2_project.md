@@ -2,7 +2,7 @@
 layout: page
 title: Spot-The-Camel
 description: Web App for Live Camel Detection
-img: assets/img/cmlapp.jpg #projec image format must be in jpg and the path in / / 
+img: assets/img/cmlapp.png #projec image format must be in jpg and the path in / / 
 importance: 2
 category: ""
 ---
