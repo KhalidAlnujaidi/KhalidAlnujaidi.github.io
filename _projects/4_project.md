@@ -26,7 +26,7 @@ The process of conducting this research project was as following:
 <p> </p>
 <div class="row">
     <div class="col-sm-6 mt-3 mt-md-0">
-        {% include figure.html path="df2.png" title="example image" class="img-fluid rounded z-depth-1" %}
+        {% include figure.html path="assets/img/df2.jpg" title="example image" class="img-fluid rounded z-depth-1" %}
     </div>
     <div class="col-sm-6 mt-3 mt-md-0">
         <p>The project was a nice introduction to the field of machine learning. Prior to this, the only CS classes I had completed were Intro to CS 1 & 2. Tackling something like this was quite challenging; however, the learning experience was exceptional</p>
