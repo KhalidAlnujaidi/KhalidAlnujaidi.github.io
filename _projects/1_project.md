@@ -2,7 +2,7 @@
 layout: page
 title: ConvNet Runner
 description: No Code image classifier trainer
-img: covnetrunner.png
+img: assets\img\covnetrunner.png
 importance: 1
 category: ""
 ---
