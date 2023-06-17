@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://khalidalnujaidi.github.io/sitemap.xml
+Sitemap: khalidalnujaidi.github.io/sitemap.xml
