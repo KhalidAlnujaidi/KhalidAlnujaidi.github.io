@@ -2,7 +2,7 @@
 layout: page
 title: ConvNet Runner
 description: No Code image classifier trainer
-img: assets\img\covnetrunner.png
+img: assets/img/covnetrunner.png # tried \ if not work try / || this is pasting assets\img\4.jpg
 importance: 1
 category: ""
 ---
