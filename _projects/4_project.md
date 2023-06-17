@@ -25,7 +25,7 @@ The process of conducting this research project was as following:
 - Deep learning experiments
 
 
-<p>The project provided a valuable introduction to the field of machine learning, helping me solidify my understanding of the scientific method. It taught me the importance of investing time and patience when tackling complex ideas and new technologies.</p>
+<p>The project provided a valuable introduction to the field of machine learning, helping me solidify my understanding of the scientific method. It taught me the importance of investing time and patience when tackling what at first apear as complex ideas and new technologies.</p>
 
 <center>
 <div class="row">
