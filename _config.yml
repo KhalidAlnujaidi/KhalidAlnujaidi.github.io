@@ -320,7 +320,7 @@ external_links:
 # Responsive WebP Images
 # -----------------------------------------------------------------------------
 
-imagemagick:
+imagemagick: ## last commit changed 
   enabled: false # enables responsive images for your site (recommended, see https://github.com/alshedivat/al-folio/issues/537)
   widths:
     - 480

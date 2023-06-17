@@ -2,7 +2,7 @@
 layout: page
 title: Spot-The-Camel
 description: Web App for Live Camel Detection
-img: assets\img\cmlapp.png
+img: cmlapp.png
 importance: 2
 category: ""
 ---
@@ -19,6 +19,6 @@ The app and model weight can be found on [GitHub](https://github.com/KhalidAlnuj
 
 <div class="row">
     <div class="col-sm mt-3 mt-md-0">
-        {% include figure.html path="assets\img\camelappui.png" title="example image" class="img-fluid rounded z-depth-1" %}
+        {% include figure.html path="camelappui.png" title="example image" class="img-fluid rounded z-depth-1" %}
     </div>
 </div>
