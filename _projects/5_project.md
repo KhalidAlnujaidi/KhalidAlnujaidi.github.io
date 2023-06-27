@@ -24,3 +24,15 @@ category: ""
 
 Lem (the camel) was taught using two methods, Ray Perseption (similar to LiDAR), and Vision. 
 
+
+<div class="row">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.html path="assets/img/CAMEL-TRAINING.jpg" title="example image" class="img-fluid rounded z-depth-1" %}
+    </div>
+</div>
+<div class="caption" style="margin-bottom: 10px;">
+    Training Process
+</div>
+
+<p>Since the maximum award the agent can get is 1. When the Mean Reward reached 0.96 it is expected that the agent has fully learnt the task.
+</p>
