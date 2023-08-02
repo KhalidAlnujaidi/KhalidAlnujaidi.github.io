@@ -17,6 +17,8 @@ Technology used for this project was:
 
 The app and model weight can be found on [GitHub](https://github.com/KhalidAlnujaidi/Spot-The-Camel-App) 
 
+The dataset can be accessed [here](https://www.kaggle.com/datasets/khalidalnujaidi/images-of-camels-annotated-for-object-detection) 
+
 <div class="row">
     <div class="col-sm mt-3 mt-md-0">
         {% include figure.html path="assets/img/camelappui.jpg" title="example image" class="img-fluid rounded z-depth-1" %}

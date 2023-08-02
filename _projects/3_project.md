@@ -21,4 +21,11 @@ How the tutor system works is by having an individual point thier finger at prin
 
 This project <a href="https://www.neom.com/en-us/newsroom/hackathon-winning-teams"> won</a> our team top 3 at NEOM's Hackathon 2022
 
+<div class="row">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include video.html path="assets/video/hackathonvideo.mp4" class="img-fluid rounded z-depth-1" controls=true autoplay=false %}
+    </div>
+</div>
+
+
 
