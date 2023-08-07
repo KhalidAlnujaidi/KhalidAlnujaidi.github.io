@@ -25,7 +25,16 @@
 - title: Experience
   type: time_table
   contents:
-    - title:  Co-founder & CTO
+
+    - title:  Strategy Specialist | Internship
+      institution: Saudi Authority for Data and Artificial Intelligence (SDAIA)
+      year: Jun 2022 - Sep 2023
+      description:
+        - Survey of Generative AI Applications, Trends, and Potential.
+        - Benchmark global innovations for SDAIA projects.
+        - Deliver thorough reports and presentations.
+        
+    - title:  Co-founder & CTO | Pre-Seed 
       institution: Pre-Binary Smart Solutions
       year: Oct 2022 - Jan 2023
       description:
@@ -33,7 +42,7 @@
         - Meet & Interview both potential investors and customers.
         - Work on developing an MVP and pitch deck for Angle Investors.
         
-    - title: Research Assistance
+    - title: Research Assistant | Internship
       institution: RoboLab at PMU
       year: Jun 2022 - Sep 2022
       description:
