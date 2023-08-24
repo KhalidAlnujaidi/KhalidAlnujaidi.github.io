@@ -21,6 +21,7 @@ How the tutor system works is by having an individual point thier finger at prin
 
 This project <a href="https://www.neom.com/en-us/newsroom/hackathon-winning-teams"> won</a> our team top 3 at NEOM's Hackathon 2022
 
+The code for the device can be found <a href="https://github.com/KhalidAlnujaidi/NEOM-Hackathon-2022/blob/main/blindline.py"> here</a>
 <center>
 <div class="row">
     <div class="col-sm mt-3 mt-md-0">
