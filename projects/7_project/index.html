@@ -10,10 +10,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>projects | Khalid Alnujaidi</title>
+    <title>Intelligent Avatar | Khalid Alnujaidi</title>
     <meta name="author" content="Khalid  AlNujaidi">
-    <meta name="description" content="A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
-">
+    <meta name="description" content="Digital Tour guide that can be found around airports.">
     <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
 
 
@@ -39,7 +38,7 @@
     <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%F0%9F%8E%93&lt;/text&gt;&lt;/svg&gt;">
     
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="canonical" href="khalidalnujaidi.github.io/projects/">
+    <link rel="canonical" href="khalidalnujaidi.github.io/projects/7_project/">
 
     <!-- Dark Mode -->
     
@@ -86,8 +85,8 @@
               <li class="nav-item ">
                 <a class="nav-link" href="/publications/">publications</a>
               </li>
-              <li class="nav-item active">
-                <a class="nav-link" href="/projects/">projects<span class="sr-only">(current)</span></a>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
               </li>
               <li class="nav-item ">
                 <a class="nav-link" href="/cv/">cv</a>
@@ -121,246 +120,94 @@
         <div class="post">
 
           <header class="post-header">
-            <h1 class="post-title">projects</h1>
-            <p class="post-description"></p>
+            <h1 class="post-title">Intelligent Avatar</h1>
+            <p class="post-description">Digital Tour guide that can be found around airports.</p>
           </header>
 
           <article>
-            <!-- pages/projects.md -->
-<div class="projects">
-  <!-- Display categorized projects -->
-  <h2 class="category"></h2>
-  <!-- Generate cards for each project -->
-  <div class="container">
-    <div class="row row-cols-2">
-<div class="card-item col">
-<a href="/projects/1_project/"><div class="card hoverable">
-      <div class="row g-0">
-<div class="card-img col-md-6">
-          <figure>
+            <div class="row">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
 
   <picture>
     
 
     <!-- Fallback to the original file -->
-    <img src="/assets/img/covnetrunner.jpg" width="auto" height="auto" alt="project thumbnail" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+    <img src="/assets/img/saudichatheader.jpg" class="img-fluid rounded z-depth-1" width="auto" height="auto" title="example image" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
 
   </picture>
 
 </figure>
 
-        </div>
-        <div class="col-md-6">
-<div class="card-body">
-            <h3 class="card-title text-lowercase">ConvNet Runner</h3>
-            <p class="card-text">No Code image classifier trainer</p>
-            <div class="row ml-1 mr-1 p-0"></div>
-          </div>
-        </div>
-      </div>
     </div>
-  </a>
 </div>
-<div class="card-item col">
-<a href="/projects/2_project/"><div class="card hoverable">
-      <div class="row g-0">
-<div class="card-img col-md-6">
-          <figure>
 
-  <picture>
-    
+<h4 id="project-outline">Project outline</h4>
 
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/cmlapp.png" width="auto" height="auto" alt="project thumbnail" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+<p>Hackathon project. When OpenAI first released API keys for ChatGPT, the Ministry of Communication and Information Technology ran a hackathon under the theme of using the technology to serve a national use case. <a href="https://tuwaiq.hackathon.sa/" rel="external nofollow noopener" target="_blank">Hackathon page</a>. </p>
 
-  </picture>
+<p>
+The idea was to build an avatar that would sit on a large advertisment screen (<a href="https://www.google.com/search?q=indoor+advertising+display+screen&amp;tbm=isch&amp;ved=2ahUKEwiGhqTJ_7CAAxWxsEwKHZbEAI8Q2-cCegQIABAA&amp;oq=indoor+advertising+&amp;gs_lcp=CgNpbWcQARgBMgUIABCABDIFCAAQgAQyBQgAEIAEMgUIABCABDIFCAAQgAQyBQgAEIAEMgQIABAeMgYIABAFEB4yBggAEAUQHjIGCAAQCBAeOgQIIxAnOggIABCABBCxAzoICAAQsQMQgwE6BwgAEIoFEEM6CwgAEIAEELEDEIMBULUDWPEhYLMxaABwAHgAgAGoAYgBvhaSAQQwLjIwmAEAoAEBqgELZ3dzLXdpei1pbWfAAQE&amp;sclient=img&amp;ei=_H3DZIaYKrHhsgKWiYP4CA&amp;bih=786&amp;biw=1536#imgrc=Z_BxTjhYwjbt0M" rel="external nofollow noopener" target="_blank">similar to these</a>), that could be found as someone was waiting for thier laugadge at the airport. The avatar would be able to conversate with users fluently. Through a digital avatar interface.
+</p>
+
+<p>The technology used:</p>
+
+<ul>
+  <li>Whisper AI: Transcribes what is spoken to the avatar into text.</li>
+  <li>GPT-3.5: Initiated and fine-tuned to behave as a tour guide, specifically focused on Saudi Arabia.</li>
+  <li>Google Text-to-Speech: To speak out the responses on ChatGPT.</li>
+  <li>UI*: Not integrated, but will need to rig a character and render to match responses.</li>
+</ul>
+
+<p>
+As proof of concept, the avatars presented in the project pitch is a product of movio.la studio. However, the goal of the project is to have a fixed set of in-house developed avatars.
+</p>
+
+<center>
+<h5>Working code demo</h5>
+</center>
+
+<div class="row">
+    <div class="col-sm mt-3 mt-md-0">
+        
+
+<figure>
+
+  
+
+  <video src="/assets/video/Intelligent%20Avatar%20Saudi%20ChatGPT%20Hackathon.mp4" class="img-fluid rounded z-depth-1" width="auto" height="auto" controls=""></video>
+
+  
 
 </figure>
 
-        </div>
-        <div class="col-md-6">
-<div class="card-body">
-            <h3 class="card-title text-lowercase">Spot-The-Camel</h3>
-            <p class="card-text">Web App for Live Camel Detection</p>
-            <div class="row ml-1 mr-1 p-0"></div>
-          </div>
-        </div>
-      </div>
     </div>
-  </a>
 </div>
-<div class="card-item col">
-<a href="/projects/3_project/"><div class="card hoverable">
-      <div class="row g-0">
-<div class="card-img col-md-6">
-          <figure>
+<div class="caption" style="margin-top: -15px;">
+    *Video is sped up for better representation.
+</div>
 
-  <picture>
-    
+<center>
+<h5>End product concept demo.</h5>
+</center>
 
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/blindlineRing.jpg" width="auto" height="auto" alt="project thumbnail" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+<div class="row">
+    <div class="col-sm mt-3 mt-md-0">
+        
 
-  </picture>
+<figure>
+
+  
+
+  <video src="/assets/video/Intelligent%20Avatar%20by%20Whisper%20and%20ChatGPT.mp4" class="img-fluid rounded z-depth-1" width="auto" height="auto" controls=""></video>
+
+  
 
 </figure>
 
-        </div>
-        <div class="col-md-6">
-<div class="card-body">
-            <h3 class="card-title text-lowercase">BlindLine Ring</h3>
-            <p class="card-text">Innovative Education System for the Visually Impaired</p>
-            <div class="row ml-1 mr-1 p-0"></div>
-          </div>
-        </div>
-      </div>
     </div>
-  </a>
-</div>
-<div class="card-item col">
-<a href="/projects/4_project/"><div class="card hoverable">
-      <div class="row g-0">
-<div class="card-img col-md-6">
-          <figure>
-
-  <picture>
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/dfdthumbnail.jpg" width="auto" height="auto" alt="project thumbnail" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
-
-  </picture>
-
-</figure>
-
-        </div>
-        <div class="col-md-6">
-<div class="card-body">
-            <h3 class="card-title text-lowercase">Disease Classification</h3>
-            <p class="card-text">Date fruit disease classification using Machine Learning</p>
-            <div class="row ml-1 mr-1 p-0"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </a>
-</div>
-<div class="card-item col">
-<a href="/projects/5_project/"><div class="card hoverable">
-      <div class="row g-0">
-<div class="card-img col-md-6">
-          <figure>
-
-  <picture>
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/lemacprojectthumbnail.jpg" width="auto" height="auto" alt="project thumbnail" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
-
-  </picture>
-
-</figure>
-
-        </div>
-        <div class="col-md-6">
-<div class="card-body">
-            <h3 class="card-title text-lowercase">LeMAC Project</h3>
-            <p class="card-text">AI Agents taught using RL in Unity</p>
-            <div class="row ml-1 mr-1 p-0"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </a>
-</div>
-<div class="card-item col">
-<a href="/projects/6_project/"><div class="card hoverable">
-      <div class="row g-0">
-<div class="card-img col-md-6">
-          <figure>
-
-  <picture>
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/gptwhisper.jpg" width="auto" height="auto" alt="project thumbnail" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
-
-  </picture>
-
-</figure>
-
-        </div>
-        <div class="col-md-6">
-<div class="card-body">
-            <h3 class="card-title text-lowercase">Voice Analytics</h3>
-            <p class="card-text">Smart call center auditing via Generative AI.</p>
-            <div class="row ml-1 mr-1 p-0"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </a>
-</div>
-<div class="card-item col">
-<a href="/projects/7_project/"><div class="card hoverable">
-      <div class="row g-0">
-<div class="card-img col-md-6">
-          <figure>
-
-  <picture>
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/saudigpt.jpg" width="auto" height="auto" alt="project thumbnail" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
-
-  </picture>
-
-</figure>
-
-        </div>
-        <div class="col-md-6">
-<div class="card-body">
-            <h3 class="card-title text-lowercase">Intelligent Avatar</h3>
-            <p class="card-text">Digital Tour guide that can be found around airports.</p>
-            <div class="row ml-1 mr-1 p-0"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </a>
-</div>
-<div class="card-item col">
-<a href="/projects/8_project/"><div class="card hoverable">
-      <div class="row g-0">
-<div class="card-img col-md-6">
-          <figure>
-
-  <picture>
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/gpapp.jpg" width="auto" height="auto" alt="project thumbnail" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
-
-  </picture>
-
-</figure>
-
-        </div>
-        <div class="col-md-6">
-<div class="card-body">
-            <h3 class="card-title text-lowercase">Smart Surveillance</h3>
-            <p class="card-text">Full-stack web application for live visual analytics.</p>
-            <div class="row ml-1 mr-1 p-0"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </a>
 </div>
 
-    </div>
-  </div>
-</div>
 
           </article>
 

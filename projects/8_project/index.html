@@ -10,9 +10,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Intelligent Avatar | Khalid Alnujaidi</title>
+    <title>Smart Surveillance | Khalid Alnujaidi</title>
     <meta name="author" content="Khalid  AlNujaidi">
-    <meta name="description" content="Digital Tour guide that can be found around airports.">
+    <meta name="description" content="Full-stack web application for live visual analytics.">
     <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
 
 
@@ -38,7 +38,7 @@
     <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%F0%9F%8E%93&lt;/text&gt;&lt;/svg&gt;">
     
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="canonical" href="khalidalnujaidi.github.io/projects/7_projectt/">
+    <link rel="canonical" href="khalidalnujaidi.github.io/projects/8_project/">
 
     <!-- Dark Mode -->
     
@@ -120,94 +120,30 @@
         <div class="post">
 
           <header class="post-header">
-            <h1 class="post-title">Intelligent Avatar</h1>
-            <p class="post-description">Digital Tour guide that can be found around airports.</p>
+            <h1 class="post-title">Smart Surveillance</h1>
+            <p class="post-description">Full-stack web application for live visual analytics.</p>
           </header>
 
           <article>
-            <div class="row">
-    <div class="col-sm mt-3 mt-md-0">
-        <figure>
+            <h4 id="project-outline">Project outline</h4>
 
-  <picture>
-    
+<p>Prototype for a software as a service. Given access to video feeds, can share with user live analytics that are relevant; initialy just counting objects.</p>
 
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/saudichatheader.jpg" class="img-fluid rounded z-depth-1" width="auto" height="auto" title="example image" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+<p>The project is basicly a website that is served through flask framework. Users need to register to be able to access the live video feed + analysis.</p>
 
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-
-<h4 id="project-outline">Project outline</h4>
-
-<p>Hackathon project. When OpenAI first released API keys for ChatGPT, the Ministry of Communication and Information Technology ran a hackathon under the theme of using the technology to serve a national use case. <a href="https://tuwaiq.hackathon.sa/" rel="external nofollow noopener" target="_blank">Hackathon page</a>. </p>
-
-<p>
-The idea was to build an avatar that would sit on a large advertisment screen (<a href="https://www.google.com/search?q=indoor+advertising+display+screen&amp;tbm=isch&amp;ved=2ahUKEwiGhqTJ_7CAAxWxsEwKHZbEAI8Q2-cCegQIABAA&amp;oq=indoor+advertising+&amp;gs_lcp=CgNpbWcQARgBMgUIABCABDIFCAAQgAQyBQgAEIAEMgUIABCABDIFCAAQgAQyBQgAEIAEMgQIABAeMgYIABAFEB4yBggAEAUQHjIGCAAQCBAeOgQIIxAnOggIABCABBCxAzoICAAQsQMQgwE6BwgAEIoFEEM6CwgAEIAEELEDEIMBULUDWPEhYLMxaABwAHgAgAGoAYgBvhaSAQQwLjIwmAEAoAEBqgELZ3dzLXdpei1pbWfAAQE&amp;sclient=img&amp;ei=_H3DZIaYKrHhsgKWiYP4CA&amp;bih=786&amp;biw=1536#imgrc=Z_BxTjhYwjbt0M" rel="external nofollow noopener" target="_blank">similar to these</a>), that could be found as someone was waiting for thier laugadge at the airport. The avatar would be able to conversate with users fluently. Through a digital avatar interface.
-</p>
+<p>This project was completed as part of undergraduate requirment in place of thesis.</p>
 
 <p>The technology used:</p>
 
 <ul>
-  <li>Whisper AI: Transcribes what is spoken to the avatar into text.</li>
-  <li>GPT-3.5: Initiated and fine-tuned to behave as a tour guide, specifically focused on Saudi Arabia.</li>
-  <li>Google Text-to-Speech: To speak out the responses on ChatGPT.</li>
-  <li>UI*: Not integrated, but will need to rig a character and render to match responses.</li>
+  <li>Object Detectionn: Can use pretrained or fined tuned models.</li>
+  <li>Website: Using Python for backend.</li>
+  <li>UI: Utiliznig CSS and Bootstrap framework for asthetic layout.</li>
 </ul>
 
 <p>
-As proof of concept, the avatars presented in the project pitch is a product of movio.la studio. However, the goal of the project is to have a fixed set of in-house developed avatars.
+Details and demo to maybe come..
 </p>
-
-<center>
-<h5>Working code demo</h5>
-</center>
-
-<div class="row">
-    <div class="col-sm mt-3 mt-md-0">
-        
-
-<figure>
-
-  
-
-  <video src="/assets/video/Intelligent%20Avatar%20Saudi%20ChatGPT%20Hackathon.mp4" class="img-fluid rounded z-depth-1" width="auto" height="auto" controls=""></video>
-
-  
-
-</figure>
-
-    </div>
-</div>
-<div class="caption" style="margin-top: -15px;">
-    *Video is sped up for better representation.
-</div>
-
-<center>
-<h5>End product concept demo.</h5>
-</center>
-
-<div class="row">
-    <div class="col-sm mt-3 mt-md-0">
-        
-
-<figure>
-
-  
-
-  <video src="/assets/video/Intelligent%20Avatar%20by%20Whisper%20and%20ChatGPT.mp4" class="img-fluid rounded z-depth-1" width="auto" height="auto" controls=""></video>
-
-  
-
-</figure>
-
-    </div>
-</div>
-
 
           </article>
 
