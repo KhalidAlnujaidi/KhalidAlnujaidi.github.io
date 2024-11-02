@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Data Scientist @ <a href="https://www.crayon.com/ae/">Crayon</a>
+subtitle: Data Scientist @ <a href="https://www.mozn.sa/">Mozn</a>
 
 profile:
   align: left
