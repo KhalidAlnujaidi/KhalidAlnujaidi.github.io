@@ -6,7 +6,7 @@
   - name: Phone
     value: (+966) 546349719
   - name: Location
-    value: Al Khobar, Saudi Arabia
+    value: Riyadh, Saudi Arabia
   - name: Email
     value: khalidnujaidi@gmail.com
 
@@ -16,16 +16,29 @@
   contents:
     - title: Bachelor of Computer Science
       institution: Prince Mohammad Bin Fahd University
-      year: Expected 05/2024
+      year: 05/2024
       description:
         - "Relevant Coursework: Algorithms, Artificial Intelligence, Calculus, and Linear Algebra."
-        - "GPA: 3.57"
+        - "GPA: 3.49"
 
 
 - title: Experience
   type: time_table
   contents:
 
+    - title:  Data Scientist | Full-time
+      institution: Mozn
+      year: Oct 2024 - Current
+      description:
+        
+    
+    - title:  Jr. Data Scientist | Full-time
+      institution: Crayon
+      year: Aug 2024 - Oct 2024
+      description:
+
+
+      
     - title:  Strategy Specialist | Internship
       institution: Saudi Authority for Data and Artificial Intelligence (SDAIA)
       year: Jun 2023 - Sep 2023
