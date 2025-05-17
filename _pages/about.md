@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Data Scientist @ <a href="https://www.mozn.sa/">Mozn</a>
+subtitle: Data Analyst @ <a href="https://hungerstation.com/sa-en">HungerStation</a>
 
 profile:
   align: left
@@ -16,7 +16,7 @@ selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-Fresh Computer Science graduate from PMU.
+Computer Science graduate from PMU.
 
 Driven by curiosity, I once landed an internship as a research assistant, which sparked my fascination and fueled my independent exploration of the vast world of AI technology.
 
