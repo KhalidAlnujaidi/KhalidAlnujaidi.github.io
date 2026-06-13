@@ -16,7 +16,7 @@
 <body>
 <div class="wrap">
 
-  <!-- ========== Identity & Philosophy ========== -->
+  <!-- ========== Identity & Philosophy (full width) ========== -->
   <header class="passport-head">
     <div>
       <h1 class="name">Khalid Alnujaidi</h1>
@@ -29,60 +29,101 @@
     embedded hardware engineering, and autonomous AI orchestration layers.
   </p>
 
-  <!-- ========== Section A: Core Technical Highlights ========== -->
-  <section aria-labelledby="highlights">
-    <h2 class="sec-label" id="highlights">Core Technical Highlights</h2>
+  <!-- ========== Two-column content grid ========== -->
+  <div class="content-grid">
 
-    <p class="group-label">// Systems Engineering &amp; Machine Learning</p>
-    <ul class="dense">
-      <li>
-        Designed and deployed a production-grade <strong>MultiModal LLM fraud detection
-        system</strong> using vision models to parse refund images, scaling directly into
-        regional delivery infrastructure &mdash; adopted by
-        <a href="/projects/refund-audit.html">Delivery&nbsp;Hero&nbsp;&rarr;</a>.
-      </li>
-      <li>
-        Engineered a B2B automated computer-vision <strong>drive-through loyalty system</strong>
-        tracking vehicle license plates for frictionless processing; scaled architecture to
-        <span class="metric">10+&nbsp;clients</span> across public/private sectors, securing
-        <span class="metric">300k&nbsp;SAR</span> in revenue at a
-        <span class="metric">66%</span> average profit margin.
-      </li>
-    </ul>
+    <!-- ---- Left column: the data-dense CV ---- -->
+    <div class="col">
+      <section aria-labelledby="highlights">
+        <h2 class="sec-label" id="highlights">Core Technical Highlights</h2>
 
-    <p class="group-label">// Hardware &amp; Rapid Prototyping Stack</p>
-    <ul class="dense">
-      <li>
-        Programmed custom firmware and hardware integrations across <strong>ESP32</strong> and
-        <strong>Raspberry&nbsp;Pi</strong> environments for IoT automation and modular robotics.
-      </li>
-      <li>
-        Structured multi-part mechanical enclosures and rapid-prototyping iterations optimized
-        for structural shells using <strong>Bambu&nbsp;Lab</strong> ecosystems.
-      </li>
-    </ul>
-  </section>
+        <p class="group-label">// Systems Engineering &amp; Machine Learning</p>
+        <ul class="dense">
+          <li>
+            Designed and deployed a production-grade <strong>MultiModal LLM fraud detection
+            system</strong> using vision models to parse refund images, scaling directly into
+            regional delivery infrastructure &mdash; adopted by
+            <a href="/projects/refund-audit.html">Delivery&nbsp;Hero&nbsp;&rarr;</a>.
+          </li>
+          <li>
+            Engineered a B2B automated computer-vision <strong>drive-through loyalty system</strong>
+            tracking vehicle license plates for frictionless processing; scaled architecture to
+            <span class="metric">10+&nbsp;clients</span> across public/private sectors, securing
+            <span class="metric">300k&nbsp;SAR</span> in revenue at a
+            <span class="metric">66%</span> average profit margin.
+          </li>
+        </ul>
 
-  <!-- ========== Section B: Essays ========== -->
-  <section aria-labelledby="essays">
-    <h2 class="sec-label" id="essays">Theoretical &amp; Engineering Essays</h2>
-    <ul class="stream">
-      <li>
-        <span class="date">2026&middot;05</span>
-        <a class="entry-title" href="/concepts/stalking-the-wild-pendulum/index.html">Stalking the Wild Pendulum: Continuous Fields and Time in N-Dimensional Space</a>
-      </li>
-      <li>
-        <span class="date">2026&middot;04</span>
-        <a class="entry-title" href="/essays/tenure-bottleneck.html">The Tenure Bottleneck: Why Big Tech Stagnates While Startups Innovate</a>
-      </li>
-      <li>
-        <span class="date">2026&middot;03</span>
-        <span class="entry-title">Synthetic Data Generation: Simulating Replicas for Real-Time Computer Vision Detection<span class="soon">Coming soon</span></span>
-      </li>
-    </ul>
-  </section>
+        <p class="group-label">// Hardware &amp; Rapid Prototyping Stack</p>
+        <ul class="dense">
+          <li>
+            Programmed custom firmware and hardware integrations across <strong>ESP32</strong> and
+            <strong>Raspberry&nbsp;Pi</strong> environments for IoT automation and modular robotics.
+          </li>
+          <li>
+            Structured multi-part mechanical enclosures and rapid-prototyping iterations optimized
+            for structural shells using <strong>Bambu&nbsp;Lab</strong> ecosystems.
+          </li>
+        </ul>
+      </section>
+    </div>
 
-  <!-- ========== Footer ========== -->
+    <!-- ---- Right column: writing + interactives + work ---- -->
+    <div class="col">
+      <section aria-labelledby="essays">
+        <h2 class="sec-label" id="essays">Theoretical &amp; Engineering Essays</h2>
+        <ul class="stream">
+          <li>
+            <span class="date">2026&middot;05</span>
+            <a class="entry-title" href="/concepts/stalking-the-wild-pendulum/index.html">Stalking the Wild Pendulum: Continuous Fields and Time in N-Dimensional Space</a>
+          </li>
+          <li>
+            <span class="date">2026&middot;04</span>
+            <a class="entry-title" href="/essays/tenure-bottleneck.html">The Tenure Bottleneck: Why Big Tech Stagnates While Startups Innovate</a>
+          </li>
+          <li>
+            <span class="date">2026&middot;03</span>
+            <span class="entry-title">Synthetic Data Generation: Simulating Replicas for Real-Time Computer Vision Detection<span class="soon">Coming soon</span></span>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="concepts">
+        <h2 class="sec-label" id="concepts">Interactive Concepts</h2>
+        <ul class="worklist">
+          <li>
+            <a class="entry-title" href="/concepts/fourier-transform-interactive.html">The Fourier Transform &mdash; An Interactive Lab</a>
+            <span class="tag">signal decomposition, explorable</span>
+          </li>
+          <li>
+            <a class="entry-title" href="/concepts/stalking-the-wild-pendulum/index.html">Stalking the Wild Pendulum &mdash; Interactive Edition</a>
+            <span class="tag">waves &amp; vibration, multi-chapter</span>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="work">
+        <h2 class="sec-label" id="work">Selected Work</h2>
+        <ul class="worklist">
+          <li>
+            <a class="entry-title" href="/projects/refund-audit.html">Multimodal Refund Audit System</a>
+            <span class="tag">MultiModal LLM fraud detection &middot; Delivery Hero</span>
+          </li>
+          <li>
+            <a class="entry-title" href="/projects/convnetrunner.html">ConvNet Runner</a>
+            <span class="tag">no-code CNN trainer &middot; TensorFlow Community Spotlight</span>
+          </li>
+          <li>
+            <a class="entry-title" href="/projects/smart-surveillance.html">Smart Surveillance</a>
+            <span class="tag">full-stack SaaS video analytics &middot; capstone</span>
+          </li>
+        </ul>
+      </section>
+    </div>
+
+  </div><!-- /content-grid -->
+
+  <!-- ========== Footer (full width) ========== -->
   <footer>
     <a href="/feed.xml">[RSS Feed]</a>
     <span class="sep">/</span>

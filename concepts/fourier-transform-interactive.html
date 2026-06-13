@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Fourier Transform Interactive Explainer -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Fourier Transform — An Interactive Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070a11;
+  --bg2:#0b1019;
+  --panel:#0d131e;
+  --panel2:#111927;
+  --line:#1b2738;
+  --grid:#142033;
+  --ink:#cdd9e8;
+  --muted:#6e7e96;
+  --dim:#43526a;
+  --cyan:#3ee0d6;
+  --cyan-glow:rgba(62,224,214,.55);
+  --amber:#f6a823;
+  --amber-glow:rgba(246,168,35,.5);
+  --pink:#f472b6;
+  --green:#7ee787;
+  --violet:#a78bfa;
+  --red:#fb6a6a;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(62,224,214,.06), transparent 60%),
+    radial-gradient(1000px 500px at 0% 30%, rgba(246,168,35,.05), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:"Hanken Grotesk",sans-serif;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.4;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:46px 46px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 10%,transparent 75%);
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px;position:relative;z-index:2}
+.mono{font-family:"JetBrains Mono",monospace}
+
+/* ---------- HERO ---------- */
+header{padding:74px 0 30px;position:relative}
+.kicker{
+  font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:12px;margin-bottom:22px;
+}
+.kicker::before{content:"";width:34px;height:1px;background:var(--cyan);box-shadow:0 0 8px var(--cyan-glow)}
+h1{
+  font-family:"Fraunces",serif;font-weight:900;font-size:clamp(46px,8vw,104px);
+  line-height:.92;letter-spacing:-.02em;margin:0 0 8px;color:#f3f7fc;
+}
+h1 .em{font-style:italic;font-weight:400;color:var(--cyan);text-shadow:0 0 30px var(--cyan-glow)}
+.lede{max-width:640px;font-size:clamp(17px,2.2vw,21px);color:var(--muted);margin:18px 0 0}
+.lede b{color:var(--ink);font-weight:600}
+.hero-wave{width:100%;height:120px;margin-top:34px;display:block}
+
+/* ---------- SECTION SCAFFOLD ---------- */
+section{padding:54px 0;border-top:1px solid var(--line)}
+.sec-tag{
+  font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:14px;display:flex;gap:10px;align-items:center;
+}
+.sec-tag .num{
+  display:inline-flex;width:26px;height:26px;border:1px solid var(--amber);border-radius:50%;
+  align-items:center;justify-content:center;color:var(--amber);font-size:12px;
+}
+h2{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(28px,4.6vw,46px);line-height:1.05;letter-spacing:-.015em;margin:0 0 14px;color:#eef3f9}
+h2 em{font-style:italic;color:var(--cyan)}
+.sub{color:var(--muted);max-width:680px;font-size:16.5px;margin:0 0 26px}
+.sub b{color:var(--ink);font-weight:600}
+
+/* ---------- PANELS ---------- */
+.panel{
+  background:linear-gradient(180deg,var(--panel),var(--bg2));
+  border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0;
+  box-shadow:0 22px 50px -30px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.02);
+}
+.scope-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.012);
+}
+.scope-head .lbl{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.dots{display:flex;gap:6px}.dots i{width:9px;height:9px;border-radius:50%;display:block;opacity:.85}
+.dots i:nth-child(1){background:#f6a823}.dots i:nth-child(2){background:#3ee0d6}.dots i:nth-child(3){background:#f472b6}
+canvas{display:block;width:100%;max-width:100%}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.grid2>*{min-width:0}
+@media(max-width:820px){.grid2{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- CONTROLS ---------- */
+.controls{padding:18px 18px 6px}
+.ctl-row{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.ctl-row .name{font-family:"JetBrains Mono",monospace;font-size:12px;width:118px;flex:none;color:var(--ink)}
+.ctl-row .name small{color:var(--dim);display:block;font-size:10.5px;letter-spacing:.05em}
+.ctl-row .val{font-family:"JetBrains Mono",monospace;font-size:12px;width:54px;text-align:right;flex:none;color:var(--cyan)}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:4px;background:var(--line);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 4px rgba(62,224,214,.15),0 0 12px var(--cyan-glow);cursor:pointer;transition:transform .12s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.18)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 4px rgba(62,224,214,.15),0 0 12px var(--cyan-glow);cursor:pointer}
+input[type=range].amber::-webkit-slider-thumb{background:var(--amber);box-shadow:0 0 0 4px rgba(246,168,35,.15),0 0 12px var(--amber-glow)}
+input[type=range].amber::-moz-range-thumb{background:var(--amber)}
+input[type=range].pink::-webkit-slider-thumb{background:var(--pink);box-shadow:0 0 0 4px rgba(244,114,182,.15)}
+
+.btns{display:flex;flex-wrap:wrap;gap:9px;padding:4px 18px 20px}
+button.chip{
+  font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.04em;
+  background:var(--panel2);color:var(--muted);border:1px solid var(--line);
+  padding:8px 14px;border-radius:8px;cursor:pointer;transition:all .15s;
+}
+button.chip:hover{color:var(--ink);border-color:var(--dim)}
+button.chip.on{background:rgba(62,224,214,.12);color:var(--cyan);border-color:var(--cyan)}
+
+/* readout cards */
+.readout{display:flex;gap:18px;flex-wrap:wrap;padding:2px 18px 20px}
+.metric{flex:1;min-width:120px}
+.metric .k{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.metric .v{font-family:"Fraunces",serif;font-size:30px;font-weight:600;color:var(--ink);line-height:1.1}
+.metric .v small{font-size:14px;color:var(--muted);font-family:"JetBrains Mono",monospace}
+
+/* legend */
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted);padding:0 18px 16px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend span::before{content:"";width:14px;height:3px;border-radius:3px;background:var(--c,#fff)}
+
+/* byte/coefficient readout strip under canvases */
+.bytes{
+  padding:9px 16px 11px;font-family:"JetBrains Mono",monospace;font-size:11px;
+  color:var(--muted);letter-spacing:.03em;border-top:1px solid var(--line);
+  background:rgba(255,255,255,.012);line-height:1.55;
+}
+.bytes b{color:var(--cyan);font-weight:600}
+.bytes .amber{color:var(--amber)}
+.bytes .sep{color:var(--dim);margin:0 6px}
+
+/* explainer note */
+.note{
+  margin-top:18px;padding:16px 18px;border-left:2px solid var(--amber);
+  background:linear-gradient(90deg,rgba(246,168,35,.06),transparent);
+  border-radius:0 10px 10px 0;font-size:15px;color:var(--muted);
+}
+.note b{color:var(--ink)}.note code{font-family:"JetBrains Mono",monospace;color:var(--cyan);font-size:13px}
+
+/* ---------- USE CASE TABS ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.tab{
+  font-family:"JetBrains Mono",monospace;font-size:12.5px;letter-spacing:.05em;
+  padding:11px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:9px;
+}
+.tab .ic{font-size:15px}
+.tab:hover{border-color:var(--dim);color:var(--ink)}
+.tab.on{background:linear-gradient(180deg,rgba(62,224,214,.14),rgba(62,224,214,.04));border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 24px -8px var(--cyan-glow)}
+.tabpane{display:none}.tabpane.on{display:block;animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.usecase-intro{font-size:16px;color:var(--muted);max-width:720px;margin:0 0 22px}
+.usecase-intro b{color:var(--ink)}
+
+/* card grid for descriptive cases */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+@media(max-width:820px){.cards{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-3px);border-color:var(--dim)}
+.card .ic{font-size:24px;margin-bottom:12px;display:block}
+.card h4{font-family:"Fraunces",serif;font-size:21px;font-weight:600;margin:0 0 8px;color:#eef3f9}
+.card p{font-size:14.5px;color:var(--muted);margin:0}
+.card p b{color:var(--ink);font-weight:600}
+
+/* closing */
+.thread{background:linear-gradient(135deg,var(--panel2),var(--bg2));border:1px solid var(--line);border-radius:18px;padding:38px;margin-top:10px}
+.thread h3{font-family:"Fraunces",serif;font-size:26px;font-weight:600;margin:0 0 12px;color:#eef3f9}
+.thread p{color:var(--muted);font-size:16.5px;margin:0 0 14px}
+.thread .eq{font-family:"JetBrains Mono",monospace;font-size:15px;color:var(--cyan);background:rgba(62,224,214,.06);border:1px solid var(--line);border-radius:10px;padding:14px 18px;display:inline-block;margin-top:6px}
+footer{padding:40px 0 60px;color:var(--dim);font-family:"JetBrains Mono",monospace;font-size:12px;text-align:center}
+
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header>
+    <div class="kicker">Signal Analysis · Interactive Lab</div>
+    <h1>The Fourier<br><span class="em">Transform</span></h1>
+    <p class="lede">Every wiggle, sound, image, and vibration in the universe can be rebuilt from <b>pure sine waves</b>. The Fourier transform is the machine that finds the recipe — it takes a signal apart into the frequencies hiding inside it. Play with the instruments below to feel how it works, then see where it powers the technology around you.</p>
+    <canvas class="hero-wave" id="heroWave" height="120"></canvas>
+  </header>
+
+  <!-- ================= MODULE 1: SYNTHESIS ================= -->
+  <section class="reveal">
+    <div class="sec-tag"><span class="num">1</span> The core idea — building a signal</div>
+    <h2>Any shape is just <em>sines stacked up</em></h2>
+    <p class="sub">Before we take signals <i>apart</i>, let's build one. Add a few sine waves of different speeds and heights. On the left you see them sum into one complex wave (time domain). On the right is the <b>recipe</b> — one bar per ingredient (frequency domain). Hit <b>Square wave</b> to watch a stack of sines approximate a sharp edge.</p>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="scope-head"><span class="lbl">Time domain — the signal</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <canvas id="synthTime" height="280"></canvas>
+      </div>
+      <div class="panel">
+        <div class="scope-head"><span class="lbl">Frequency domain — the recipe</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <canvas id="synthFreq" height="280"></canvas>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span style="--c:var(--cyan)">summed signal</span>
+      <span style="--c:var(--dim)">individual sine components</span>
+      <span style="--c:var(--amber)">frequency bars = amplitudes</span>
+    </div>
+
+    <div class="panel" style="margin-top:6px">
+      <div class="controls" id="synthControls"></div>
+      <div class="btns">
+        <button class="chip" data-preset="reset">↺ Reset</button>
+        <button class="chip" data-preset="square">⊓ Square wave</button>
+        <button class="chip" data-preset="saw">◢ Sawtooth</button>
+        <button class="chip" data-preset="beat">≈ Beat / interference</button>
+      </div>
+    </div>
+    <div class="note"><b>The big idea:</b> the right-hand chart contains the <i>exact same information</i> as the left, just written differently. Knowing "how much of each frequency" is enough to perfectly rebuild the wave. The Fourier transform is simply the dictionary that translates left ⇄ right.</div>
+  </section>
+
+  <!-- ================= MODULE 2: ANALYSIS ================= -->
+  <section class="reveal">
+    <div class="sec-tag"><span class="num">2</span> The transform itself — taking signals apart</div>
+    <h2>Feed it a mystery wave, get back its <em>frequencies</em></h2>
+    <p class="sub">Now the reverse. Here a real <b>Fast Fourier Transform (FFT)</b> runs in your browser on each waveform and reveals its hidden frequency content. Notice the patterns: a square wave is built only from <i>odd</i> harmonics; a sawtooth uses <i>all</i> of them. The transform discovers this with no prior knowledge of the shape.</p>
+
+    <div class="btns" style="padding-left:0;padding-right:0">
+      <button class="chip on" data-wave="sine">Sine</button>
+      <button class="chip" data-wave="square">Square</button>
+      <button class="chip" data-wave="saw">Sawtooth</button>
+      <button class="chip" data-wave="triangle">Triangle</button>
+      <button class="chip" data-wave="pulse">Pulse train</button>
+      <button class="chip" data-wave="chirp">Chirp (rising pitch)</button>
+      <button class="chip" id="anaPlay" style="margin-left:auto">▶ Hear it</button>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="scope-head"><span class="lbl">Input signal &nbsp;f(t)</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <canvas id="anaTime" height="270"></canvas>
+      </div>
+      <div class="panel">
+        <div class="scope-head"><span class="lbl">FFT magnitude spectrum &nbsp;|F(ω)|</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <canvas id="anaFreq" height="270"></canvas>
+      </div>
+    </div>
+    <div class="note" id="anaNote"></div>
+  </section>
+
+  <!-- ================= MODULE 3 (NEW): YOUR OWN SIGNAL ================= -->
+  <section class="reveal">
+    <div class="sec-tag"><span class="num">3</span> Bring your own signal</div>
+    <h2>Now do it on <em>your</em> data</h2>
+    <p class="sub">Speak into your mic or snap a photo with your webcam. The left panels show what the computer literally receives — just <b>numbers</b>. The right panels show the same data after a live FFT. Watch your voice become a fingerprint; watch a picture become a frequency map.</p>
+
+    <!-- ===== VOICE ===== -->
+    <div class="panel" style="margin-bottom:14px">
+      <div class="scope-head">
+        <span class="lbl">🎤 Live voice — your signal in real time</span>
+        <span class="dots"><i></i><i></i><i></i></span>
+      </div>
+      <div style="padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="chip" id="micBtn">▶ Start microphone</button>
+        <span class="mono" id="micStatus" style="color:var(--muted);font-size:12px"></span>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="scope-head"><span class="lbl">Waveform — what the mic captures</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <canvas id="micTime" height="220"></canvas>
+        <div class="bytes" id="micTimeStats">—</div>
+      </div>
+      <div class="panel">
+        <div class="scope-head"><span class="lbl">FFT spectrum — frequencies right now</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <canvas id="micFreq" height="220"></canvas>
+        <div class="bytes" id="micFreqStats">—</div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <div class="scope-head"><span class="lbl">Spectrogram — frequencies over time (scrolls right → left)</span><span class="dots"><i></i><i></i><i></i></span></div>
+      <canvas id="micSpec" height="200"></canvas>
+    </div>
+    <div class="note"><b>Try this:</b> hum a steady note → tight horizontal bands at your pitch and its harmonics. Whistle → a single thin moving line. Say "<i>shhh</i>" → a fat cloud at the top of the spectrogram (lots of high frequencies). Say "<i>aaah</i>" → multiple stacked lines (your vocal formants).</div>
+
+    <!-- ===== IMAGE ===== -->
+    <div class="panel" style="margin-top:36px;margin-bottom:14px">
+      <div class="scope-head">
+        <span class="lbl">📷 Pictures are signals too — 2D FFT</span>
+        <span class="dots"><i></i><i></i><i></i></span>
+      </div>
+      <div style="padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="chip" id="camBtn">▶ Start webcam</button>
+        <button class="chip" id="snapBtn" disabled>⏸ Pause</button>
+        <button class="chip" id="uploadBtn">📁 Upload image</button>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+        <span class="mono" id="camStatus" style="color:var(--muted);font-size:12px"></span>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="scope-head"><span class="lbl">Original (grayscale) — pixels as numbers</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <canvas id="imgIn" height="320"></canvas>
+        <div class="bytes" id="imgInStats">—</div>
+      </div>
+      <div class="panel">
+        <div class="scope-head"><span class="lbl">|F(u,v)| — 2D FFT magnitude (log, centered)</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <canvas id="imgFft" height="320"></canvas>
+        <div class="bytes" id="imgFftStats">—</div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:22px">
+      <div class="scope-head">
+        <span class="lbl">🔬 Reconstruction — inverse FFT from the top-K coefficients only</span>
+        <span class="dots"><i></i><i></i><i></i></span>
+      </div>
+      <canvas id="imgRecon" height="280"></canvas>
+      <div class="bytes" id="imgReconStats">drag the slider to reconstruct the image from a handful of coefficients</div>
+      <div class="controls" id="imgReconCtl"></div>
+    </div>
+    <div class="note"><b>This is the JPEG/MP3 trick.</b> Slide left → keep only the brightest few FFT bins → image becomes a blurry blob (just the lowest frequencies). Slide right → add more bins → edges and texture snap back in. Around <b>1–2%</b> of the coefficients you already get something recognizably "your face" — the rest is just diminishing returns. This is how a 2 MB photo becomes a 200 KB JPEG.</div>
+  </section>
+
+  <!-- ================= CLOSING ================= -->
+  <section class="reveal" style="border-bottom:1px solid var(--line)">
+    <div class="sec-tag"><span class="num">∑</span> The common thread</div>
+    <div class="thread">
+      <h3>One sentence to remember it by</h3>
+      <p>In every example above — building a wave, cleaning noise, compressing a photo, tuning your bass, reading an MRI — the move is identical: <b>switch a signal from "what it does over time" to "what frequencies it's made of," do something easy in that view, and (if needed) switch back.</b></p>
+      <p>The forward transform analyzes; the inverse transform rebuilds. Continuous signals use the integral form below, while everything in this page used its digital cousin, the discrete FFT.</p>
+      <span class="eq">F(ω) = ∫ f(t) · e<sup style="font-size:10px">−i·2π·ω·t</sup> dt</span>
+    </div>
+  </section>
+
+  <footer>BUILT AS AN INTERACTIVE EXPLAINER · ALL SPECTRA COMPUTED WITH A REAL IN-BROWSER FFT</footer>
+</div>
+
+<script>
+"use strict";
+const TAU = Math.PI*2;
+
+/* ============ FFT (iterative radix-2 Cooley–Tukey, in place) ============ */
+function fft(re, im, inverse){
+  const n = re.length;
+  for(let i=1,j=0;i<n;i++){
+    let bit=n>>1;
+    for(;j&bit;bit>>=1) j^=bit;
+    j^=bit;
+    if(i<j){[re[i],re[j]]=[re[j],re[i]];[im[i],im[j]]=[im[j],im[i]];}
+  }
+  for(let len=2;len<=n;len<<=1){
+    const ang=(inverse?TAU:-TAU)/len;
+    const wlR=Math.cos(ang), wlI=Math.sin(ang);
+    for(let i=0;i<n;i+=len){
+      let wR=1,wI=0;
+      const h=len>>1;
+      for(let k=0;k<h;k++){
+        const uR=re[i+k], uI=im[i+k];
+        const vR=re[i+k+h]*wR-im[i+k+h]*wI;
+        const vI=re[i+k+h]*wI+im[i+k+h]*wR;
+        re[i+k]=uR+vR; im[i+k]=uI+vI;
+        re[i+k+h]=uR-vR; im[i+k+h]=uI-vI;
+        const nwR=wR*wlR-wI*wlI; wI=wR*wlI+wI*wlR; wR=nwR;
+      }
+    }
+  }
+  if(inverse){ for(let i=0;i<n;i++){re[i]/=n; im[i]/=n;} }
+}
+
+/* ============ canvas helpers (DPR-aware) ============ */
+// Lock canvas backing-store size once per canvas. Slider drags must NEVER
+// reassign canvas.width — that updates the HTML width attribute (intrinsic
+// size) and can feed back into grid track sizing, blowing the panel up.
+function sizeCanvas(canvas){
+  const dpr=Math.min(window.devicePixelRatio||1, 2);
+  const parent=canvas.parentElement;
+  let w=parent.clientWidth;
+  if(!w||w<10) w=300;
+  w=Math.min(w,2200);
+  const h=parseInt(canvas.getAttribute('height'),10)||260;
+  canvas.style.width='100%';
+  canvas.style.height=h+'px';
+  canvas.width=Math.round(w*dpr);
+  canvas.height=Math.round(h*dpr);
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  canvas._cache={ctx,w,h,dpr};
+  return canvas._cache;
+}
+function setup(canvas){
+  return canvas._cache || sizeCanvas(canvas);
+}
+function resizeAllCanvases(){
+  document.querySelectorAll('canvas').forEach(c=>sizeCanvas(c));
+}
+const _cssCache={};
+const css=k=>k in _cssCache?_cssCache[k]:(_cssCache[k]=getComputedStyle(document.documentElement).getPropertyValue(k).trim());
+function grid(ctx,w,h,rows=4,cols=8){
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle=css('--grid'); ctx.lineWidth=1;
+  for(let r=0;r<=rows;r++){const y=h*r/rows+.5;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+  for(let c=0;c<=cols;c++){const x=w*c/cols+.5;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+}
+function plotLine(ctx,data,w,h,color,glow,lw=2,pad=14,fixedMax){
+  let mx;
+  if(fixedMax&&fixedMax>0){ mx=fixedMax; }
+  else { mx=1e-9; for(const v of data) mx=Math.max(mx,Math.abs(v)); }
+  const mid=h/2, amp=(h/2-pad)/mx;
+  ctx.save();
+  if(glow){ctx.shadowColor=color;ctx.shadowBlur=12;}
+  ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.lineJoin='round';ctx.beginPath();
+  for(let i=0;i<data.length;i++){
+    const x=i/(data.length-1)*w, y=mid-data[i]*amp;
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  }
+  ctx.stroke();ctx.restore();
+}
+function plotBars(ctx,mags,w,h,color,glow,maxBins,pad=16){
+  let mx=1e-9; for(let i=0;i<maxBins;i++) mx=Math.max(mx,mags[i]);
+  const baseY=h-pad, usableH=h-pad*1.4;
+  ctx.save();
+  if(glow){ctx.shadowColor=color;ctx.shadowBlur=10;}
+  const bw=Math.max(1.5, w/maxBins*0.6);
+  for(let i=0;i<maxBins;i++){
+    const x=i/(maxBins-1)*(w-bw)+bw/2;
+    const bh=mags[i]/mx*usableH;
+    ctx.fillStyle=color;
+    ctx.fillRect(x-bw/2, baseY-bh, bw, bh);
+  }
+  ctx.restore();
+}
+
+/* ====================================================================
+   MODULE 1 — SYNTHESIS
+==================================================================== */
+const N1=512;
+const synthState=[{f:1,a:1},{f:2,a:0},{f:3,a:0},{f:4,a:0},{f:5,a:0}];
+const sNames=["Fundamental","Harmonic 2","Harmonic 3","Harmonic 4","Harmonic 5"];
+function buildSynthControls(){
+  const host=document.getElementById('synthControls');
+  host.innerHTML='';
+  synthState.forEach((c,i)=>{
+    const row=document.createElement('div');row.className='ctl-row';
+    row.innerHTML=`<div class="name">${sNames[i]}<small>amplitude</small></div>
+      <input type="range" min="0" max="100" value="${c.a*100}" data-i="${i}">
+      <div class="val">${c.a.toFixed(2)}</div>`;
+    const inp=row.querySelector('input'), val=row.querySelector('.val');
+    inp.addEventListener('input',()=>{c.a=inp.value/100;val.textContent=c.a.toFixed(2);drawSynth();});
+    host.appendChild(row);
+  });
+}
+let sT,sF;
+function drawSynth(){
+  if(!sT) sT=document.getElementById('synthTime');
+  if(!sF) sF=document.getElementById('synthFreq');
+  const A=setup(sT), B=setup(sF);
+  grid(A.ctx,A.w,A.h); grid(B.ctx,B.w,B.h);
+  // compute the sum + total amplitude FIRST, so every line shares one stable scale
+  const sum=new Array(N1).fill(0);
+  synthState.forEach(c=>{ for(let i=0;i<N1;i++) sum[i]+=c.a*Math.sin(TAU*c.f*i/N1); });
+  let scale=1; for(let i=0;i<N1;i++) scale=Math.max(scale,Math.abs(sum[i])); scale=Math.max(scale,1);
+  // components faint, drawn at the SAME scale as the sum (honest relative heights)
+  synthState.forEach(c=>{
+    if(c.a<0.01) return;
+    const d=new Array(N1);
+    for(let i=0;i<N1;i++) d[i]=c.a*Math.sin(TAU*c.f*i/N1);
+    plotLine(A.ctx,d,A.w,A.h,css('--dim'),false,1,14,scale);
+  });
+  // sum bright, same scale — always cyan to match the legend
+  plotLine(A.ctx,sum,A.w,A.h,css('--cyan'),true,2.4,14,scale);
+  // freq bars
+  const bins=new Array(13).fill(0);
+  synthState.forEach(c=>{ if(c.f<bins.length) bins[c.f]=Math.max(bins[c.f],c.a); });
+  plotBars(B.ctx,bins,B.w,B.h,css('--amber'),true,bins.length);
+}
+document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{
+  const p=b.dataset.preset;
+  if(p==='reset') synthState.forEach((c,i)=>{c.f=i+1;c.a=i===0?1:0;});
+  if(p==='square'){synthState.forEach((c,i)=>{const k=2*i+1;c.f=k;c.a=1/k;});}
+  if(p==='saw'){synthState.forEach((c,i)=>{c.f=i+1;c.a=1/(i+1);});}
+  if(p==='beat'){synthState.forEach((c,i)=>{c.a=0;});synthState[3].f=4;synthState[3].a=1;synthState[4].f=5;synthState[4].a=1;synthState[0].f=1;synthState[0].a=0;}
+  buildSynthControls();drawSynth();
+}));
+
+/* ====================================================================
+   MODULE 2 — ANALYSIS (real FFT)
+==================================================================== */
+const N2=1024;
+function genWave(type){
+  const d=new Array(N2);
+  for(let i=0;i<N2;i++){
+    const t=i/N2, ph=t*8; // 8 cycles across window
+    let v=0;
+    if(type==='sine') v=Math.sin(TAU*ph);
+    else if(type==='square') v=Math.sign(Math.sin(TAU*ph));
+    else if(type==='saw') v=2*((ph%1))-1;
+    else if(type==='triangle') v=2*Math.abs(2*((ph%1))-1)-1;
+    else if(type==='pulse') v=((ph%1)<0.12)?1:-0.15;
+    else if(type==='chirp') v=Math.sin(TAU*(2+ t*36)*t);
+    d[i]=v;
+  }
+  return d;
+}
+const anaNotes={
+  sine:"A pure sine has <b>one</b> spike. It's the single building block every other signal is made from — the simplest possible recipe.",
+  square:"Look closely: spikes appear only at <b>odd</b> multiples (1×, 3×, 5×…), each smaller than the last by <code>1/n</code>. That specific recipe is what makes the edges sharp.",
+  saw:"A sawtooth uses <b>every</b> harmonic, falling off as <code>1/n</code>. More ingredients than the square wave, which is why it sounds brighter and buzzier.",
+  triangle:"Odd harmonics again, but they die away fast (<code>1/n²</code>). Few high frequencies → a soft, rounded shape and a mellow tone.",
+  pulse:"A narrow pulse spreads energy across a <b>huge</b> range of frequencies. Narrow in time ⇄ wide in frequency: this trade-off is the heart of the uncertainty principle.",
+  chirp:"A rising pitch shows energy <b>smeared</b> across many bins, because the frequency itself changes over time. This is exactly why we use spectrograms — short FFTs over time — to track sounds that move."
+};
+let aT,aF;
+function drawAnalysis(type){
+  if(!aT) aT=document.getElementById('anaTime');
+  if(!aF) aF=document.getElementById('anaFreq');
+  const sig=genWave(type);
+  const A=setup(aT), B=setup(aF);
+  grid(A.ctx,A.w,A.h); grid(B.ctx,B.w,B.h);
+  plotLine(A.ctx,sig,A.w,A.h,css('--cyan'),true,2.2);
+  const re=sig.slice(), im=new Array(N2).fill(0);
+  fft(re,im,false);
+  const half=80; const mags=new Array(half);
+  for(let i=0;i<half;i++) mags[i]=Math.hypot(re[i],im[i])/N2*2;
+  plotBars(B.ctx,mags,B.w,B.h,css('--amber'),true,half);
+  document.getElementById('anaNote').innerHTML=anaNotes[type];
+}
+document.querySelectorAll('[data-wave]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-wave]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); drawAnalysis(b.dataset.wave);
+  if(audioPlaying) playAudio(b.dataset.wave); // hot-swap while playing
+}));
+
+/* ============ AUDIO (Module 2) — hear the waveform you see ============ */
+let audioCtx=null, audioSrc=null, audioGain=null, audioPlaying=false;
+const AUDIO_FREQ=220, AUDIO_DUR=2.0;          // integer cycles → seamless loop
+function ensureAudio(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+}
+function buildAudioBuffer(type){
+  const sr=audioCtx.sampleRate, n=Math.floor(sr*AUDIO_DUR);
+  const buf=audioCtx.createBuffer(1,n,sr), d=buf.getChannelData(0);
+  for(let i=0;i<n;i++){
+    const t=i/sr, ph=AUDIO_FREQ*t, fr=ph-Math.floor(ph);
+    let v=0;
+    if(type==='sine')          v=Math.sin(TAU*ph);
+    else if(type==='square')   v=Math.sign(Math.sin(TAU*ph));
+    else if(type==='saw')      v=2*fr-1;
+    else if(type==='triangle') v=2*Math.abs(2*fr-1)-1;
+    else if(type==='pulse')    v=fr<0.12?1:-0.15;
+    else if(type==='chirp'){
+      // linear sweep 220→880 Hz, phase=∫f dt → loop ends at integer cycles
+      const f1=AUDIO_FREQ*4;
+      const phase=AUDIO_FREQ*t+(f1-AUDIO_FREQ)*t*t/(2*AUDIO_DUR);
+      v=Math.sin(TAU*phase);
+    }
+    d[i]=v*0.25;
+  }
+  return buf;
+}
+function stopAudio(){
+  if(audioSrc){ try{ audioSrc.stop(); }catch(e){} audioSrc.disconnect(); audioSrc=null; }
+  if(audioGain){ audioGain.disconnect(); audioGain=null; }
+  audioPlaying=false; updatePlayButton();
+}
+function playAudio(type){
+  ensureAudio();
+  if(audioSrc){ try{ audioSrc.stop(); }catch(e){} audioSrc.disconnect(); audioSrc=null; }
+  if(audioGain){ audioGain.disconnect(); audioGain=null; }
+  audioSrc=audioCtx.createBufferSource();
+  audioSrc.buffer=buildAudioBuffer(type);
+  audioSrc.loop=true;
+  audioGain=audioCtx.createGain();
+  const now=audioCtx.currentTime;
+  audioGain.gain.setValueAtTime(0,now);
+  audioGain.gain.linearRampToValueAtTime(0.4,now+0.03);  // soft fade-in, no click
+  audioSrc.connect(audioGain).connect(audioCtx.destination);
+  audioSrc.start();
+  audioPlaying=true; updatePlayButton();
+}
+function updatePlayButton(){
+  const btn=document.getElementById('anaPlay'); if(!btn) return;
+  btn.textContent=audioPlaying?'⏹ Stop':'▶ Hear it';
+  btn.classList.toggle('on',audioPlaying);
+}
+document.getElementById('anaPlay').addEventListener('click',()=>{
+  if(audioPlaying) stopAudio();
+  else playAudio(document.querySelector('[data-wave].on').dataset.wave);
+});
+
+/* ====================================================================
+   MODULE 3 — YOUR OWN SIGNAL (live mic + image 2D FFT)
+==================================================================== */
+
+/* number formatters used by the byte-readout strips */
+const fmtN=n=>n.toLocaleString();
+const fmtBytes=b=> b<1024 ? b+' B'
+                   : b<1024*1024 ? (b/1024).toFixed(1)+' KB'
+                   : (b/1024/1024).toFixed(2)+' MB';
+
+/* ---------- VOICE: getUserMedia + AnalyserNode ---------- */
+let micCtx=null, micAnalyser=null, micStream=null, micRAF=null;
+let micTimeArr=null, micFreqArr=null;
+let specCtx=null, specW=0, specH=0;
+const MIC_FFT=2048;
+
+function setMicStatus(msg){ document.getElementById('micStatus').textContent=msg; }
+
+async function startMic(){
+  try{
+    setMicStatus('requesting permission…');
+    micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    micCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const src=micCtx.createMediaStreamSource(micStream);
+    micAnalyser=micCtx.createAnalyser();
+    micAnalyser.fftSize=MIC_FFT;
+    micAnalyser.smoothingTimeConstant=0.4;
+    src.connect(micAnalyser);                       // NOT connected to destination → no feedback
+    micTimeArr=new Float32Array(micAnalyser.fftSize);
+    micFreqArr=new Float32Array(micAnalyser.frequencyBinCount);
+    initSpectrogram();
+    setMicStatus('listening · '+(micCtx.sampleRate/1000).toFixed(1)+' kHz · '+MIC_FFT+'-pt FFT');
+    const b=document.getElementById('micBtn');
+    b.textContent='⏹ Stop microphone'; b.classList.add('on');
+    drawMicLoop();
+  }catch(e){
+    setMicStatus('mic blocked: '+(e.message||e.name||'unknown'));
+  }
+}
+
+function stopMic(){
+  if(micRAF){ cancelAnimationFrame(micRAF); micRAF=null; }
+  if(micStream){ micStream.getTracks().forEach(t=>t.stop()); }
+  if(micCtx){ micCtx.close(); }
+  micStream=micCtx=micAnalyser=null;
+  setMicStatus('');
+  const b=document.getElementById('micBtn');
+  b.textContent='▶ Start microphone'; b.classList.remove('on');
+}
+
+function initSpectrogram(){
+  const c=document.getElementById('micSpec');
+  c._cache=null;                                    // re-measure now that section is visible
+  const s=setup(c);
+  specCtx=s.ctx; specW=s.w; specH=s.h;
+  specCtx.fillStyle='#070a11';
+  specCtx.fillRect(0,0,specW,specH);
+}
+
+function drawMicLoop(){
+  if(!micAnalyser) return;
+  micAnalyser.getFloatTimeDomainData(micTimeArr);
+  micAnalyser.getFloatFrequencyData(micFreqArr);
+
+  // time domain — downsample for speed; fixed scale so quiet/loud read as quiet/loud
+  const T=setup(document.getElementById('micTime'));
+  grid(T.ctx,T.w,T.h);
+  const step=4, ds=new Array(Math.floor(micTimeArr.length/step));
+  let peak=0;
+  for(let i=0,j=0;i<micTimeArr.length;i+=step,j++){
+    ds[j]=micTimeArr[i];
+    const a=Math.abs(micTimeArr[i]); if(a>peak) peak=a;
+  }
+  plotLine(T.ctx,ds,T.w,T.h,css('--cyan'),true,2,14,0.5);
+
+  // freq domain — show up to ~6 kHz (where speech energy lives)
+  const F=setup(document.getElementById('micFreq'));
+  grid(F.ctx,F.w,F.h);
+  const binHz=micCtx.sampleRate/MIC_FFT;
+  const nBins=Math.min(micFreqArr.length,Math.floor(6000/binHz));
+  const mags=new Array(nBins);
+  let active=0;
+  for(let i=0;i<nBins;i++){
+    mags[i]=Math.max(0,(micFreqArr[i]+100)/100);
+    if(micFreqArr[i]>-60) active++;
+  }
+  plotBars(F.ctx,mags,F.w,F.h,css('--amber'),true,nBins);
+
+  // live byte/sample readouts
+  const tBytes=MIC_FFT*4;                             // Float32 per sample
+  const fBytes=micFreqArr.length*4;
+  document.getElementById('micTimeStats').innerHTML=
+    `<b>${fmtN(MIC_FFT)}</b> samples<span class="sep">·</span><b>${fmtBytes(tBytes)}</b> per snapshot @ 32-bit float<span class="sep">·</span>peak <b>${peak.toFixed(3)}</b>`;
+  document.getElementById('micFreqStats').innerHTML=
+    `<b>${fmtN(micFreqArr.length)}</b> bins<span class="sep">·</span><b>${fmtBytes(fBytes)}</b> @ 32-bit dB<span class="sep">·</span><span class="amber"><b>${active}</b> bins above −60 dB</span>`;
+
+  drawSpectrogramColumn();
+  micRAF=requestAnimationFrame(drawMicLoop);
+}
+
+function drawSpectrogramColumn(){
+  if(!specCtx) return;
+  // scroll the existing image left by 2 CSS px (each tick = 2 px wide)
+  specCtx.drawImage(specCtx.canvas,-2,0,specW,specH);
+  specCtx.fillStyle='#070a11';
+  specCtx.fillRect(specW-2,0,2,specH);
+  const binHz=micCtx.sampleRate/MIC_FFT;
+  const maxBin=Math.min(micFreqArr.length,Math.floor(8000/binHz));
+  for(let y=0;y<specH;y++){
+    const bin=Math.floor((1-y/specH)*maxBin);    // low freq at bottom
+    const db=micFreqArr[bin]||-100;
+    const v=Math.max(0,Math.min(1,(db+90)/70));   // -90→0, -20→1
+    specCtx.fillStyle=specColor(v);
+    specCtx.fillRect(specW-2,y,2,1);
+  }
+}
+
+// dark navy → cyan → amber → red (matches the page palette)
+function specColor(v){
+  if(v<=0) return '#070a11';
+  const stops=[[7,10,17],[20,40,70],[62,224,214],[246,168,35],[251,106,106]];
+  const t=v*(stops.length-1), i=Math.min(stops.length-2,Math.floor(t)), f=t-i;
+  const a=stops[i], b=stops[i+1];
+  return `rgb(${Math.round(a[0]+(b[0]-a[0])*f)},${Math.round(a[1]+(b[1]-a[1])*f)},${Math.round(a[2]+(b[2]-a[2])*f)})`;
+}
+
+document.getElementById('micBtn').addEventListener('click',()=>{ micStream?stopMic():startMic(); });
+
+
+/* ---------- IMAGE: webcam / upload → live 2D FFT ---------- */
+const IMG_N=128;                                     // power of 2 — 128×128 keeps FFT snappy
+let camStream=null, camVideo=null, camRAF=null, camPaused=false;
+let camOff=null, camOffCtx=null;                     // cached offscreen for frame downscale
+function ensureCamOff(){
+  if(!camOff){
+    camOff=document.createElement('canvas');
+    camOff.width=camOff.height=IMG_N;
+    camOffCtx=camOff.getContext('2d',{willReadFrequently:true});
+  }
+}
+
+function setCamStatus(msg){ document.getElementById('camStatus').textContent=msg; }
+
+async function startCam(){
+  try{
+    setCamStatus('requesting permission…');
+    camStream=await navigator.mediaDevices.getUserMedia({video:{width:320,height:320}});
+    camVideo=document.createElement('video');
+    camVideo.srcObject=camStream; camVideo.muted=true; camVideo.playsInline=true;
+    await camVideo.play();
+    setCamStatus('webcam live · transforming '+IMG_N+'×'+IMG_N+' frames in real time');
+    const b=document.getElementById('camBtn');
+    b.textContent='⏹ Stop webcam'; b.classList.add('on');
+    const s=document.getElementById('snapBtn');
+    s.disabled=false; s.textContent='⏸ Pause'; s.classList.remove('on');
+    camPaused=false;
+    drawCamLoop();
+  }catch(e){
+    setCamStatus('webcam blocked: '+(e.message||e.name||'unknown'));
+  }
+}
+
+function stopCam(){
+  if(camRAF){ cancelAnimationFrame(camRAF); camRAF=null; }
+  if(camStream) camStream.getTracks().forEach(t=>t.stop());
+  camStream=camVideo=null;
+  const b=document.getElementById('camBtn');
+  b.textContent='▶ Start webcam'; b.classList.remove('on');
+  const s=document.getElementById('snapBtn');
+  s.disabled=true; s.textContent='⏸ Pause'; s.classList.remove('on');
+  camPaused=false;
+  setCamStatus('');
+}
+
+function togglePause(){
+  if(!camStream) return;
+  camPaused=!camPaused;
+  const s=document.getElementById('snapBtn');
+  s.textContent=camPaused?'▶ Resume':'⏸ Pause';
+  s.classList.toggle('on',camPaused);
+  setCamStatus(camPaused?'paused · frame frozen for study':'webcam live · transforming '+IMG_N+'×'+IMG_N+' frames in real time');
+  if(!camPaused) drawCamLoop();
+}
+
+function drawCamLoop(){
+  if(!camVideo||camPaused){ camRAF=null; return; }
+  if(camVideo.readyState>=2){                       // HAVE_CURRENT_DATA
+    ensureCamOff();
+    const vw=camVideo.videoWidth, vh=camVideo.videoHeight, s=Math.min(vw,vh);
+    if(vw&&vh){
+      camOffCtx.drawImage(camVideo,(vw-s)/2,(vh-s)/2,s,s,0,0,IMG_N,IMG_N);
+      processImage(camOffCtx.getImageData(0,0,IMG_N,IMG_N));
+    }
+  }
+  camRAF=requestAnimationFrame(drawCamLoop);
+}
+
+function loadFromFile(file){
+  // Pause live loop if running so the still image isn't immediately overwritten.
+  if(camStream && !camPaused) togglePause();
+  const img=new Image();
+  img.onload=()=>{
+    ensureCamOff();
+    const s=Math.min(img.width,img.height);
+    camOffCtx.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,IMG_N,IMG_N);
+    processImage(camOffCtx.getImageData(0,0,IMG_N,IMG_N));
+    URL.revokeObjectURL(img.src);
+    setCamStatus('uploaded · transformed ✓');
+  };
+  img.src=URL.createObjectURL(file);
+}
+
+/* Cached buffers + state for the top-K reconstruction */
+let imgReconK=500;
+let imgFftCache=null;                                // {re, im, sortedIdx} of latest frame
+let _mags=null, _sortedIdx=null, _reconR=null, _reconI=null;
+function ensureImgBuffers(){
+  if(_mags) return;
+  const n=IMG_N*IMG_N;
+  _mags=new Float32Array(n);
+  _sortedIdx=new Array(n);
+  _reconR=Array.from({length:IMG_N},()=>new Array(IMG_N));
+  _reconI=Array.from({length:IMG_N},()=>new Array(IMG_N));
+}
+
+function processImage(imgData){
+  ensureImgBuffers();
+  // 1) grayscale
+  const data=imgData.data;
+  const gray=Array.from({length:IMG_N},()=>new Array(IMG_N));
+  for(let r=0;r<IMG_N;r++) for(let c=0;c<IMG_N;c++){
+    const i=(r*IMG_N+c)*4;
+    gray[r][c]=0.299*data[i]+0.587*data[i+1]+0.114*data[i+2];
+  }
+  renderMatrix(document.getElementById('imgIn'),gray,255);
+  // 2) 2D FFT
+  const re=gray.map(row=>row.slice());
+  const im=Array.from({length:IMG_N},()=>new Array(IMG_N).fill(0));
+  fft2d(re,im);
+  // 3) magnitudes (once) → reused for display, significance, and sort
+  const total=IMG_N*IMG_N;
+  let rawMx=0;
+  for(let r=0;r<IMG_N;r++) for(let c=0;c<IMG_N;c++){
+    const m=Math.hypot(re[r][c],im[r][c]);
+    _mags[r*IMG_N+c]=m;
+    if(m>rawMx) rawMx=m;
+  }
+  // sort indices by magnitude descending — used by the reconstruction
+  for(let i=0;i<total;i++) _sortedIdx[i]=i;
+  _sortedIdx.sort((a,b)=>_mags[b]-_mags[a]);
+  imgFftCache={re,im,sortedIdx:_sortedIdx};
+  // significance + log mag for FFT display
+  const threshold=rawMx*0.01;
+  let significant=0, mx=0;
+  const mag=Array.from({length:IMG_N},()=>new Array(IMG_N));
+  for(let r=0;r<IMG_N;r++) for(let c=0;c<IMG_N;c++){
+    const m=_mags[r*IMG_N+c];
+    if(m>threshold) significant++;
+    const lm=Math.log(1+m);
+    mag[r][c]=lm; if(lm>mx) mx=lm;
+  }
+  fftShift2d(mag);
+  renderMatrix(document.getElementById('imgFft'),mag,mx);
+
+  // live byte readouts (image + FFT)
+  const pixBytes=total;
+  const fftBytes=total*8;
+  const sigBytes=significant*8;
+  document.getElementById('imgInStats').innerHTML=
+    `<b>${fmtN(IMG_N)}</b>×<b>${fmtN(IMG_N)}</b> = <b>${fmtN(total)}</b> pixels<span class="sep">·</span><b>${fmtBytes(pixBytes)}</b> at 8-bit grayscale`;
+  document.getElementById('imgFftStats').innerHTML=
+    `<b>${fmtN(total)}</b> complex coeffs<span class="sep">·</span><b>${fmtBytes(fftBytes)}</b> raw <span style="color:var(--dim)">(${(fftBytes/pixBytes).toFixed(0)}× the image!)</span><br>`+
+    `<span class="amber">only <b>${fmtN(significant)}</b> (<b>${(significant/total*100).toFixed(1)}%</b>) carry meaningful info — that's <b>${fmtBytes(sigBytes)}</b>, smaller than the original</span>`;
+
+  reconstructFromCache();
+}
+
+function reconstructFromCache(){
+  if(!imgFftCache) return;
+  const {re,im,sortedIdx}=imgFftCache;
+  ensureImgBuffers();
+  const k=Math.max(1,Math.min(imgReconK,sortedIdx.length));
+  // zero the recon buffers, then copy top-K coefficients from cache
+  for(let r=0;r<IMG_N;r++) for(let c=0;c<IMG_N;c++){ _reconR[r][c]=0; _reconI[r][c]=0; }
+  for(let i=0;i<k;i++){
+    const idx=sortedIdx[i];
+    const r=Math.floor(idx/IMG_N), c=idx%IMG_N;
+    _reconR[r][c]=re[r][c]; _reconI[r][c]=im[r][c];
+  }
+  // inverse 2D FFT — the 1D fft() handles the 1/N normalization, so 2D gets 1/N²
+  fft2d(_reconR,_reconI,true);
+  renderMatrix(document.getElementById('imgRecon'),_reconR,255);
+
+  // recon byte readout: complex coefficient (8B) + position index (~14 bits → 2B) per kept bin
+  const total=IMG_N*IMG_N;
+  const reconBytes=k*(8+2);
+  const orig=total;                                  // 8-bit grayscale original
+  document.getElementById('imgReconStats').innerHTML=
+    `Keeping <b>${fmtN(k)}</b> of ${fmtN(total)} coefficients (<b>${(k/total*100).toFixed(2)}%</b>)<span class="sep">·</span>`+
+    `stores in <b>${fmtBytes(reconBytes)}</b> <span style="color:var(--dim)">(coeffs + indices)</span><span class="sep">·</span>`+
+    (reconBytes<orig
+      ? `<span class="amber"><b>${(orig/reconBytes).toFixed(1)}×</b> smaller than the ${fmtBytes(orig)} original</span>`
+      : `<span style="color:var(--dim)">${(reconBytes/orig).toFixed(1)}× the original — past the useful point</span>`);
+}
+
+function buildReconControls(){
+  const host=document.getElementById('imgReconCtl');
+  if(!host) return;
+  host.innerHTML='';
+  const maxK=Math.floor(IMG_N*IMG_N/4);              // 25% is way past visually-needed
+  const row=document.createElement('div');
+  row.className='ctl-row';
+  row.innerHTML=`<div class="name">Keep top-K<small>biggest FFT coefficients</small></div>
+    <input type="range" class="amber" min="1" max="${maxK}" value="${imgReconK}">
+    <div class="val">${imgReconK}</div>`;
+  const inp=row.querySelector('input'),val=row.querySelector('.val');
+  inp.addEventListener('input',()=>{
+    imgReconK=+inp.value;
+    val.textContent=imgReconK;
+    reconstructFromCache();
+  });
+  host.appendChild(row);
+}
+
+function fft2d(re,im,inverse=false){
+  for(let r=0;r<IMG_N;r++) fft(re[r],im[r],inverse);
+  const cr=new Array(IMG_N), ci=new Array(IMG_N);
+  for(let c=0;c<IMG_N;c++){
+    for(let r=0;r<IMG_N;r++){ cr[r]=re[r][c]; ci[r]=im[r][c]; }
+    fft(cr,ci,inverse);
+    for(let r=0;r<IMG_N;r++){ re[r][c]=cr[r]; im[r][c]=ci[r]; }
+  }
+}
+function fftShift2d(a){
+  const h=IMG_N>>1;
+  for(let r=0;r<h;r++) for(let c=0;c<h;c++){
+    const t1=a[r][c]; a[r][c]=a[r+h][c+h]; a[r+h][c+h]=t1;
+    const t2=a[r][c+h]; a[r][c+h]=a[r+h][c]; a[r+h][c]=t2;
+  }
+}
+
+function renderMatrix(canvas, mat, maxVal){
+  const S=setup(canvas);
+  // Cache the offscreen canvas + ImageData on the target canvas so the live loop
+  // doesn't allocate ~64 KB per frame per panel.
+  if(!canvas._rOff){
+    canvas._rOff=document.createElement('canvas');
+    canvas._rOff.width=canvas._rOff.height=IMG_N;
+    canvas._rCtx=canvas._rOff.getContext('2d');
+    canvas._rImg=canvas._rCtx.createImageData(IMG_N,IMG_N);
+  }
+  const img=canvas._rImg;
+  for(let r=0;r<IMG_N;r++) for(let c=0;c<IMG_N;c++){
+    const v=Math.max(0,Math.min(255,Math.round((mat[r][c]/maxVal)*255)));
+    const i=(r*IMG_N+c)*4;
+    img.data[i]=img.data[i+1]=img.data[i+2]=v;
+    img.data[i+3]=255;
+  }
+  canvas._rCtx.putImageData(img,0,0);
+  S.ctx.clearRect(0,0,S.w,S.h);
+  const size=Math.min(S.w,S.h);
+  const ox=(S.w-size)/2, oy=(S.h-size)/2;
+  S.ctx.imageSmoothingEnabled=false;
+  S.ctx.drawImage(canvas._rOff,ox,oy,size,size);
+}
+
+document.getElementById('camBtn').addEventListener('click',()=>{ camStream?stopCam():startCam(); });
+document.getElementById('snapBtn').addEventListener('click',togglePause);
+document.getElementById('uploadBtn').addEventListener('click',()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(f) loadFromFile(f);
+  e.target.value='';                              // allow picking the same file again
+});
+
+/* ============ HERO animated wave ============ */
+let heroC, heroPhase=0;
+function drawHero(){
+  if(!heroC) heroC=document.getElementById('heroWave');
+  const {ctx,w,h}=setup(heroC);
+  ctx.clearRect(0,0,w,h);
+  const comps=[[1,1,0],[3,.34,0],[5,.2,0],[7,.14,0]];
+  const cyan=css('--cyan');
+  ctx.save();ctx.strokeStyle=cyan;ctx.lineWidth=2.4;ctx.shadowColor=cyan;ctx.shadowBlur=14;ctx.beginPath();
+  for(let x=0;x<=w;x+=2){
+    const t=x/w*TAU*2+heroPhase; let v=0;
+    comps.forEach(([f,a])=>v+=a*Math.sin(f*t));
+    const y=h/2 - v*(h/3.4);
+    x?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  }
+  ctx.stroke();ctx.restore();
+  heroPhase+=0.012;
+  requestAnimationFrame(drawHero);
+}
+
+/* ============ INIT + reveal + resize ============ */
+function initAll(){
+  buildSynthControls(); drawSynth();
+  drawAnalysis('sine');
+  drawHero();
+  buildReconControls();
+}
+if (document.readyState === 'complete') initAll();
+else window.addEventListener('load', initAll);
+let rT;
+window.addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(()=>{
+  document.querySelectorAll('canvas').forEach(c=>c._cache=null);
+  drawSynth();
+  const aw=document.querySelector('[data-wave].on'); if(aw) drawAnalysis(aw.dataset.wave);
+  if(specCtx) initSpectrogram();                   // mic visuals catch up on next rAF tick
+},160);});
+
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
