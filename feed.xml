@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Khalid Alnujaidi — Theoretical &amp; Engineering Essays</title>
+    <link>https://khalidalnujaidi.github.io/</link>
+    <description>Deep-dive essays on system architecture, computer vision, embedded hardware, and autonomous AI orchestration.</description>
+    <language>en</language>
+    <atom:link href="https://khalidalnujaidi.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>Sat, 13 Jun 2026 00:00:00 +0000</lastBuildDate>
+
+    <item>
+      <title>Stalking the Wild Pendulum: Continuous Fields and Time in N-Dimensional Space</title>
+      <link>https://khalidalnujaidi.github.io/concepts/stalking-the-wild-pendulum/index.html</link>
+      <guid>https://khalidalnujaidi.github.io/concepts/stalking-the-wild-pendulum/index.html</guid>
+      <description>An interactive deep-dive into continuous fields and the treatment of time in N-dimensional space.</description>
+      <pubDate>Fri, 15 May 2026 00:00:00 +0000</pubDate>
+    </item>
+
+    <item>
+      <title>The Tenure Bottleneck: Why Big Tech Stagnates While Startups Innovate</title>
+      <link>https://khalidalnujaidi.github.io/essays/tenure-bottleneck.html</link>
+      <guid>https://khalidalnujaidi.github.io/essays/tenure-bottleneck.html</guid>
+      <description>Why credibility measured in tenure has become a bottleneck for innovation, and how startups route around it.</description>
+      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>

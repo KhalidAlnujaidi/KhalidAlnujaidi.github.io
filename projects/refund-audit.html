@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multimodal Refund Audit System — Khalid Alnujaidi</title>
+  <meta name="description" content="A multimodal LLM system automating image-based refund claim auditing at HungerStation, adopted globally by Delivery Hero." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    /* ── Decision flow ── */
+    .decision-flow {
+      border: 1px solid var(--rule); border-radius: 3px;
+      background: var(--paper-alt); overflow: hidden;
+    }
+    .decision-row {
+      display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr;
+      align-items: center; padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--rule); gap: 0;
+    }
+    .decision-row:last-child { border-bottom: none; }
+    .decision-node {
+      text-align: center; padding: 0.65rem 0.5rem;
+      border: 1px solid var(--rule); border-radius: 3px;
+      background: var(--paper);
+    }
+    .decision-node.red { background: #fdf0f0; border-color: #f0b8b8; }
+    .decision-node.green { background: #e6f4ed; border-color: #a8d8bc; }
+    .decision-node.blue { background: #e8f0fb; border-color: #b5cef0; }
+    .decision-node-title { font-size: 11px; font-weight: 500; color: var(--ink); }
+    .decision-node-sub { font-size: 10px; color: var(--ink-faint); margin-top: 2px; }
+    .decision-node.red .decision-node-title { color: #8a2020; }
+    .decision-node.green .decision-node-title { color: #1a5c38; }
+    .decision-node.blue .decision-node-title { color: #1a4a8a; }
+    .decision-arrow { text-align: center; font-size: 13px; color: var(--ink-faint); }
+    .flow-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); padding: 0.6rem 1.5rem; border-bottom: 1px solid var(--rule); background: var(--paper); }
+
+    /* ── Global adoption banner ── */
+    .adoption-banner {
+      background: #e8f0fb; border: 1px solid #b5cef0;
+      border-radius: 3px; padding: 1.5rem 1.75rem;
+      display: flex; align-items: flex-start; gap: 1.25rem;
+    }
+    .adoption-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+    .adoption-title { font-size: 14px; font-weight: 500; color: #1a4a8a; margin-bottom: 0.35rem; }
+    .adoption-desc { font-size: 13px; color: #2a5caa; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="../index.html" class="topbar-back"><span class="arrow">←</span> Khalid Alnujaidi</a>
+    <a href="../index.html" class="topbar-logo"></a>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-label">
+      <span>HungerStation · Delivery Hero · –25</span>
+      <span class="badge-pill badge-blue"><span class="dot"></span> Multimodal LLM</span>
+      <span class="badge-pill badge-green"><span class="dot"></span> Adopted Globally</span>
+    </div>
+    <h1 class="hero-title">Multimodal Refund<br>Audit System</h1>
+    <p class="hero-subtitle">
+      A Generative AI proof-of-concept that automated image-based refund claim auditing at HungerStation — validated internally, then adopted as a global standard by the parent company, Delivery Hero.
+    </p>
+    <div class="confidential-notice">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" stroke="#b8b4ae"/><rect x="6.5" y="6" width="1" height="4.5" rx="0.5" fill="#b8b4ae"/><rect x="6.5" y="3.5" width="1" height="1.5" rx="0.5" fill="#b8b4ae"/></svg>
+      Internal project — architecture and outcomes shared at a high level. Model details, datasets, and operational thresholds are confidential to Delivery Hero.
+    </div>
+  </div>
+
+  <div class="meta-strip" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="meta-cell">
+      <div class="meta-label">Year</div>
+      <div class="meta-value">2025</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Organisation</div>
+      <div class="meta-value">HungerStation</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Scope</div>
+      <div class="meta-value">PoC → Global standard</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Parent company</div>
+      <div class="meta-value">Delivery Hero</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Problem -->
+    <div class="content-section">
+      <h2>The problem</h2>
+      <div class="prose">
+        <p>
+          Food delivery platforms process thousands of refund claims daily. A significant portion of those claims involve <strong>image evidence</strong> — photos of incorrect, missing, or damaged items submitted by customers. Manually reviewing each image to determine claim validity is slow, inconsistent, and doesn't scale.
+        </p>
+        <p>
+          The challenge: build a system that could look at an image, understand its content in context, and make a reliable audit decision — matching or exceeding human reviewer accuracy, at scale.
+        </p>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="content-section">
+      <h2>How it works</h2>
+
+      <div class="decision-flow" style="margin-bottom: 1.5rem;">
+        <div class="flow-label">Refund claim audit pipeline</div>
+
+        <div class="decision-row">
+          <div class="decision-node">
+            <div class="decision-node-title">Claim submitted</div>
+            <div class="decision-node-sub">Customer image + metadata</div>
+          </div>
+          <div class="decision-arrow">→</div>
+          <div class="decision-node blue">
+            <div class="decision-node-title">Multimodal LLM</div>
+            <div class="decision-node-sub">Analyses image + claim context</div>
+          </div>
+          <div class="decision-arrow">→</div>
+          <div class="decision-node blue">
+            <div class="decision-node-title">Evidence scoring</div>
+            <div class="decision-node-sub">Validity, consistency, confidence</div>
+          </div>
+        </div>
+
+        <div class="decision-row">
+          <div class="decision-node green">
+            <div class="decision-node-title">Valid — approve</div>
+            <div class="decision-node-sub">Refund processed automatically</div>
+          </div>
+          <div class="decision-arrow">←</div>
+          <div class="decision-node blue">
+            <div class="decision-node-title">Decision routing</div>
+            <div class="decision-node-sub">Above threshold → auto-resolve</div>
+          </div>
+          <div class="decision-arrow">→</div>
+          <div class="decision-node red">
+            <div class="decision-node-title">Flagged — review</div>
+            <div class="decision-node-sub">Low confidence → human queue</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>The model evaluates the image against the claimed issue, checking for visual consistency between the order contents and the reported problem. Claims above a confidence threshold are resolved automatically; ambiguous cases are routed to human reviewers with model reasoning attached — significantly reducing review time even in the manual queue.</p>
+      </div>
+    </div>
+
+    <!-- Global adoption -->
+    <div class="content-section">
+      <h2>Global adoption</h2>
+      <div class="adoption-banner" style="margin-bottom: 1.5rem;">
+        <div class="adoption-icon">🌐</div>
+        <div>
+          <div class="adoption-title">Adopted as a Delivery Hero global standard</div>
+          <div class="adoption-desc">The architectural blueprint and curated datasets developed at HungerStation were shared with Delivery Hero. They served as the foundation and inspiration for the company's final global solution — scaling the approach across the international organisation.</div>
+        </div>
+      </div>
+      <div class="prose">
+        <p>Starting as a local PoC, this system's validation at HungerStation gave Delivery Hero enough confidence to invest in a production-grade version. The core design decisions — multimodal evidence analysis, confidence-based routing, and human-in-the-loop fallback — were preserved in the global implementation.</p>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="content-section">
+      <h2>Design decisions</h2>
+      <div class="feature-grid">
+        <div class="feature-cell">
+          <div class="feature-icon">◈</div>
+          <div class="feature-title">Multimodal reasoning</div>
+          <div class="feature-desc">The model jointly processes the image and textual claim context — not just the image in isolation. Reduces false positives from ambiguous photos.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">⬡</div>
+          <div class="feature-title">Confidence-based routing</div>
+          <div class="feature-desc">High-confidence decisions are resolved automatically. Low-confidence cases go to human reviewers with model reasoning — accelerating manual review rather than replacing it.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">◎</div>
+          <div class="feature-title">Curated training data</div>
+          <div class="feature-desc">Built and maintained a dataset of labelled claim images to improve model reliability — shared upstream with Delivery Hero for their global rollout.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">▦</div>
+          <div class="feature-title">Audit trail</div>
+          <div class="feature-desc">Every model decision is logged with its reasoning — maintaining accountability and enabling continuous model improvement over time.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stack -->
+    <div class="content-section">
+      <h2>Built with</h2>
+      <div class="stack-list">
+        <span class="stack-tag">Multimodal LLM</span>
+        <span class="stack-tag">Computer Vision</span>
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">GCP</span>
+        <span class="stack-tag">BigQuery</span>
+        <span class="stack-tag">REST API</span>
+        <span class="stack-tag">Custom Dataset</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="project-footer">
+    <span class="footer-copy">© 2026 Khalid Alnujaidi</span>
+    <a href="../index.html" class="footer-back">← Back to portfolio</a>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Stalking the Wild Pendulum — Sound, Waves & Vibration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070a14;
+    --ink:#ece6d6;
+    --muted:#7d879c;
+    --cyan:#4fe6cd;
+    --cyan-dim:#2c8a7d;
+    --gold:#e7b257;
+    --line:rgba(236,230,214,0.10);
+    --panel:rgba(10,14,26,0.62);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+    font-family:"IBM Plex Mono",monospace;-webkit-font-smoothing:antialiased}
+  #app{position:fixed;inset:0;
+    background:
+      radial-gradient(140% 100% at 78% 8%, rgba(231,178,87,0.07), transparent 42%),
+      radial-gradient(120% 120% at 12% 92%, rgba(79,230,205,0.08), transparent 46%),
+      radial-gradient(100% 100% at 50% 50%, #0a1020 0%, #060812 72%, #04060d 100%);
+  }
+  canvas{display:block;position:absolute;inset:0}
+
+  /* ---- top bar ---- */
+  #topbar{position:absolute;top:0;left:0;right:0;padding:22px 28px;z-index:5;
+    display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+  .brand .kick{font-size:10px;letter-spacing:.32em;color:var(--cyan);text-transform:uppercase}
+  .brand h1{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:26px;
+    line-height:1.05;margin-top:3px;letter-spacing:.01em}
+  .brand .by{font-size:10.5px;color:var(--muted);letter-spacing:.14em;margin-top:4px}
+  .hint{font-size:10px;color:var(--muted);letter-spacing:.18em;text-align:right;text-transform:uppercase}
+  .hint b{color:var(--ink);font-weight:400}
+
+  /* ---- nav ---- */
+  #nav{position:absolute;left:28px;top:50%;transform:translateY(-50%);z-index:6;
+    display:flex;flex-direction:column;gap:2px}
+  .nav-item{pointer-events:auto;cursor:pointer;background:none;border:none;color:var(--muted);
+    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;text-align:left;
+    padding:9px 12px 9px 16px;border-left:2px solid transparent;display:flex;align-items:baseline;gap:10px;
+    transition:color .25s,border-color .25s;white-space:nowrap}
+  .nav-item .num{font-size:9px;color:var(--cyan-dim);width:14px}
+  .nav-item .num.star{color:var(--gold);font-size:12px}
+  .nav-item.active .num.star{color:var(--gold)}
+  .ptitle .idx.star{color:var(--gold)}
+  #panel.reflect{width:min(940px,calc(100% - 48px));background:rgba(9,12,22,0.93)}
+  #panel.reflect #pBlurb{max-width:none;column-count:2;column-gap:36px;column-rule:1px solid rgba(231,178,87,.16);
+    font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:500;font-size:16.5px;
+    line-height:1.62;color:var(--ink);max-height:40vh;overflow:auto;margin-top:14px;padding-right:2px}
+  #panel.reflect #pBlurb .rhead{column-span:all;display:block;font-family:"IBM Plex Mono",monospace;
+    font-style:normal;font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  #panel.reflect #pBlurb p{margin:0 0 13px;break-inside:avoid}
+  #panel.reflect #pBlurb p:last-child{color:var(--gold)}
+  .nav-item:hover{color:var(--ink)}
+  .nav-item.active{color:var(--ink);border-left-color:var(--cyan)}
+  .nav-item.active .num{color:var(--cyan)}
+
+  /* ---- bottom panel ---- */
+  #panel{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;z-index:6;
+    width:min(660px,calc(100% - 48px));background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);padding:18px 22px 20px;
+    box-shadow:0 24px 60px rgba(0,0,0,.5)}
+  #panelToggle{position:absolute;top:12px;right:14px;width:26px;height:26px;border-radius:7px;
+    background:rgba(236,230,214,.04);border:1px solid var(--line);color:var(--muted);cursor:pointer;
+    font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;
+    transition:color .2s,border-color .2s;z-index:2}
+  #panelToggle:hover{color:var(--ink);border-color:rgba(79,230,205,.45)}
+  #panel.collapsed{padding-bottom:14px}
+  #panel.collapsed #pBlurb,#panel.collapsed #controls{display:none}
+  #panel .ptitle{font-family:"Cormorant Garamond",serif;font-size:27px;font-weight:600;line-height:1;
+    display:flex;align-items:baseline;gap:12px;padding-right:34px}
+  #panel .ptitle .idx{font-family:"IBM Plex Mono";font-size:11px;color:var(--cyan);letter-spacing:.2em}
+  .dim-badge{font-family:"IBM Plex Mono";font-size:10px;letter-spacing:.14em;color:var(--gold);
+    border:1px solid rgba(231,178,87,.45);border-radius:5px;padding:2px 7px;align-self:center}
+  .nav-item .dim{font-size:8.5px;letter-spacing:.1em;color:var(--cyan-dim);border:1px solid var(--line);
+    border-radius:4px;padding:1px 5px;margin-left:6px}
+  #panel .blurb{font-size:12px;line-height:1.62;color:#c6c2b6;margin-top:10px;max-width:62ch}
+  #controls{display:flex;flex-wrap:wrap;gap:18px 26px;margin-top:16px;align-items:flex-end}
+  .ctl{display:flex;flex-direction:column;gap:7px;min-width:130px}
+  .ctl label{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .ctl .val{color:var(--gold)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;
+    background:rgba(236,230,214,.2);border-radius:2px;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+    background:var(--cyan);cursor:pointer;box-shadow:0 0 10px rgba(79,230,205,.7)}
+  input[type=range]::-moz-range-thumb{width:13px;height:13px;border:none;border-radius:50%;
+    background:var(--cyan);cursor:pointer;box-shadow:0 0 10px rgba(79,230,205,.7)}
+  .btnrow{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font-family:"IBM Plex Mono";font-size:11px;color:var(--muted);background:rgba(236,230,214,.04);
+    border:1px solid var(--line);border-radius:7px;padding:6px 11px;cursor:pointer;
+    transition:all .2s;letter-spacing:.04em}
+  .chip:hover{color:var(--ink);border-color:rgba(79,230,205,.4)}
+  .chip.on{color:#06120f;background:var(--cyan);border-color:var(--cyan);font-weight:500}
+  .meter{height:5px;background:rgba(236,230,214,.12);border-radius:3px;overflow:hidden;width:100%}
+  .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));
+    transition:width .1s linear}
+
+  #loader{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+    background:var(--bg);color:var(--muted);font-size:11px;letter-spacing:.25em;text-transform:uppercase}
+
+  @media (max-width:760px){
+    #nav{position:absolute;left:0;right:0;top:auto;bottom:calc(100% - 100%);transform:none;
+      flex-direction:row;overflow-x:auto;gap:0;padding:0 16px;
+      top:84px;bottom:auto;-webkit-overflow-scrolling:touch}
+    .nav-item{padding:8px 10px;border-left:none;border-bottom:2px solid transparent}
+    .nav-item.active{border-left:none;border-bottom-color:var(--cyan)}
+    .nav-item .num{display:none}
+    #panel{bottom:14px;padding:14px 16px 16px}
+    #panel .ptitle{font-size:22px}
+    .brand h1{font-size:20px}
+    .hint{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="loader">assembling the standing waves…</div>
+  <div id="topbar">
+    <div class="brand">
+      <div class="kick">Stalking the Wild Pendulum</div>
+      <h1>Sound, Waves &amp; Vibration</h1>
+      <div class="by">after Itzhak Bentov · Ch. 1</div>
+    </div>
+    <div class="hint"><b>drag</b> to orbit<br><b>scroll</b> to zoom</div>
+  </div>
+  <nav id="nav"></nav>
+  <div id="panel">
+    <button id="panelToggle" title="Hide panel">▾</button>
+    <div class="ptitle"><span class="idx" id="pIdx">01</span><span id="pTitle"></span><span class="dim-badge" id="pDim"></span></div>
+    <div class="blurb" id="pBlurb"></div>
+    <div id="controls"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+const TAU = Math.PI*2;
+
+/* ============================================================= renderer */
+const app = document.getElementById('app');
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true, preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setClearColor(0x000000,0);
+app.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 400);
+const clock = new THREE.Clock();
+
+const root = new THREE.Group();           // per-concept content lives here
+scene.add(root);
+
+/* lights (used by lit scenes) */
+const amb = new THREE.AmbientLight(0x6a78a0, 0.55); scene.add(amb);
+const key = new THREE.DirectionalLight(0xfff0d8, 0.9); key.position.set(4,7,6); scene.add(key);
+const rim = new THREE.DirectionalLight(0x4fe6cd, 0.5); rim.position.set(-6,2,-5); scene.add(rim);
+
+/* persistent starfield */
+(function stars(){
+  const N=1400, g=new THREE.BufferGeometry(), p=new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const r=60+Math.random()*120, t=Math.random()*TAU, ph=Math.acos(2*Math.random()-1);
+    p[i*3]=r*Math.sin(ph)*Math.cos(t); p[i*3+1]=r*Math.cos(ph); p[i*3+2]=r*Math.sin(ph)*Math.sin(t);
+  }
+  g.setAttribute('position',new THREE.BufferAttribute(p,3));
+  const m=new THREE.PointsMaterial({color:0x9fb0d0,size:0.45,transparent:true,opacity:0.5,
+    sizeAttenuation:true});
+  const pts=new THREE.Points(g,m); pts.name='__stars'; scene.add(pts);
+  scene.userData.stars=pts;
+})();
+
+/* ============================================================= camera orbit */
+const cam = {theta:0.7, phi:1.05, radius:9, target:new THREE.Vector3(0,0,0),
+             auto:true, autoSpeed:0.05, rmin:3, rmax:30};
+function applyCam(){
+  const sp=Math.sin(cam.phi);
+  camera.position.set(
+    cam.target.x + cam.radius*sp*Math.cos(cam.theta),
+    cam.target.y + cam.radius*Math.cos(cam.phi),
+    cam.target.z + cam.radius*sp*Math.sin(cam.theta));
+  camera.lookAt(cam.target);
+}
+let dragging=false, lastX=0, lastY=0, pinchD=0, idle=0;
+const el=renderer.domElement;
+function down(x,y){dragging=true;lastX=x;lastY=y;cam.auto=false;idle=0;}
+function move(x,y){ if(!dragging)return;
+  cam.theta -= (x-lastX)*0.006;
+  cam.phi = Math.max(0.12, Math.min(Math.PI-0.12, cam.phi - (y-lastY)*0.006));
+  lastX=x;lastY=y; }
+function up(){dragging=false;}
+el.addEventListener('mousedown',e=>down(e.clientX,e.clientY));
+window.addEventListener('mousemove',e=>move(e.clientX,e.clientY));
+window.addEventListener('mouseup',up);
+el.addEventListener('wheel',e=>{e.preventDefault();
+  cam.radius=Math.max(cam.rmin,Math.min(cam.rmax,cam.radius*(1+e.deltaY*0.0011)));cam.auto=false;idle=0;
+},{passive:false});
+el.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){down(e.touches[0].clientX,e.touches[0].clientY);}
+  else if(e.touches.length===2){pinchD=Math.hypot(
+    e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);}
+},{passive:true});
+el.addEventListener('touchmove',e=>{
+  if(e.touches.length===1){move(e.touches[0].clientX,e.touches[0].clientY);}
+  else if(e.touches.length===2){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    if(pinchD){cam.radius=Math.max(cam.rmin,Math.min(cam.rmax,cam.radius*(pinchD/d)));}
+    pinchD=d;cam.auto=false;idle=0;}
+},{passive:true});
+el.addEventListener('touchend',()=>{dragging=false;pinchD=0;});
+
+/* ============================================================= helpers */
+function clearGroup(g){
+  for(let i=g.children.length-1;i>=0;i--){
+    const c=g.children[i];
+    if(c.geometry)c.geometry.dispose();
+    if(c.material){(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>{
+      if(m.map)m.map.dispose(); m.dispose();});}
+    g.remove(c);
+  }
+}
+function makeLabel(text,color){
+  const c=document.createElement('canvas'); c.width=256;c.height=64;
+  const x=c.getContext('2d');
+  x.fillStyle=color||'#4fe6cd';
+  x.font='600 30px "IBM Plex Mono",monospace';x.textAlign='center';x.textBaseline='middle';
+  x.fillText(text,128,34);
+  const t=new THREE.CanvasTexture(c);t.minFilter=THREE.LinearFilter;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false,opacity:.9}));
+  s.scale.set(1.7,0.42,1); return s;
+}
+
+/* control-panel builders -------------------------------------------------- */
+const controlsEl=document.getElementById('controls');
+function clearControls(){controlsEl.innerHTML='';}
+function ctlSlider(o){ // {label,min,max,value,step,fmt,onInput}
+  const w=document.createElement('div');w.className='ctl';
+  const lab=document.createElement('label');
+  const val=document.createElement('span');val.className='val';
+  const fmt=o.fmt||(v=>v);
+  lab.textContent=o.label+' · '; lab.appendChild(val); val.textContent=fmt(o.value);
+  const inp=document.createElement('input');inp.type='range';
+  inp.min=o.min;inp.max=o.max;inp.step=o.step||1;inp.value=o.value;
+  inp.addEventListener('input',()=>{val.textContent=fmt(+inp.value);o.onInput(+inp.value);});
+  w.appendChild(lab);w.appendChild(inp);controlsEl.appendChild(w);return inp;
+}
+function ctlChips(o){ // {label,options:[{label,value}],value,onPick}
+  const w=document.createElement('div');w.className='ctl';
+  const lab=document.createElement('label');lab.textContent=o.label;
+  const row=document.createElement('div');row.className='btnrow';
+  o.options.forEach(op=>{
+    const b=document.createElement('button');b.className='chip'+(op.value===o.value?' on':'');
+    b.textContent=op.label;
+    b.addEventListener('click',()=>{[...row.children].forEach(c=>c.classList.remove('on'));
+      b.classList.add('on');o.onPick(op.value);});
+    row.appendChild(b);
+  });
+  w.appendChild(lab);w.appendChild(row);controlsEl.appendChild(w);return row;
+}
+function ctlButton(label,onClick){
+  const b=document.createElement('button');b.className='chip';b.textContent=label;
+  b.style.alignSelf='flex-end';b.addEventListener('click',onClick);controlsEl.appendChild(b);return b;
+}
+function ctlMeter(label){
+  const w=document.createElement('div');w.className='ctl';w.style.minWidth='150px';
+  const lab=document.createElement('label');const val=document.createElement('span');
+  val.className='val';lab.textContent=label+' · ';lab.appendChild(val);
+  const m=document.createElement('div');m.className='meter';const i=document.createElement('i');
+  m.appendChild(i);w.appendChild(lab);w.appendChild(m);controlsEl.appendChild(w);
+  return {set:v=>{i.style.width=(v*100).toFixed(0)+'%';val.textContent=(v*100).toFixed(0)+'%';}};
+}
+
+/* ============================================================= CONCEPTS */
+const COL_CYAN=0x4fe6cd, COL_GOLD=0xe7b257, COL_INK=0xece6d6;
+
+const CONCEPTS=[];
+
+/* --- 1. STANDING WAVES ON A STRING --------------------------------------- */
+CONCEPTS.push({
+  title:"Standing Waves", dim:"1D",
+  blurb:"Pluck a string fixed at both ends and only certain shapes survive — those that fit a whole number of half-waves between the endpoints. The motionless points are nodes; the swinging bellies are antinodes. Raise the harmonic to watch the medium itself decide which notes it is allowed to hold.",
+  cam:{theta:0.55,phi:1.18,radius:8.5,auto:true,rmin:4,rmax:16,target:[0,0,0]},
+  build(g){
+    const L=7, segs=160, amp=1.15;
+    let n=1;
+    const labels=[];
+    // ghost envelope (extreme positions)
+    const env=[];
+    for(let s=-1;s<=1;s+=2){
+      const geo=new THREE.BufferGeometry();const a=new Float32Array((segs+1)*3);
+      geo.setAttribute('position',new THREE.BufferAttribute(a,3));
+      const ln=new THREE.Line(geo,new THREE.LineBasicMaterial({color:COL_CYAN,transparent:true,opacity:0.16}));
+      g.add(ln);env.push({geo,s});
+    }
+    // posts
+    const postMat=new THREE.MeshStandardMaterial({color:0x46506a,roughness:.7,metalness:.3});
+    [-L/2,L/2].forEach(px=>{
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,2.4,16),postMat);
+      post.position.set(px,0,0);g.add(post);
+    });
+    // string as tube rebuilt each frame
+    let tube=null;
+    const tubeMat=new THREE.MeshStandardMaterial({color:COL_GOLD,emissive:0x4a2f06,
+      emissiveIntensity:.6,roughness:.35,metalness:.4});
+    // node markers
+    let nodeGroup=new THREE.Group();g.add(nodeGroup);
+    function rebuildNodes(){
+      clearGroup(nodeGroup); labels.length=0;
+      for(let k=0;k<=n;k++){
+        const x=-L/2 + (k/n)*L;
+        const dot=new THREE.Mesh(new THREE.SphereGeometry(.12,16,16),
+          new THREE.MeshBasicMaterial({color:COL_CYAN}));
+        dot.position.set(x,0,0);nodeGroup.add(dot);
+      }
+      const lab=makeLabel('NODES',COL_CYAN);lab.position.set(0,-1.7,0);nodeGroup.add(lab);
+    }
+    rebuildNodes();
+    function shape(x,t){ // x in [-L/2,L/2]
+      const u=(x+L/2)/L; // 0..1
+      return amp*Math.sin(n*Math.PI*u)*Math.cos(t*3.2);
+    }
+    function rebuildTube(t){
+      const pts=[];
+      for(let i=0;i<=segs;i++){const x=-L/2+(i/segs)*L;pts.push(new THREE.Vector3(x,shape(x,t),0));}
+      const curve=new THREE.CatmullRomCurve3(pts);
+      const ng=new THREE.TubeGeometry(curve,segs,0.06,8,false);
+      if(tube){tube.geometry.dispose();tube.geometry=ng;}
+      else{tube=new THREE.Mesh(ng,tubeMat);g.add(tube);}
+      // envelope
+      env.forEach(e=>{const arr=e.geo.attributes.position.array;
+        for(let i=0;i<=segs;i++){const x=-L/2+(i/segs)*L;const u=(x+L/2)/L;
+          arr[i*3]=x;arr[i*3+1]=e.s*amp*Math.sin(n*Math.PI*u);arr[i*3+2]=0;}
+        e.geo.attributes.position.needsUpdate=true;});
+    }
+    ctlChips({label:"Harmonic (half-waves)",value:n,
+      options:[1,2,3,4,5,6].map(v=>({label:'n='+v,value:v})),
+      onPick:v=>{n=v;rebuildNodes();}});
+    return {update:(dt,t)=>rebuildTube(t)};
+  }
+});
+
+/* --- 2. CHLADNI PLATE ----------------------------------------------------- */
+CONCEPTS.push({
+  title:"Chladni Plate", dim:"2D",
+  blurb:"Bow a clamped metal plate sprinkled with sand. The grains flee the trembling regions and gather along the still nodal lines, drawing out the plate's hidden standing-wave pattern in fine ribbons of sand. Each driving frequency carves a different figure.",
+  cam:{theta:0.9,phi:0.62,radius:7.8,auto:true,autoSpeed:0.04,rmin:4,rmax:16,target:[0,0,0]},
+  build(g){
+    const S=5;                       // world size of plate
+    let mode={a:2,b:5};
+    const W=(x,y)=>                  // x,y in 0..1 ; classic square-plate Chladni
+      Math.cos(mode.a*Math.PI*x)*Math.cos(mode.b*Math.PI*y) -
+      Math.cos(mode.b*Math.PI*x)*Math.cos(mode.a*Math.PI*y);
+    // plate mesh
+    const segs=90;
+    const pg=new THREE.PlaneGeometry(S,S,segs,segs);
+    pg.rotateX(-Math.PI/2);
+    const plate=new THREE.Mesh(pg,new THREE.MeshStandardMaterial({
+      color:0x1d2740,roughness:.55,metalness:.5,side:THREE.DoubleSide,
+      emissive:0x0a1530,emissiveIntensity:.4}));
+    g.add(plate);
+    // sand particles — each grain carries velocity + a real vertical bounce
+    const NP=3800;
+    const sg=new THREE.BufferGeometry();
+    const pos=new Float32Array(NP*3);
+    const xs=new Float32Array(NP), ys=new Float32Array(NP);    // plate coords 0..1
+    const vx=new Float32Array(NP), vy=new Float32Array(NP);    // in-plane velocity
+    const hh=new Float32Array(NP), vh=new Float32Array(NP);    // height + vertical velocity
+    const mass=new Float32Array(NP);                           // slight per-grain variety
+    function scatter(){for(let i=0;i<NP;i++){
+      xs[i]=Math.random();ys[i]=Math.random();
+      vx[i]=0;vy[i]=0;hh[i]=Math.random()*0.04;vh[i]=0;
+      mass[i]=0.75+Math.random()*0.55;
+    }}
+    scatter();
+    sg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const sand=new THREE.Points(sg,new THREE.PointsMaterial({
+      color:COL_GOLD,size:0.06,sizeAttenuation:true,transparent:true,opacity:.95}));
+    g.add(sand);
+
+    let driveAmp=0.25;
+    const FREQ=4.5, e=0.01, GRAV=9.5;
+    // plate flex now scales with Drive — bowing harder visibly shakes the plate more
+    const plateH=(x,y,t)=>W(x,y)*0.34*driveAmp*Math.sin(t*FREQ);   // surface height
+    const plateV=(x,y,t)=>W(x,y)*0.34*driveAmp*FREQ*Math.cos(t*FREQ); // surface velocity
+    function step(dt,t){
+      const h=Math.min(dt,0.033);
+      const fric=Math.exp(-5.5*h);                                 // in-plane friction
+      for(let i=0;i<NP;i++){
+        let x=xs[i],y=ys[i];
+        const aw=Math.min(Math.abs(W(x,y)),1);                     // local vibration
+        const im=1/mass[i];
+        // downhill direction toward the nearest nodal line
+        const gx=(Math.abs(W(x+e,y))-Math.abs(W(x-e,y)))/(2*e);
+        const gy=(Math.abs(W(x,y+e))-Math.abs(W(x,y-e)))/(2*e);
+        const gl=Math.hypot(gx,gy)+1e-6;
+        // accelerate toward the node + Brownian agitation, both fade as amplitude → 0
+        vx[i]+=(-(gx/gl)*1.7*aw + (Math.random()-0.5)*2.6*aw)*driveAmp*h*im;
+        vy[i]+=(-(gy/gl)*1.7*aw + (Math.random()-0.5)*2.6*aw)*driveAmp*h*im;
+        vx[i]*=fric; vy[i]*=fric;
+        if(vx[i]>1.5)vx[i]=1.5; else if(vx[i]<-1.5)vx[i]=-1.5;
+        if(vy[i]>1.5)vy[i]=1.5; else if(vy[i]<-1.5)vy[i]=-1.5;
+        x+=vx[i]*h; y+=vy[i]*h;
+        if(x<0){x=-x;vx[i]=-vx[i]*0.4;} else if(x>1){x=2-x;vx[i]=-vx[i]*0.4;}
+        if(y<0){y=-y;vy[i]=-vy[i]*0.4;} else if(y>1){y=2-y;vy[i]=-vy[i]*0.4;}
+        xs[i]=x;ys[i]=y;
+        // vertical: gravity pulls down, the plate flings grains up on its upstroke
+        vh[i]-=GRAV*h; hh[i]+=vh[i]*h;
+        if(hh[i]<=0){
+          hh[i]=0;
+          if(vh[i]<0)vh[i]*=-0.22;                                 // inelastic bounce
+          const pv=plateV(x,y,t);
+          if(pv>0)vh[i]+=(pv*1.3*aw+Math.random()*aw*0.5*driveAmp)*im;
+        }
+        if(vh[i]>7)vh[i]=7;
+        pos[i*3]=(x-0.5)*S;
+        pos[i*3+1]=0.05+plateH(x,y,t)+hh[i]*0.26;
+        pos[i*3+2]=(y-0.5)*S;
+      }
+      sg.attributes.position.needsUpdate=true;
+      // flex the plate to match
+      const arr=pg.attributes.position.array;
+      for(let i=0;i<arr.length;i+=3){
+        arr[i+1]=plateH(arr[i]/S+0.5, arr[i+2]/S+0.5, t);
+      }
+      pg.attributes.position.needsUpdate=true;pg.computeVertexNormals();
+    }
+    ctlChips({label:"Vibration mode (a,b)",value:'2,5',
+      options:[['1,2',1,2],['2,3',2,3],['1,4',1,4],['3,4',3,4],['2,5',2,5],['3,5',3,5]]
+        .map(([l])=>({label:l,value:l})),
+      onPick:l=>{const ab=l.split(',');mode={a:+ab[0],b:+ab[1]};scatter();}});
+    ctlSlider({label:"Drive · bow pressure",min:0.15,max:2.0,value:0.25,step:0.05,
+      fmt:v=>v.toFixed(2),onInput:v=>driveAmp=v});
+    ctlButton('↻ re-sprinkle sand',()=>scatter());
+    return {update:step};
+  }
+});
+
+/* --- 3. 3D STANDING WAVE → CRYSTAL --------------------------------------- */
+CONCEPTS.push({
+  title:"Crystal in a Box", dim:"3D",
+  blurb:"The third dimension of the same idea — a standing wave is one-dimensional on the string, two-dimensional on the plate, and here it fills a volume. Vibrating a fluid full of suspended particles from every side sets up a 3D standing wave whose calm pockets sit in a regular 3×3×3 grid. The particles drift out of the churning regions and lock into those pockets — order conjured from a formless suspension, much as atoms settle into a crystal.",
+  cam:{theta:0.7,phi:1.0,radius:8.5,auto:true,autoSpeed:0.08,rmin:4,rmax:18,target:[0,0,0]},
+  build(g){
+    const B=4; // box size
+    // wireframe box
+    const box=new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(B,B,B)),
+      new THREE.LineBasicMaterial({color:COL_CYAN,transparent:true,opacity:.3}));
+    g.add(box);
+    const faces=new THREE.Mesh(new THREE.BoxGeometry(B,B,B),
+      new THREE.MeshBasicMaterial({color:0x0c1830,transparent:true,opacity:.10,side:THREE.BackSide}));
+    g.add(faces);
+    // --- optional "vibration zones": the loud antinodes of the standing wave that particles FLEE ---
+    // they sit in the gaps between lattice sites, so glow and particles never overlap
+    const field=new THREE.Group(); g.add(field);
+    const wellGeo=new THREE.SphereGeometry(1,18,18);
+    const wellOuter=new THREE.MeshBasicMaterial({color:0xe07a22,transparent:true,opacity:0.05,
+      blending:THREE.AdditiveBlending,depthWrite:false});
+    const wellInner=new THREE.MeshBasicMaterial({color:0xffb24d,transparent:true,opacity:0.10,
+      blending:THREE.AdditiveBlending,depthWrite:false});
+    let showField=false;
+    // antinodes (maxima) sit at ±0.5 per axis — the body-centres of the lattice cells
+    function buildField(){
+      for(let i=field.children.length-1;i>=0;i--) field.remove(field.children[i]);
+      if(!showField) return;
+      const ax=[-0.5,0.5], rad=0.85;
+      for(const cx of ax)for(const cy of ax)for(const cz of ax){
+        const xw=cx*B/2,yw=cy*B/2,zw=cz*B/2;
+        const o=new THREE.Mesh(wellGeo,wellOuter); o.position.set(xw,yw,zw); o.scale.setScalar(rad); field.add(o);
+        const ic=new THREE.Mesh(wellGeo,wellInner); ic.position.set(xw,yw,zw); ic.scale.setScalar(rad*0.55); field.add(ic);
+      }
+    }
+    buildField();
+    const NP=4200;
+    const geo=new THREE.BufferGeometry();
+    const pos=new Float32Array(NP*3);
+    const col=new Float32Array(NP*3);
+    const p=new Float32Array(NP*3);            // positions in [-1,1]
+    const vel=new Float32Array(NP*3);          // velocities
+    const mass=new Float32Array(NP);
+    function disperse(){for(let i=0;i<NP;i++){
+      p[i*3]=Math.random()*2-1;p[i*3+1]=Math.random()*2-1;p[i*3+2]=Math.random()*2-1;
+      vel[i*3]=vel[i*3+1]=vel[i*3+2]=0; mass[i]=0.8+Math.random()*0.6;
+    }}
+    disperse();
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+    const cloud=new THREE.Points(geo,new THREE.PointsMaterial({
+      size:0.075,sizeAttenuation:true,transparent:true,opacity:.92,vertexColors:true}));
+    g.add(cloud);
+    const cInk=new THREE.Color(COL_INK), cCyan=new THREE.Color(0x5ff0dd), ctmp=new THREE.Color();
+    let conv=0, target=1;                       // 0 = loose suspension, 1 = crystal
+    const e=0.012;
+    function step(dt,t){
+      const h=Math.min(dt,0.033);
+      const rate=(target<conv)?0.9:0.22;          // disperse fast, crystallize slowly
+      conv += (target-conv)*Math.min(1,h*rate);
+      const kk=Math.PI*2, springC=3.0/kk;        // fixed 3×3×3 standing wave
+      const fric=Math.exp(-3.4*h);
+      const agit=5.2*(1-conv)+0.30*conv;         // lively, wide-spreading when fluid → faint thermal when solid
+      for(let i=0;i<NP;i++){
+        const ix=i*3,iy=ix+1,iz=ix+2;
+        let x=p[ix],y=p[iy],z=p[iz];
+        const im=1/mass[i];
+        // spring toward the nearest standing-wave minimum (eases in as it arrives)
+        const gx=(Math.cos(kk*(x-e))-Math.cos(kk*(x+e)))/(2*e);
+        const gy=(Math.cos(kk*(y-e))-Math.cos(kk*(y+e)))/(2*e);
+        const gz=(Math.cos(kk*(z-e))-Math.cos(kk*(z+e)))/(2*e);
+        const s=springC*conv*im*h;
+        vel[ix]-=gx*s; vel[iy]-=gy*s; vel[iz]-=gz*s;
+        // brownian agitation of the suspension
+        const ag=agit*im*h;
+        vel[ix]+=(Math.random()-.5)*ag; vel[iy]+=(Math.random()-.5)*ag; vel[iz]+=(Math.random()-.5)*ag;
+        vel[ix]*=fric; vel[iy]*=fric; vel[iz]*=fric;
+        x+=vel[ix]*h; y+=vel[iy]*h; z+=vel[iz]*h;
+        if(x<-1){x=-1;vel[ix]*=-0.4;} else if(x>1){x=1;vel[ix]*=-0.4;}
+        if(y<-1){y=-1;vel[iy]*=-0.4;} else if(y>1){y=1;vel[iy]*=-0.4;}
+        if(z<-1){z=-1;vel[iz]*=-0.4;} else if(z>1){z=1;vel[iz]*=-0.4;}
+        p[ix]=x;p[iy]=y;p[iz]=z;
+        pos[ix]=x*B/2;pos[iy]=y*B/2;pos[iz]=z*B/2;
+        // glow up as each atom reaches its lattice site
+        const Uv=-(Math.cos(kk*x)+Math.cos(kk*y)+Math.cos(kk*z));
+        const tn=Math.max(0,Math.min(1,(-Uv+3)/6))*conv;
+        ctmp.copy(cInk).lerp(cCyan,tn);
+        col[ix]=ctmp.r;col[iy]=ctmp.g;col[iz]=ctmp.b;
+      }
+      geo.attributes.position.needsUpdate=true;
+      geo.attributes.color.needsUpdate=true;
+      if(showField){const o=0.04+0.04*(0.5+0.5*Math.sin(t*4.0));wellOuter.opacity=o;wellInner.opacity=o*2.0;
+        field.scale.setScalar(1+0.05*Math.sin(t*4.0));}
+    }
+    const fldBtn=ctlButton('◇ vibration zones: off',()=>{
+      showField=!showField; buildField(); if(!showField) field.scale.setScalar(1);
+      fldBtn.classList.toggle('on',showField);
+      fldBtn.textContent='◇ vibration zones: '+(showField?'on':'off');});
+    ctlButton('≋ melt / disperse',()=>{ target=0;
+      for(let i=0;i<NP;i++){const ix=i*3,iy=ix+1,iz=ix+2;
+        const L=Math.hypot(p[ix],p[iy],p[iz])||1e-3, kick=1.5;
+        vel[ix]+=p[ix]/L*kick+(Math.random()-.5)*1.0;
+        vel[iy]+=p[iy]/L*kick+(Math.random()-.5)*1.0;
+        vel[iz]+=p[iz]/L*kick+(Math.random()-.5)*1.0;}
+    });
+    ctlButton('◆ crystallize',()=>{target=1;});
+    return {update:step};
+  }
+});
+
+/* --- 4. RIPPLE-TANK INTERFERENCE ----------------------------------------- */
+CONCEPTS.push({
+  title:"Interference",
+  blurb:"Watch the pebbles land: each one sends a slow ring of ripples spreading across the pan. Where the rings overlap, crests that arrive together pile into bright ridges — constructive interference — while a crest meeting a trough flattens to a calm, dark lane — destructive interference. As the ripples fill the pan a fixed pattern of bright and dark bands settles in and holds its place even though the water keeps moving — the same principle that lets a hologram store an image.",
+  cam:{theta:0.85,phi:0.58,radius:12.5,auto:true,autoSpeed:0.04,rmin:6,rmax:26,target:[0,0,0]},
+  build(g){
+    const R=6, rings=54, spokes=104;
+    let nSrc=2, frozen=false, age=0;
+    const c=2.2, k=2.0, w=2.2, edgeW=1.0, T0=0.85;   // ripple speed, wavenumber, freq, drop time
+    // circular water surface on a polar grid → fits the round pan with no overspill
+    const verts=[0,0,0], idx=[];
+    for(let ri=1;ri<=rings;ri++){const rr=R*ri/rings;
+      for(let si=0;si<spokes;si++){const a=si/spokes*TAU;verts.push(Math.cos(a)*rr,0,Math.sin(a)*rr);}}
+    for(let si=0;si<spokes;si++){idx.push(0,1+(si+1)%spokes,1+si);}
+    for(let ri=1;ri<rings;ri++){const b0=1+(ri-1)*spokes,b1=1+ri*spokes;
+      for(let si=0;si<spokes;si++){const a=b0+si,b=b0+(si+1)%spokes,cc=b1+si,d=b1+(si+1)%spokes;
+        idx.push(a,d,cc, a,b,d);}}
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+    geo.setIndex(idx);
+    const NV=verts.length/3, pos=geo.attributes.position.array;
+    const colors=new Float32Array(NV*3);
+    geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
+    const surf=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({
+      vertexColors:true,roughness:.28,metalness:.5,side:THREE.DoubleSide}));
+    g.add(surf);
+    const rim=new THREE.Mesh(new THREE.TorusGeometry(R+0.05,0.16,14,90),
+      new THREE.MeshStandardMaterial({color:0x39435e,roughness:.6,metalness:.4}));
+    rim.rotation.x=Math.PI/2;g.add(rim);
+    const presets={1:[[0,0]],2:[[-2.6,0],[2.6,0]],3:[[0,-2.8],[-2.6,1.7],[2.6,1.7]]};
+    // groups for the dropping pebbles, splash rings, and source dots
+    const pebbleG=new THREE.Group(), splashG=new THREE.Group(), srcG=new THREE.Group();
+    g.add(pebbleG); g.add(splashG); g.add(srcG);
+    // colours (numeric, to avoid per-vertex allocation)
+    const cl=[0x0d/255,0x22/255,0x36/255];      // calm / cancel  (deep blue)
+    const cm=[0x2f/255,0x9f/255,0xb0/255];      // mid
+    const ch=[0x9f/255,0xf6/255,0xea/255];      // reinforce (bright cyan)
+    const stableCol=new Float32Array(NV*3);
+    let src=presets[2], hScale=1, bakeStart=4;
+    function rebuild(){
+      src=presets[nSrc]; age=0; frozen=false;
+      clearGroup(pebbleG); clearGroup(splashG); clearGroup(srcG);
+      src.forEach(()=> {
+        const peb=new THREE.Mesh(new THREE.SphereGeometry(0.17,16,16),
+          new THREE.MeshStandardMaterial({color:0x8a8f9c,roughness:.8,metalness:.1}));
+        peb.visible=false; pebbleG.add(peb);
+        const spl=new THREE.Mesh(new THREE.RingGeometry(0.8,1.0,44),
+          new THREE.MeshBasicMaterial({color:0x9ff6ea,transparent:true,opacity:0,
+            blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+        spl.rotation.x=-Math.PI/2; spl.visible=false; splashG.add(spl);
+        const dot=new THREE.Mesh(new THREE.SphereGeometry(0.12,12,12),
+          new THREE.MeshBasicMaterial({color:COL_GOLD}));
+        dot.visible=false; srcG.add(dot);
+      });
+      // precompute the fixed interference amplitude → baked band colours
+      let maxA=1e-6;
+      for(let i=0;i<NV;i++){
+        const x=pos[i*3], z=pos[i*3+2]; let re=0,im=0;
+        for(let s=0;s<src.length;s++){
+          const dx=x-src[s][0],dz=z-src[s][1], r=Math.sqrt(dx*dx+dz*dz), f=Math.sqrt(1+0.45*r);
+          re+=Math.cos(k*r)/f; im+=Math.sin(k*r)/f;
+        }
+        const a=Math.hypot(re,im); stableCol[i*3]=a; if(a>maxA)maxA=a;
+      }
+      hScale=0.95/maxA;
+      for(let i=0;i<NV;i++){
+        const tn=Math.pow(stableCol[i*3]/maxA,0.85);
+        let r,gn,b;
+        if(tn<0.5){const u=tn*2; r=cl[0]+(cm[0]-cl[0])*u; gn=cl[1]+(cm[1]-cl[1])*u; b=cl[2]+(cm[2]-cl[2])*u;}
+        else{const u=(tn-0.5)*2; r=cm[0]+(ch[0]-cm[0])*u; gn=cm[1]+(ch[1]-cm[1])*u; b=cm[2]+(ch[2]-cm[2])*u;}
+        stableCol[i*3]=r; stableCol[i*3+1]=gn; stableCol[i*3+2]=b;
+      }
+      bakeStart=T0 + 1.25*R/c;
+    }
+    rebuild();
+    function step(dt,t){
+      if(!frozen) age+=Math.min(dt,0.05);
+      const te=age-T0;                         // time since the pebbles hit
+      // pebbles fall, splash, then the source dot appears
+      const yStart=3.6, fallDur=0.6, appear=T0-fallDur;
+      for(let s=0;s<src.length;s++){
+        const peb=pebbleG.children[s], spl=splashG.children[s], dot=srcG.children[s];
+        if(age<appear){peb.visible=false;}
+        else if(age<T0){peb.visible=true; const u=(age-appear)/fallDur;
+          peb.position.set(src[s][0], yStart*(1-u*u)+0.1, src[s][1]);}
+        else peb.visible=false;
+        const sa=age-T0, life=0.85;            // splash ring
+        if(sa>=0 && sa<life){spl.visible=true; const u=sa/life;
+          spl.position.set(src[s][0],0.06,src[s][1]); spl.scale.setScalar(0.3+u*2.0);
+          spl.material.opacity=0.7*(1-u);}
+        else spl.visible=false;
+        dot.visible = age>=T0; dot.position.set(src[s][0],0.1,src[s][1]);
+      }
+      // surface: expanding ripples from each source, settling into the steady pattern
+      const bake=Math.max(0,Math.min(1,(age-bakeStart)/2.6));
+      for(let i=0;i<NV;i++){
+        const x=pos[i*3], z=pos[i*3+2]; let h=0;
+        if(te>0){
+          const reach=c*te;
+          for(let s=0;s<src.length;s++){
+            const dx=x-src[s][0],dz=z-src[s][1], r=Math.sqrt(dx*dx+dz*dz);
+            if(r<reach){
+              let gt=(reach-r)/edgeW; if(gt>1)gt=1; gt=gt*gt*(3-2*gt);
+              h += Math.sin(k*r-w*te)/Math.sqrt(1+0.45*r)*gt;
+            }
+          }
+        }
+        pos[i*3+1]=h*hScale;
+        // colour: live ripples (bright crests) cross-fading into the fixed band pattern
+        let tin=0.5+h/(1/hScale)*0.6; if(tin<0)tin=0; else if(tin>1)tin=1;
+        const ir=cl[0]+(ch[0]-cl[0])*tin, ig=cl[1]+(ch[1]-cl[1])*tin, ib=cl[2]+(ch[2]-cl[2])*tin;
+        colors[i*3]  =ir+(stableCol[i*3]  -ir)*bake;
+        colors[i*3+1]=ig+(stableCol[i*3+1]-ig)*bake;
+        colors[i*3+2]=ib+(stableCol[i*3+2]-ib)*bake;
+      }
+      geo.attributes.position.needsUpdate=true;
+      geo.attributes.color.needsUpdate=true;
+      geo.computeVertexNormals();
+    }
+    ctlChips({label:"Sources",value:2,
+      options:[1,2,3].map(v=>({label:v+(v>1?' sources':' source'),value:v})),
+      onPick:v=>{nSrc=v;rebuild();}});
+    ctlButton('↻ drop again',()=>rebuild());
+    let frzChip=ctlButton('❄ freeze (the ice sheet)',()=>{
+      frozen=!frozen;
+      frzChip.classList.toggle('on',frozen);
+      frzChip.textContent=frozen?'≈ release ripples':'❄ freeze (the ice sheet)';});
+    return {update:step};
+  }
+});
+
+/* --- 5. BEAT FREQUENCIES -------------------------------------------------- */
+CONCEPTS.push({
+  title:"Beat Frequencies",
+  blurb:"Sound two close tones together and they drift in and out of step — where they align the volume swells, where they oppose it nearly vanishes. That slow throb is the beat, and its rate is just the difference between the two frequencies. Press play on A or B (they sound almost the same alone) and then on A + B to hear the throb appear — the displayed beat number is roughly how many throbs per second you'll hear.",
+  cam:{theta:Math.PI/2,phi:Math.PI/2,radius:11,auto:false,rmin:6,rmax:20,target:[0,0,0]},
+  build(g){
+    let f1=10, f2=12;
+    const W=9, segs=600;
+    const rows=[{y:2.6,col:COL_CYAN,label:'tone A'},
+                {y:0.9,col:COL_GOLD,label:'tone B'},
+                {y:-1.4,col:COL_INK,label:'A + B'}];
+    const lines=rows.map(r=>{
+      const geo=new THREE.BufferGeometry();const a=new Float32Array((segs+1)*3);
+      geo.setAttribute('position',new THREE.BufferAttribute(a,3));
+      const ln=new THREE.Line(geo,new THREE.LineBasicMaterial({color:r.col}));
+      g.add(ln);
+      const lab=makeLabel(r.label,r.col);lab.position.set(-W/2-1.4,r.y+0.4,0);lab.scale.set(2,0.5,1);
+      g.add(lab);
+      // baseline
+      const bg=new THREE.BufferGeometry();bg.setAttribute('position',
+        new THREE.BufferAttribute(new Float32Array([-W/2,r.y,0, W/2,r.y,0]),3));
+      g.add(new THREE.Line(bg,new THREE.LineBasicMaterial({color:0x2a3450})));
+      return {geo,row:r};
+    });
+    // beat-envelope line over the sum
+    const envGeo=new THREE.BufferGeometry();
+    envGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array((segs+1)*3),3));
+    g.add(new THREE.Line(envGeo,new THREE.LineBasicMaterial(
+      {color:0xb98a2e,transparent:true,opacity:.55})));
+    function step(dt,t){
+      const scrollT=t*0.5;
+      for(let i=0;i<=segs;i++){
+        const x=-W/2+(i/segs)*W;
+        const tau=scrollT + (i/segs)*1.4;
+        const yA=Math.sin(TAU*f1*tau);
+        const yB=Math.sin(TAU*f2*tau);
+        // A
+        let a=lines[0].geo.attributes.position.array;a[i*3]=x;a[i*3+1]=rows[0].y+yA*0.7;a[i*3+2]=0;
+        // B
+        let b=lines[1].geo.attributes.position.array;b[i*3]=x;b[i*3+1]=rows[1].y+yB*0.7;b[i*3+2]=0;
+        // sum
+        let c=lines[2].geo.attributes.position.array;c[i*3]=x;c[i*3+1]=rows[2].y+(yA+yB)*0.55;c[i*3+2]=0;
+        // envelope
+        const env=2*Math.cos(TAU*((f2-f1)/2)*tau)*0.55;
+        let e=envGeo.attributes.position.array;e[i*3]=x;e[i*3+1]=rows[2].y+Math.abs(env);e[i*3+2]=0;
+      }
+      lines.forEach(l=>l.geo.attributes.position.needsUpdate=true);
+      envGeo.attributes.position.needsUpdate=true;
+    }
+    let beatNum=null, meter=null;
+    function refreshBeat(){
+      const b=Math.abs(f2-f1);
+      if(meter) meter.set(Math.min(1,b/16));
+      if(beatNum) beatNum.textContent=b+' Hz';
+    }
+    // --- audio: map the abstract Hz onto an audible carrier so the beat = |B−A| is heard as a throb ---
+    const CARRIER=300;
+    const hzA=()=>CARRIER+f1, hzB=()=>CARRIER+f2;
+    let nodes=null, playing=null;
+    function stopTone(){
+      if(nodes&&audioCtx){
+        const now=audioCtx.currentTime;
+        nodes.g.gain.cancelScheduledValues(now);
+        nodes.g.gain.setValueAtTime(nodes.g.gain.value,now);
+        nodes.g.gain.linearRampToValueAtTime(0,now+0.05);
+        nodes.oscs.forEach(o=>o.stop(now+0.06));
+      }
+      nodes=null;
+    }
+    function startTone(sel){
+      if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state==='suspended') audioCtx.resume();
+      const g=audioCtx.createGain(); g.gain.value=0; g.connect(audioCtx.destination);
+      const freqs = sel==='A'?[hzA()] : sel==='B'?[hzB()] : [hzA(),hzB()];
+      const oscs=freqs.map(fr=>{const o=audioCtx.createOscillator();o.type='sine';
+        o.frequency.value=fr;o.connect(g);o.start();return o;});
+      const now=audioCtx.currentTime, vol=sel==='AB'?0.16:0.22;
+      g.gain.linearRampToValueAtTime(vol,now+0.05);
+      nodes={g,oscs,sel};
+    }
+    function liveFreq(){
+      if(nodes&&audioCtx){
+        const fr= nodes.sel==='A'?[hzA()] : nodes.sel==='B'?[hzB()] : [hzA(),hzB()];
+        nodes.oscs.forEach((o,i)=>o.frequency.setTargetAtTime(fr[i],audioCtx.currentTime,0.02));
+      }
+    }
+    const playBtns={};
+    function refreshPlay(){for(const s in playBtns){const on=playing===s;
+      playBtns[s].classList.toggle('on',on);
+      playBtns[s].textContent=(on?'⏸ ':'▶ ')+(s==='AB'?'A + B':s);}}
+    function select(sel){ if(playing===sel){stopTone();playing=null;} else{stopTone();startTone(sel);playing=sel;} refreshPlay(); }
+    function mkPlay(sel){const b=ctlButton('▶ '+(sel==='AB'?'A + B':sel),()=>select(sel));playBtns[sel]=b;return b;}
+
+    ctlSlider({label:"Tone A (Hz)",min:4,max:20,value:10,step:1,fmt:v=>v+' Hz',onInput:v=>{f1=v;refreshBeat();liveFreq();}});
+    mkPlay('A');
+    ctlSlider({label:"Tone B (Hz)",min:4,max:20,value:12,step:1,fmt:v=>v+' Hz',onInput:v=>{f2=v;refreshBeat();liveFreq();}});
+    mkPlay('B');
+    meter=ctlMeter('Beat = |B−A|');
+    const beatLbl=document.createElement('div');beatLbl.className='ctl';beatLbl.style.minWidth='120px';
+    beatLbl.innerHTML='<label>Beat rate</label><span style="font-family:Cormorant Garamond,serif;font-size:30px;color:var(--gold);line-height:1"></span>';
+    controlsEl.appendChild(beatLbl);
+    beatNum=beatLbl.querySelector('span');
+    mkPlay('AB');
+    refreshBeat();
+    return {update:step, dispose:()=>{stopTone();playing=null;}};
+  }
+});
+
+/* --- 6. RHYTHM ENTRAINMENT ------------------------------------------------ */
+CONCEPTS.push({
+  title:"Rhythm Entrainment",
+  blurb:"Fireflies in a bush, pendulum clocks on a wall, the heart timing itself against the echo from the aorta — given the faintest coupling, nature nudges independent oscillators into a shared rhythm. Raise the coupling and watch scattered swings collapse into a single synchronized pulse.",
+  cam:{theta:Math.PI/2,phi:1.32,radius:10,auto:false,rmin:6,rmax:18,target:[0,1.2,0]},
+  build(g){
+    const N=9;
+    let K=0.0;
+    const spacing=1.5, x0=-(N-1)*spacing/2, pivotY=4.2, rodLen=3.2;
+    const osc=[];
+    const beam=new THREE.Mesh(new THREE.BoxGeometry((N)*spacing+0.6,0.22,0.6),
+      new THREE.MeshStandardMaterial({color:0x39435e,roughness:.6,metalness:.4}));
+    beam.position.set(0,pivotY+0.2,0);g.add(beam);
+    const phaseColor=new THREE.Color();
+    for(let i=0;i<N;i++){
+      const phi=Math.random()*TAU;
+      const w=2.0 + (i-(N-1)/2)*0.012;           // slightly detuned natural freqs
+      const px=x0+i*spacing;
+      const rodGeo=new THREE.BufferGeometry();
+      rodGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
+      const rod=new THREE.Line(rodGeo,new THREE.LineBasicMaterial({color:0x6b7693}));
+      g.add(rod);
+      const bob=new THREE.Mesh(new THREE.SphereGeometry(0.3,20,20),
+        new THREE.MeshStandardMaterial({color:COL_CYAN,emissive:0x0a3a33,
+          emissiveIntensity:.5,roughness:.3,metalness:.3}));
+      g.add(bob);
+      const piv=new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10),
+        new THREE.MeshBasicMaterial({color:0x8893ad}));
+      piv.position.set(px,pivotY,0);g.add(piv);
+      osc.push({phi,w,px,rod,rodGeo,bob});
+    }
+    function step(dt,t){
+      const ddt=Math.min(dt,0.05);
+      // order parameter
+      let sx=0,sy=0;
+      osc.forEach(o=>{sx+=Math.cos(o.phi);sy+=Math.sin(o.phi);});
+      sx/=N;sy/=N;const r=Math.hypot(sx,sy);const psi=Math.atan2(sy,sx);
+      osc.forEach((o,i)=>{
+        // Kuramoto coupling toward mean phase
+        o.phi += (o.w + K*r*Math.sin(psi-o.phi))*ddt;
+        const ang=0.5*Math.sin(o.phi);           // swing angle
+        const bx=o.px+Math.sin(ang)*rodLen;
+        const by=pivotY-Math.cos(ang)*rodLen;
+        o.bob.position.set(bx,by,0);
+        const rp=o.rodGeo.attributes.position.array;
+        rp[0]=o.px;rp[1]=pivotY;rp[2]=0; rp[3]=bx;rp[4]=by;rp[5]=0;
+        o.rodGeo.attributes.position.needsUpdate=true;
+        // colour by phase
+        phaseColor.setHSL((o.phi%TAU)/TAU*0.5+0.45,0.7,0.55);
+        o.bob.material.color.copy(phaseColor);
+        o.bob.material.emissive.copy(phaseColor).multiplyScalar(0.25);
+      });
+      meter.set(r);
+    }
+    ctlSlider({label:"Coupling strength",min:0,max:3,value:0,step:0.05,
+      fmt:v=>v.toFixed(2),onInput:v=>K=v});
+    ctlButton('⟲ randomize phases',()=>osc.forEach(o=>o.phi=Math.random()*TAU));
+    const meter=ctlMeter('Synchrony');
+    return {update:step};
+  }
+});
+
+/* ============================================================= scene switch */
+let audioCtx=null;
+let activeUpdate=null, activeDispose=null;
+function loadConcept(idx){
+  const c=CONCEPTS[idx];
+  if(activeDispose){try{activeDispose();}catch(e){}} activeDispose=null;
+  clearGroup(root); clearControls();
+  // panel text
+  const pIdxEl=document.getElementById('pIdx');
+  let __n=0; for(let k=0;k<=idx;k++){ if(!CONCEPTS[k].star) __n++; }
+  pIdxEl.textContent = c.star ? '★' : String(__n).padStart(2,'0');
+  pIdxEl.classList.toggle('star', !!c.star);
+  document.getElementById('pTitle').textContent=c.title;
+  const pDim=document.getElementById('pDim');
+  pDim.textContent=c.dim||''; pDim.style.display=c.dim?'inline-block':'none';
+  const pBlurbEl=document.getElementById('pBlurb');
+  document.getElementById('panel').classList.toggle('reflect', !!c.reflection);
+  if(c.reflection){
+    pBlurbEl.classList.add('reflection');
+    pBlurbEl.innerHTML='<span class="rhead">✦ A personal reflection</span>'+
+      c.reflection.split('\n\n').map(p=>'<p>'+p.trim()+'</p>').join('');
+  } else {
+    pBlurbEl.classList.remove('reflection');
+    pBlurbEl.textContent=c.blurb;
+  }
+  // nav
+  [...document.querySelectorAll('.nav-item')].forEach((b,i)=>b.classList.toggle('active',i===idx));
+  // camera defaults
+  const cc=c.cam||{};
+  cam.theta=cc.theta!=null?cc.theta:0.7;
+  cam.phi=cc.phi!=null?cc.phi:1.05;
+  cam.radius=(cc.radius!=null?cc.radius:9)*1.12;   // pull back a touch so the panel doesn't crowd the view
+  cam.auto=cc.auto!=null?cc.auto:true;
+  cam.autoSpeed=cc.autoSpeed!=null?cc.autoSpeed:0.05;
+  cam.rmin=cc.rmin!=null?cc.rmin:3; cam.rmax=cc.rmax!=null?cc.rmax:30;
+  cam.target.set(...(cc.target||[0,0,0]));
+  idle=0;
+  const inst=c.build(root);
+  activeUpdate=inst&&inst.update?inst.update:null;
+  activeDispose=inst&&inst.dispose?inst.dispose:null;
+}
+
+/* nav build */
+const navEl=document.getElementById('nav');
+let __dispNum=0;
+CONCEPTS.forEach((c,i)=>{
+  const b=document.createElement('button');b.className='nav-item';
+  const num = c.star ? '★' : String(++__dispNum).padStart(2,'0');
+  b.innerHTML='<span class="num'+(c.star?' star':'')+'">'+num+'</span><span>'+c.title+'</span>'+(c.dim?'<span class="dim">'+c.dim+'</span>':'');
+  b.addEventListener('click',()=>loadConcept(i));
+  navEl.appendChild(b);
+});
+
+/* ---- in-page guided tour (press, then screen-record with audio) ---- */
+function runGuidedTour(btn){
+  // per-scene seconds, tuned so scene changes land on the narration's segment starts
+  const PROFILES={ roger:[17.8,18.8,21.0,19.6,16.6,26.1], quentin:[19.9,21.1,23.6,21.9,18.7,29.2] };
+  const voice=(new URLSearchParams(location.search).get('voice')||'roger').toLowerCase();
+  const prof=PROFILES[voice]||PROFILES.roger;
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  const sc=i=>navEl.children[i].click();
+  const tap=txt=>{const el=[...controlsEl.querySelectorAll('.chip')].find(e=>e.textContent.includes(txt)); if(el)el.click();};
+  const sl=(i,v)=>{const s=controlsEl.querySelectorAll('input[type=range]')[i]; if(s){s.value=v;s.dispatchEvent(new Event('input',{bubbles:true}));}};
+  const seg=async(i,steps)=>{const T=prof[i]*1000; for(const st of steps){ if(st[0])st[0](); await wait(Math.max(200,st[1]*T)); }};
+  (async()=>{
+    await seg(0,[[()=>sc(0),0.5],[()=>tap('n=2'),0.5]]);                                   // 1D
+    await seg(1,[[()=>sc(1),0.25],[()=>sl(0,1.2),0.25],[()=>tap('3,4'),0.30],[()=>{sl(0,0.4);tap('re-sprinkle');},0.20]]); // 2D
+    await seg(2,[[()=>sc(2),0.35],[()=>tap('vibration zones'),0.20],[()=>tap('melt'),0.20],[()=>tap('crystallize'),0.25]]); // 3D
+    await seg(3,[[()=>sc(3),0.55],[()=>tap('3 sources'),0.30],[()=>tap('freeze'),0.15]]);  // interference
+    await seg(4,[[()=>sc(4),0.20],[()=>tap('A + B'),0.25],[()=>sl(1,16),0.275],[()=>sl(1,11),0.275]]); // beats
+    await seg(5,[[()=>sc(5),0.20],[()=>sl(0,2.0),0.55],[()=>tap('randomize'),0.25]]);      // entrainment
+    if(btn){btn.textContent='▶ Guided tour';btn.disabled=false;}
+  })();
+}
+const tourBtn=document.createElement('button');
+Object.assign(tourBtn.style,{position:'fixed',top:'74px',right:'28px',zIndex:7,
+  font:'500 10px/1 "IBM Plex Mono",monospace',letterSpacing:'.16em',textTransform:'uppercase',
+  padding:'8px 12px',borderRadius:'8px',border:'1px solid var(--line)',
+  background:'rgba(10,14,26,.6)',color:'var(--ink)',cursor:'pointer',backdropFilter:'blur(10px)'});
+tourBtn.textContent='▶ Guided tour';
+tourBtn.onclick=()=>{tourBtn.disabled=true;tourBtn.textContent='● touring…';runGuidedTour(tourBtn);};
+app.appendChild(tourBtn);
+const panelEl=document.getElementById('panel'), panelToggle=document.getElementById('panelToggle');
+panelToggle.onclick=()=>{const c=panelEl.classList.toggle('collapsed');
+  panelToggle.textContent=c?'▴':'▾'; panelToggle.title=c?'Show panel':'Hide panel';};
+if(/[?&]tour\b/.test(location.search)) setTimeout(()=>tourBtn.onclick(),800);
+
+/* ============================================================= loop */
+function resize(){
+  const w=app.clientWidth,h=app.clientHeight;
+  renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
+}
+window.addEventListener('resize',resize);
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),0.05);
+  const t=clock.getElapsedTime();
+  idle+=dt; if(idle>4 && !dragging) cam.auto=true;
+  if(cam.auto) cam.theta += cam.autoSpeed*dt;
+  applyCam();
+  if(scene.userData.stars) scene.userData.stars.rotation.y += dt*0.006;
+  if(activeUpdate) activeUpdate(dt,t);
+  renderer.render(scene,camera);
+}
+
+resize();
+loadConcept(0);
+document.getElementById('loader').style.display='none';
+animate();
+})();
+</script>
+</body>
+</html>

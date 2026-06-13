@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Stalking the Wild Pendulum — A Look Through a Supermicroscope</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070a14;
+    --ink:#ece6d6;
+    --muted:#7d879c;
+    --cyan:#4fe6cd;
+    --cyan-dim:#2c8a7d;
+    --gold:#e7b257;
+    --line:rgba(236,230,214,0.10);
+    --panel:rgba(10,14,26,0.62);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+    font-family:"IBM Plex Mono",monospace;-webkit-font-smoothing:antialiased}
+  #app{position:fixed;inset:0;
+    background:
+      radial-gradient(140% 100% at 78% 8%, rgba(231,178,87,0.07), transparent 42%),
+      radial-gradient(120% 120% at 12% 92%, rgba(79,230,205,0.08), transparent 46%),
+      radial-gradient(100% 100% at 50% 50%, #0a1020 0%, #060812 72%, #04060d 100%);
+  }
+  canvas{display:block;position:absolute;inset:0}
+
+  /* ---- top bar ---- */
+  #topbar{position:absolute;top:0;left:0;right:0;padding:22px 28px;z-index:5;
+    display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+  .brand .kick{font-size:10px;letter-spacing:.32em;color:var(--cyan);text-transform:uppercase}
+  .brand h1{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:26px;
+    line-height:1.05;margin-top:3px;letter-spacing:.01em}
+  .brand .by{font-size:10.5px;color:var(--muted);letter-spacing:.14em;margin-top:4px}
+  .hint{font-size:10px;color:var(--muted);letter-spacing:.18em;text-align:right;text-transform:uppercase}
+  .hint b{color:var(--ink);font-weight:400}
+
+  /* ---- nav ---- */
+  #nav{position:absolute;left:28px;top:50%;transform:translateY(-50%);z-index:6;
+    display:flex;flex-direction:column;gap:2px}
+  .nav-item{pointer-events:auto;cursor:pointer;background:none;border:none;color:var(--muted);
+    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;text-align:left;
+    padding:9px 12px 9px 16px;border-left:2px solid transparent;display:flex;align-items:baseline;gap:10px;
+    transition:color .25s,border-color .25s;white-space:nowrap}
+  .nav-item .num{font-size:9px;color:var(--cyan-dim);width:14px}
+  .nav-item .num.star{color:var(--gold);font-size:12px}
+  .nav-item.active .num.star{color:var(--gold)}
+  .ptitle .idx.star{color:var(--gold)}
+  #panel.reflect{width:min(940px,calc(100% - 48px));background:rgba(9,12,22,0.93)}
+  #panel.reflect #pBlurb{max-width:none;column-count:2;column-gap:36px;column-rule:1px solid rgba(231,178,87,.16);
+    font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:500;font-size:16.5px;
+    line-height:1.62;color:var(--ink);max-height:40vh;overflow:auto;margin-top:14px;padding-right:2px}
+  #panel.reflect #pBlurb .rhead{column-span:all;display:block;font-family:"IBM Plex Mono",monospace;
+    font-style:normal;font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  #panel.reflect #pBlurb p{margin:0 0 13px;break-inside:avoid}
+  #panel.reflect #pBlurb p:last-child{color:var(--gold)}
+  .nav-item:hover{color:var(--ink)}
+  .nav-item.active{color:var(--ink);border-left-color:var(--cyan)}
+  .nav-item.active .num{color:var(--cyan)}
+
+  /* ---- bottom panel ---- */
+  #panel{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;z-index:6;
+    width:min(660px,calc(100% - 48px));background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);padding:18px 22px 20px;
+    box-shadow:0 24px 60px rgba(0,0,0,.5)}
+  #panelToggle{position:absolute;top:12px;right:14px;width:26px;height:26px;border-radius:7px;
+    background:rgba(236,230,214,.04);border:1px solid var(--line);color:var(--muted);cursor:pointer;
+    font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;
+    transition:color .2s,border-color .2s;z-index:2}
+  #panelToggle:hover{color:var(--ink);border-color:rgba(79,230,205,.45)}
+  #panel.collapsed{padding-bottom:14px}
+  #panel.collapsed #pBlurb,#panel.collapsed #controls{display:none}
+  #panel .ptitle{font-family:"Cormorant Garamond",serif;font-size:27px;font-weight:600;line-height:1;
+    display:flex;align-items:baseline;gap:12px;padding-right:34px}
+  #panel .ptitle .idx{font-family:"IBM Plex Mono";font-size:11px;color:var(--cyan);letter-spacing:.2em}
+  .dim-badge{font-family:"IBM Plex Mono";font-size:10px;letter-spacing:.14em;color:var(--gold);
+    border:1px solid rgba(231,178,87,.45);border-radius:5px;padding:2px 7px;align-self:center}
+  .nav-item .dim{font-size:8.5px;letter-spacing:.1em;color:var(--cyan-dim);border:1px solid var(--line);
+    border-radius:4px;padding:1px 5px;margin-left:6px}
+  #panel .blurb{font-size:12px;line-height:1.62;color:#c6c2b6;margin-top:10px;max-width:62ch}
+  #controls{display:flex;flex-wrap:wrap;gap:18px 26px;margin-top:16px;align-items:flex-end}
+  .ctl{display:flex;flex-direction:column;gap:7px;min-width:130px}
+  .ctl label{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .ctl .val{color:var(--gold)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;
+    background:rgba(236,230,214,.2);border-radius:2px;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+    background:var(--cyan);cursor:pointer;box-shadow:0 0 10px rgba(79,230,205,.7)}
+  input[type=range]::-moz-range-thumb{width:13px;height:13px;border:none;border-radius:50%;
+    background:var(--cyan);cursor:pointer;box-shadow:0 0 10px rgba(79,230,205,.7)}
+  .btnrow{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font-family:"IBM Plex Mono";font-size:11px;color:var(--muted);background:rgba(236,230,214,.04);
+    border:1px solid var(--line);border-radius:7px;padding:6px 11px;cursor:pointer;
+    transition:all .2s;letter-spacing:.04em}
+  .chip:hover{color:var(--ink);border-color:rgba(79,230,205,.4)}
+  .chip.on{color:#06120f;background:var(--cyan);border-color:var(--cyan);font-weight:500}
+  .meter{height:5px;background:rgba(236,230,214,.12);border-radius:3px;overflow:hidden;width:100%}
+  .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));
+    transition:width .1s linear}
+
+  #loader{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+    background:var(--bg);color:var(--muted);font-size:11px;letter-spacing:.25em;text-transform:uppercase}
+
+  @media (max-width:760px){
+    #nav{position:absolute;left:0;right:0;top:auto;bottom:calc(100% - 100%);transform:none;
+      flex-direction:row;overflow-x:auto;gap:0;padding:0 16px;
+      top:84px;bottom:auto;-webkit-overflow-scrolling:touch}
+    .nav-item{padding:8px 10px;border-left:none;border-bottom:2px solid transparent}
+    .nav-item.active{border-left:none;border-bottom-color:var(--cyan)}
+    .nav-item .num{display:none}
+    #panel{bottom:14px;padding:14px 16px 16px}
+    #panel.reflect #pBlurb{column-count:1}
+    #panel .ptitle{font-size:22px}
+    .brand h1{font-size:20px}
+    .hint{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="loader">descending into the microreality…</div>
+  <div id="topbar">
+    <div class="brand">
+      <div class="kick">Stalking the Wild Pendulum</div>
+      <h1>A Look Through a Supermicroscope</h1>
+      <div class="by">after Itzhak Bentov · Ch. 2</div>
+    </div>
+    <div class="hint"><b>drag</b> to orbit<br><b>scroll</b> to zoom</div>
+  </div>
+  <nav id="nav"></nav>
+  <div id="panel">
+    <button id="panelToggle" title="Hide panel">▾</button>
+    <div class="ptitle"><span class="idx" id="pIdx">01</span><span id="pTitle"></span><span class="dim-badge" id="pDim"></span></div>
+    <div class="blurb" id="pBlurb"></div>
+    <div id="controls"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+const TAU = Math.PI*2;
+
+/* ============================================================= renderer */
+const app = document.getElementById('app');
+// ?record → opaque canvas so translucent/additive glows capture at their true (faint) strength.
+// A transparent canvas gets its alpha un-premultiplied during captureStream, which wrongly boosts
+// every low-opacity field/glow to full brightness in the video. Opaque clear avoids that entirely.
+const REC=/[?&]record\b/.test(location.search);
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:!REC, preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setClearColor(REC?0x070a14:0x000000, REC?1:0);
+app.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 400);
+const clock = new THREE.Clock();
+
+const root = new THREE.Group();           // per-concept content lives here
+scene.add(root);
+
+/* lights (used by lit scenes) */
+const amb = new THREE.AmbientLight(0x6a78a0, 0.55); scene.add(amb);
+const key = new THREE.DirectionalLight(0xfff0d8, 0.9); key.position.set(4,7,6); scene.add(key);
+const rim = new THREE.DirectionalLight(0x4fe6cd, 0.5); rim.position.set(-6,2,-5); scene.add(rim);
+
+/* persistent starfield */
+(function stars(){
+  const N=1400, g=new THREE.BufferGeometry(), p=new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const r=60+Math.random()*120, t=Math.random()*TAU, ph=Math.acos(2*Math.random()-1);
+    p[i*3]=r*Math.sin(ph)*Math.cos(t); p[i*3+1]=r*Math.cos(ph); p[i*3+2]=r*Math.sin(ph)*Math.sin(t);
+  }
+  g.setAttribute('position',new THREE.BufferAttribute(p,3));
+  const m=new THREE.PointsMaterial({color:0x9fb0d0,size:0.45,transparent:true,opacity:0.5,
+    sizeAttenuation:true});
+  const pts=new THREE.Points(g,m); pts.name='__stars'; scene.add(pts);
+  scene.userData.stars=pts;
+})();
+
+/* ============================================================= camera orbit */
+const cam = {theta:0.7, phi:1.05, radius:9, target:new THREE.Vector3(0,0,0),
+             auto:true, autoSpeed:0.05, rmin:3, rmax:30};
+function applyCam(){
+  const sp=Math.sin(cam.phi);
+  camera.position.set(
+    cam.target.x + cam.radius*sp*Math.cos(cam.theta),
+    cam.target.y + cam.radius*Math.cos(cam.phi),
+    cam.target.z + cam.radius*sp*Math.sin(cam.theta));
+  camera.lookAt(cam.target);
+}
+let dragging=false, lastX=0, lastY=0, pinchD=0, idle=0;
+const el=renderer.domElement;
+function down(x,y){dragging=true;lastX=x;lastY=y;cam.auto=false;idle=0;}
+function move(x,y){ if(!dragging)return;
+  cam.theta -= (x-lastX)*0.006;
+  cam.phi = Math.max(0.12, Math.min(Math.PI-0.12, cam.phi - (y-lastY)*0.006));
+  lastX=x;lastY=y; }
+function up(){dragging=false;}
+el.addEventListener('mousedown',e=>down(e.clientX,e.clientY));
+window.addEventListener('mousemove',e=>move(e.clientX,e.clientY));
+window.addEventListener('mouseup',up);
+el.addEventListener('wheel',e=>{e.preventDefault();
+  cam.radius=Math.max(cam.rmin,Math.min(cam.rmax,cam.radius*(1+e.deltaY*0.0011)));cam.auto=false;idle=0;
+},{passive:false});
+el.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){down(e.touches[0].clientX,e.touches[0].clientY);}
+  else if(e.touches.length===2){pinchD=Math.hypot(
+    e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);}
+},{passive:true});
+el.addEventListener('touchmove',e=>{
+  if(e.touches.length===1){move(e.touches[0].clientX,e.touches[0].clientY);}
+  else if(e.touches.length===2){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    if(pinchD){cam.radius=Math.max(cam.rmin,Math.min(cam.rmax,cam.radius*(pinchD/d)));}
+    pinchD=d;cam.auto=false;idle=0;}
+},{passive:true});
+el.addEventListener('touchend',()=>{dragging=false;pinchD=0;});
+
+/* ============================================================= helpers */
+function clearGroup(g){
+  for(let i=g.children.length-1;i>=0;i--){
+    const c=g.children[i];
+    if(c.geometry)c.geometry.dispose();
+    if(c.material){(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>{
+      if(m.map)m.map.dispose(); m.dispose();});}
+    g.remove(c);
+  }
+}
+function makeLabel(text,color,w){
+  const cw=w||256;
+  const c=document.createElement('canvas'); c.width=cw;c.height=64;
+  const x=c.getContext('2d');
+  x.fillStyle=(typeof color==='number')?'#'+color.toString(16).padStart(6,'0'):(color||'#4fe6cd');
+  x.font='600 30px "IBM Plex Mono",monospace';x.textAlign='center';x.textBaseline='middle';
+  x.fillText(text,cw/2,34);
+  const t=new THREE.CanvasTexture(c);t.minFilter=THREE.LinearFilter;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false,opacity:.9}));
+  s.scale.set(1.7*(cw/256),0.42,1); return s;
+}
+
+/* control-panel builders -------------------------------------------------- */
+const controlsEl=document.getElementById('controls');
+function clearControls(){controlsEl.innerHTML='';}
+function ctlSlider(o){ // {label,min,max,value,step,fmt,onInput}
+  const w=document.createElement('div');w.className='ctl';
+  const lab=document.createElement('label');
+  const val=document.createElement('span');val.className='val';
+  const fmt=o.fmt||(v=>v);
+  lab.textContent=o.label+' · '; lab.appendChild(val); val.textContent=fmt(o.value);
+  const inp=document.createElement('input');inp.type='range';
+  inp.min=o.min;inp.max=o.max;inp.step=o.step||1;inp.value=o.value;
+  inp.addEventListener('input',()=>{val.textContent=fmt(+inp.value);o.onInput(+inp.value);});
+  w.appendChild(lab);w.appendChild(inp);controlsEl.appendChild(w);return inp;
+}
+function ctlChips(o){ // {label,options:[{label,value}],value,onPick}
+  const w=document.createElement('div');w.className='ctl';
+  const lab=document.createElement('label');lab.textContent=o.label;
+  const row=document.createElement('div');row.className='btnrow';
+  o.options.forEach(op=>{
+    const b=document.createElement('button');b.className='chip'+(op.value===o.value?' on':'');
+    b.textContent=op.label;
+    b.addEventListener('click',()=>{[...row.children].forEach(c=>c.classList.remove('on'));
+      b.classList.add('on');o.onPick(op.value);});
+    row.appendChild(b);
+  });
+  w.appendChild(lab);w.appendChild(row);controlsEl.appendChild(w);return row;
+}
+function ctlButton(label,onClick){
+  const b=document.createElement('button');b.className='chip';b.textContent=label;
+  b.style.alignSelf='flex-end';b.addEventListener('click',onClick);controlsEl.appendChild(b);return b;
+}
+function ctlMeter(label){
+  const w=document.createElement('div');w.className='ctl';w.style.minWidth='150px';
+  const lab=document.createElement('label');const val=document.createElement('span');
+  val.className='val';lab.textContent=label+' · ';lab.appendChild(val);
+  const m=document.createElement('div');m.className='meter';const i=document.createElement('i');
+  m.appendChild(i);w.appendChild(lab);w.appendChild(m);controlsEl.appendChild(w);
+  return {set:v=>{i.style.width=(v*100).toFixed(0)+'%';val.textContent=(v*100).toFixed(0)+'%';}};
+}
+function ctlReadout(label){
+  const w=document.createElement('div');w.className='ctl';w.style.minWidth='150px';
+  w.innerHTML='<label>'+label+'</label><span style="font-family:Cormorant Garamond,serif;font-size:26px;color:var(--gold);line-height:1"></span>';
+  controlsEl.appendChild(w); return w.querySelector('span');
+}
+
+/* opacity helpers (for cross-fading sub-groups) -------------------------- */
+function regOpacity(grp){
+  grp.traverse(o=>{ if(o.material){
+    (Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{
+      if(m.userData.op0===undefined){m.userData.op0=(m.opacity!==undefined?m.opacity:1);m.transparent=true;}
+    });}});
+}
+function setOpacity(grp,k){
+  grp.traverse(o=>{ if(o.material){
+    (Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{
+      m.opacity=(m.userData.op0!==undefined?m.userData.op0:1)*k;
+    });}});
+}
+
+/* ============================================================= CONCEPTS */
+const COL_CYAN=0x4fe6cd, COL_GOLD=0xe7b257, COL_INK=0xece6d6;
+
+const CONCEPTS=[];
+
+/* --- 1. THE SUPERMICROSCOPE --------------------------------------------- */
+CONCEPTS.push({
+  title:"The Supermicroscope", dim:"×10⁹",
+  blurb:"Take an imaginary microscope that magnifies until single atoms swim into view, and aim it at a scrap of living tissue. The gooey mess resolves into aligned muscle fibres, then long coiled molecules, then an almost crystalline lattice of vibrating atoms. Push further and the electron shell dissolves into vacuum, the nucleus into a shadowy pulsation — until solid matter is gone entirely, replaced by vast empty space threaded with oscillating fields. Drag the magnification and make the descent yourself.",
+  cam:{theta:0.7,phi:1.0,radius:9,auto:true,autoSpeed:0.06,rmin:5,rmax:20,target:[0,0,0]},
+  build(g){
+    const NAMES=["TISSUE","MUSCLE FIBRES","COILED MOLECULE","CRYSTAL LATTICE","THE ATOM","VACUUM","OSCILLATING FIELDS"];
+    const stages=[];
+    let mag=0, magTarget=0, diveDwell=0, diving=false, slider=null;
+
+    /* stage 0 — a flexed arm (one continuous swept form); we dive into the bicep */
+    const s0=new THREE.Group();{
+      const skin=new THREE.MeshStandardMaterial({color:0xceA079,emissive:0x2c1a0e,emissiveIntensity:.35,roughness:.74,metalness:.05});
+      const arm=new THREE.Group();
+      // flexed-arm centreline: shoulder → bicep belly → elbow → forearm belly → wrist
+      const CP=[
+        [-2.15,0.62,0.00],[-1.55,0.42,0.05],[-0.78,0.10,0.06],[-0.05,-0.30,0.04],
+        [0.72,-0.55,0.00],[0.95,0.18,-0.02],[0.82,0.98,-0.02],[0.58,1.66,0.00]];
+      // radius at each control point — thick bicep, pinched elbow, tapering wrist
+      const RP=[0.56,0.66,0.72,0.54,0.44,0.55,0.42,0.25];
+      const pts=CP.map(p=>new THREE.Vector3(p[0],p[1],p[2]));
+      const curve=new THREE.CatmullRomCurve3(pts,false,'catmullrom',0.5);
+      const radiusAt=u=>{ const x=u*(RP.length-1),i=Math.min(RP.length-2,Math.floor(x)),f=x-i;
+        const s=f*f*(3-2*f); return RP[i]*(1-s)+RP[i+1]*s; };
+      // build a variable-radius tube; cross-section spans the in-plane normal and the z axis
+      const TS=140,RS=22,posA=[],idx=[];
+      const up=new THREE.Vector3(0,0,1),P=new THREE.Vector3(),Pn=new THREE.Vector3(),T=new THREE.Vector3(),Nin=new THREE.Vector3();
+      for(let i=0;i<=TS;i++){
+        const u=i/TS; curve.getPoint(u,P); curve.getPoint(Math.min(1,u+0.002),Pn);
+        T.subVectors(Pn,P).normalize(); Nin.crossVectors(T,up).normalize();
+        const r=radiusAt(u);
+        for(let j=0;j<=RS;j++){const v=j/RS*TAU,c=Math.cos(v),sn=Math.sin(v);
+          posA.push(P.x+r*(c*Nin.x+sn*up.x),P.y+r*(c*Nin.y+sn*up.y),P.z+r*(c*Nin.z+sn*up.z));}
+      }
+      for(let i=1;i<=TS;i++)for(let j=1;j<=RS;j++){
+        const a=(RS+1)*(i-1)+(j-1),b=(RS+1)*i+(j-1),c=(RS+1)*i+j,d=(RS+1)*(i-1)+j;
+        idx.push(a,b,d,b,c,d);
+      }
+      const armGeo=new THREE.BufferGeometry();
+      armGeo.setAttribute('position',new THREE.Float32BufferAttribute(posA,3));
+      armGeo.setIndex(idx); armGeo.computeVertexNormals();
+      arm.add(new THREE.Mesh(armGeo,skin));
+      // rounded shoulder/deltoid cap blending the arm into an implied torso
+      const delt=new THREE.Mesh(new THREE.SphereGeometry(0.82,26,20),skin);
+      delt.position.set(-2.15,0.66,0);delt.scale.set(1.0,1.05,0.92);arm.add(delt);
+      // a clean rounded hand at the wrist — no fingers, a generic closed-hand mass
+      const wrist=pts[pts.length-1];
+      const upF=new THREE.Vector3().subVectors(pts[7],pts[6]).normalize();
+      const fistC=wrist.clone().add(upF.clone().multiplyScalar(0.20));
+      const hand=new THREE.Mesh(new THREE.SphereGeometry(0.33,28,22),skin);
+      hand.position.copy(fistC); hand.scale.set(1.12,1.05,0.94); arm.add(hand);
+      arm.scale.setScalar(0.95); arm.position.y=-0.15;
+      s0.add(arm);
+      const bicepC=new THREE.Vector3(-0.78,0.10,0.06);
+      const bicepS0=bicepC.clone().multiplyScalar(0.95).add(new THREE.Vector3(0,-0.15,0));
+      s0.userData.upd=(dt,t)=>{
+        arm.rotation.y=Math.sin(t*0.16)*0.22-0.12; arm.rotation.z=Math.sin(t*0.12)*0.03;
+        // dive-in: as magnification rises out of stage 0, fly toward the bicep
+        const z=Math.max(0,Math.min(1,mag)),sc=1+z*2.4; s0.scale.setScalar(sc);
+        s0.position.set(-z*sc*bicepS0.x,-z*sc*bicepS0.y,0);
+      };
+    }
+    /* stage 1 — a striated fascicle: bundle of muscle fibres */
+    const s1=new THREE.Group();{
+      const L=5.0;
+      const fibreMat=new THREE.MeshStandardMaterial({color:0xc6584a,emissive:0x3a120c,emissiveIntensity:.55,roughness:.55,metalness:.12});
+      // circular hex-packed bundle cross-section in the y–z plane
+      const cells=[[0,0]];
+      for(let r=1;r<=2;r++){const cnt=6*r;for(let a=0;a<cnt;a++){const ang=a/cnt*TAU;cells.push([Math.cos(ang)*r*0.42,Math.sin(ang)*r*0.42]);}}
+      const fibres=[];
+      cells.forEach(([y,z],i)=>{
+        const rad=0.19+((i*37)%5)*0.013;
+        const m=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,L,16,1,false),fibreMat);
+        m.rotation.z=Math.PI/2; m.position.set(0,y,z); s1.add(m); fibres.push({m,y,z,ph:i*0.7});
+      });
+      // sarcomere striations — thin transverse bands wrapping the whole bundle
+      const bands=[];
+      for(let i=0;i<14;i++){
+        const d=new THREE.Mesh(new THREE.CylinderGeometry(1.12,1.12,0.05,30,1,true),
+          new THREE.MeshBasicMaterial({color:COL_CYAN,transparent:true,opacity:.16}));
+        d.rotation.z=Math.PI/2; d.position.x=-L/2+(i+0.5)/14*L; s1.add(d); bands.push(d);
+      }
+      // translucent connective-tissue sheath
+      const sheath=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,L,34,1,true),
+        new THREE.MeshBasicMaterial({color:0xe0986e,transparent:true,opacity:.05,side:THREE.DoubleSide}));
+      sheath.rotation.z=Math.PI/2; s1.add(sheath);
+      s1.userData.upd=(dt,t)=>{
+        // contraction wave travelling down the bundle
+        fibres.forEach(f=>{const s=1+Math.sin(t*2.2-f.y*1.2+f.z*1.2+f.ph)*0.05; f.m.scale.set(s,1,s);});
+        bands.forEach((d,i)=>{d.material.userData.op0=0.09+0.11*(0.5+0.5*Math.sin(t*3-i*0.6));});
+      };
+    }
+    /* stage 2 — coiled molecule (helix) */
+    const s2=new THREE.Group();{
+      const pts=[],turns=4,len=4.4,rad=0.9,seg=240;
+      for(let i=0;i<=seg;i++){const u=i/seg,a=u*turns*TAU;
+        pts.push(new THREE.Vector3(-len/2+u*len,Math.cos(a)*rad,Math.sin(a)*rad));}
+      const curve=new THREE.CatmullRomCurve3(pts);
+      s2.add(new THREE.Mesh(new THREE.TubeGeometry(curve,seg,0.10,10,false),
+        new THREE.MeshStandardMaterial({color:COL_GOLD,emissive:0x4a2f06,emissiveIntensity:.55,roughness:.4,metalness:.4,transparent:true})));
+      const atoms=[];
+      for(let i=0;i<=44;i++){const u=i/44,a=u*turns*TAU;
+        const sp=new THREE.Mesh(new THREE.SphereGeometry(0.16,12,12),
+          new THREE.MeshStandardMaterial({color:0xcfe9e2,emissive:0x123a33,emissiveIntensity:.4,roughness:.4,transparent:true}));
+        sp.position.set(-len/2+u*len,Math.cos(a)*rad,Math.sin(a)*rad);s2.add(sp);atoms.push({sp,u});}
+      s2.userData.upd=(dt,t)=>{s2.rotation.x=t*0.5;s2.scale.y=s2.scale.z=1+Math.sin(t*1.5)*0.04;};
+    }
+    /* stage 3 — crystalline lattice of vibrating atoms */
+    const s3=new THREE.Group();{
+      const n=4,sp=1.0,off=(n-1)*sp/2,nodes=[];
+      const sg=new THREE.SphereGeometry(0.14,12,12);
+      const sm=new THREE.MeshStandardMaterial({color:COL_CYAN,emissive:0x0a3a33,emissiveIntensity:.5,roughness:.35,metalness:.3,transparent:true});
+      const lpos=[];
+      const grid={};
+      for(let i=0;i<n;i++)for(let j=0;j<n;j++)for(let kk=0;kk<n;kk++){
+        const x=i*sp-off,y=j*sp-off,z=kk*sp-off;
+        const m=new THREE.Mesh(sg,sm);m.position.set(x,y,z);s3.add(m);
+        nodes.push({m,bx:x,by:y,bz:z,ph:Math.random()*TAU});grid[i+','+j+','+kk]=nodes.length-1;
+      }
+      for(let i=0;i<n;i++)for(let j=0;j<n;j++)for(let kk=0;kk<n;kk++){
+        [[1,0,0],[0,1,0],[0,0,1]].forEach(d=>{const key=(i+d[0])+','+(j+d[1])+','+(kk+d[2]);
+          if(grid[key]!==undefined){const a=nodes[grid[i+','+j+','+kk]],b=nodes[grid[key]];
+            lpos.push(a.bx,a.by,a.bz,b.bx,b.by,b.bz);}});
+      }
+      const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.Float32BufferAttribute(lpos,3));
+      s3.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:COL_CYAN,transparent:true,opacity:.22})));
+      s3.userData.upd=(dt,t)=>{nodes.forEach(nd=>{
+        nd.m.position.set(nd.bx+Math.sin(t*3+nd.ph)*0.06,nd.by+Math.sin(t*3+nd.ph*1.3)*0.06,nd.bz+Math.cos(t*3+nd.ph)*0.06);});};
+    }
+    /* stage 4 — single atom + electron shell */
+    const s4=new THREE.Group();{
+      const nuc=new THREE.Mesh(new THREE.SphereGeometry(0.32,20,20),
+        new THREE.MeshStandardMaterial({color:COL_GOLD,emissive:0x5a3a08,emissiveIntensity:.9,roughness:.3,transparent:true}));
+      s4.add(nuc);
+      s4.add(new THREE.Mesh(new THREE.SphereGeometry(1.9,28,20),
+        new THREE.MeshBasicMaterial({color:COL_CYAN,wireframe:true,transparent:true,opacity:.16})));
+      const NE=700,eg=new THREE.BufferGeometry(),ep=new Float32Array(NE*3);
+      for(let i=0;i<NE;i++){const t=Math.random()*TAU,ph=Math.acos(2*Math.random()-1),r=1.9*(0.9+Math.random()*0.12);
+        ep[i*3]=r*Math.sin(ph)*Math.cos(t);ep[i*3+1]=r*Math.cos(ph);ep[i*3+2]=r*Math.sin(ph)*Math.sin(t);}
+      eg.setAttribute('position',new THREE.BufferAttribute(ep,3));
+      const shell=new THREE.Points(eg,new THREE.PointsMaterial({color:0x8fe9ff,size:0.05,sizeAttenuation:true,transparent:true,opacity:.6}));
+      s4.add(shell);
+      s4.userData.upd=(dt,t)=>{shell.rotation.y=t*0.6;shell.rotation.x=t*0.2;nuc.scale.setScalar(1+Math.sin(t*5)*0.06);};
+    }
+    /* stage 5 — vacuum: a far electron, a vanishing nucleus */
+    const s5=new THREE.Group();{
+      const nuc=new THREE.Mesh(new THREE.SphereGeometry(0.13,16,16),
+        new THREE.MeshStandardMaterial({color:COL_GOLD,emissive:0x6a4408,emissiveIntensity:1,roughness:.3,transparent:true}));
+      s5.add(nuc);
+      const orbit=new THREE.Mesh(new THREE.TorusGeometry(2.6,0.012,8,120),
+        new THREE.MeshBasicMaterial({color:COL_CYAN,transparent:true,opacity:.3}));
+      orbit.rotation.x=1.1; s5.add(orbit);
+      const e=new THREE.Mesh(new THREE.SphereGeometry(0.07,12,12),
+        new THREE.MeshBasicMaterial({color:0x8fe9ff,transparent:true}));
+      s5.add(e);
+      const lab=makeLabel("nucleus 1 mm  ·  orbit 10 m",COL_GOLD,512);
+      lab.position.set(0,-2.2,0);lab.scale.set(3.6,0.55,1);s5.add(lab);
+      s5.userData.upd=(dt,t)=>{const a=t*1.2;
+        e.position.set(Math.cos(a)*2.6,Math.sin(a)*2.6*Math.sin(1.1),Math.sin(a)*2.6*Math.cos(1.1));
+        nuc.scale.setScalar(0.7+Math.sin(t*6)*0.3);};
+    }
+    /* stage 6 — interlocked oscillating fields */
+    const s6=new THREE.Group();{
+      const waves=[];const cols=[COL_CYAN,COL_GOLD,COL_INK];
+      for(let w=0;w<5;w++){
+        const seg=160,geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array((seg+1)*3),3));
+        const ln=new THREE.Line(geo,new THREE.LineBasicMaterial({color:cols[w%3],transparent:true,opacity:.55}));
+        ln.rotation.set(Math.random()*TAU,Math.random()*TAU,Math.random()*TAU);
+        s6.add(ln);waves.push({geo,seg,k:1.5+w*0.5,sp:1+w*0.4,amp:0.6+Math.random()*0.4,ph:w});
+      }
+      s6.userData.upd=(dt,t)=>{waves.forEach(wv=>{const a=wv.geo.attributes.position.array;
+        for(let i=0;i<=wv.seg;i++){const x=-3.5+(i/wv.seg)*7;
+          a[i*3]=x;a[i*3+1]=Math.sin(x*wv.k-t*wv.sp+wv.ph)*wv.amp;a[i*3+2]=Math.cos(x*wv.k*0.6-t*wv.sp)*wv.amp*0.4;}
+        wv.geo.attributes.position.needsUpdate=true;});};
+    }
+
+    [s0,s1,s2,s3,s4,s5,s6].forEach(s=>{s.visible=false;g.add(s);regOpacity(s);stages.push(s);});
+
+    // floating stage label
+    let curLabel=-1,labelSprite=null;
+    function showLabel(i){
+      if(i===curLabel)return;curLabel=i;
+      if(labelSprite){g.remove(labelSprite);labelSprite.material.map.dispose();labelSprite.material.dispose();}
+      labelSprite=makeLabel(NAMES[i],i>=5?COL_GOLD:COL_CYAN,512);
+      labelSprite.position.set(0,3.0,0);labelSprite.scale.set(4.0,0.62,1);g.add(labelSprite);
+    }
+
+    // seven fixed magnification stops to perceive — snaps to each; the view eases between them
+    slider=ctlSlider({label:"Magnification",min:0,max:6,value:0,step:1,
+      fmt:v=>NAMES[Math.max(0,Math.min(6,Math.round(v)))],onInput:v=>{magTarget=Math.round(v);diving=false;}});
+    const diveBtn=ctlButton('⤓ auto-dive',()=>{diving=!diving;diveBtn.classList.toggle('on',diving);
+      diveBtn.textContent=diving?'⤓ diving…':'⤓ auto-dive'; if(diving&&mag>=6){mag=0;magTarget=0;}});
+
+    // exclusive smoothstep fade: a stage is visible only within ±0.5 of its own stop and fades
+    // fully to nothing by the midpoint, so two scales never overlap-blend into a clunky tangle.
+    function fadeK(m,i){ let k=1-2*Math.abs(m-i); if(k<=0)return 0; if(k>=1)return 1; return k*k*(3-2*k); }
+    function update(dt,t){
+      // auto-dive descends one stop at a time, dwelling at each so the scale can be perceived
+      if(diving && Math.abs(mag-magTarget)<0.02){
+        diveDwell+=dt;
+        if(diveDwell>1.4){ if(magTarget>=6){diving=false;diveBtn.classList.remove('on');diveBtn.textContent='⤓ auto-dive';}
+          else magTarget+=1; diveDwell=0; }
+      }
+      // ease the magnification toward the selected stop — the smooth transition animation
+      if(diving || Math.abs(magTarget-mag)>0.0012){
+        mag += (magTarget-mag)*Math.min(1,dt*3.0);
+        if(Math.abs(magTarget-mag)<0.0012) mag=magTarget;
+        if(slider){ const mv=Math.round(mag); if(+slider.value!==mv){slider.value=mv;
+          const vs=slider.parentNode.querySelector('.val'); if(vs)vs.textContent=NAMES[mv];} }
+      }
+      stages.forEach((s,i)=>{ const k=fadeK(mag,i); s.visible=k>0.012;
+        if(s.visible){ setOpacity(s,k); if(s.userData.upd)s.userData.upd(dt,t); } });
+      showLabel(Math.round(mag));
+    }
+    return {update};
+  }
+});
+
+/* --- 2. THE HOLLOW ATOM -------------------------------------------------- */
+CONCEPTS.push({
+  title:"The Hollow Atom", dim:"1 : 10,000",
+  blurb:"Focus on a single atom and the electron shell thins to nothing. If the nucleus of a hydrogen atom were 1 mm across, its electron would orbit some 10 metres away — a ratio of 1 to 10,000, with pure vacuum in between. Inflate the nucleus to make it visible; shrink it back toward true scale and watch your 'solid' matter dissolve into the void it really is.",
+  cam:{theta:0.7,phi:1.05,radius:9,auto:true,autoSpeed:0.06,rmin:5,rmax:20,target:[0,0,0]},
+  build(g){
+    const ORB=4.4;
+    let inflate=400; // nucleus magnification factor 1..5000
+    const trueNucR=ORB/10000; // true-scale radius
+    const nuc=new THREE.Mesh(new THREE.SphereGeometry(1,24,24),
+      new THREE.MeshStandardMaterial({color:COL_GOLD,emissive:0x5a3a08,emissiveIntensity:.9,roughness:.3,metalness:.3}));
+    g.add(nuc);
+    // atom boundary (electron orbit shell)
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(ORB,32,24),
+      new THREE.MeshBasicMaterial({color:COL_CYAN,wireframe:true,transparent:true,opacity:.10})));
+    const orbit=new THREE.Mesh(new THREE.TorusGeometry(ORB,0.012,8,140),
+      new THREE.MeshBasicMaterial({color:COL_CYAN,transparent:true,opacity:.35}));
+    orbit.rotation.x=1.15; g.add(orbit);
+    const e=new THREE.Mesh(new THREE.SphereGeometry(0.10,14,14),
+      new THREE.MeshBasicMaterial({color:0x8fe9ff}));
+    g.add(e);
+    // electron motion trail
+    const TR=60,tg=new THREE.BufferGeometry(),tp=new Float32Array(TR*3);
+    tg.setAttribute('position',new THREE.BufferAttribute(tp,3));
+    const trail=new THREE.Points(tg,new THREE.PointsMaterial({color:0x8fe9ff,size:0.05,transparent:true,opacity:.4}));
+    g.add(trail);
+    let cloud=null;
+    function makeCloud(on){
+      if(cloud){g.remove(cloud);cloud.geometry.dispose();cloud.material.dispose();cloud=null;}
+      if(!on)return;
+      const NE=900,cg=new THREE.BufferGeometry(),cp=new Float32Array(NE*3);
+      for(let i=0;i<NE;i++){const t=Math.random()*TAU,ph=Math.acos(2*Math.random()-1),r=ORB*(0.88+Math.random()*0.16);
+        cp[i*3]=r*Math.sin(ph)*Math.cos(t);cp[i*3+1]=r*Math.cos(ph);cp[i*3+2]=r*Math.sin(ph)*Math.sin(t);}
+      cg.setAttribute('position',new THREE.BufferAttribute(cp,3));
+      cloud=new THREE.Points(cg,new THREE.PointsMaterial({color:0x8fe9ff,size:0.045,sizeAttenuation:true,transparent:true,opacity:.5}));
+      g.add(cloud);
+    }
+    let ti=0;
+    const ratioOut=ctlReadout('If nucleus = 1 mm');
+    function refresh(){
+      const r=Math.max(trueNucR,trueNucR*inflate);
+      nuc.scale.setScalar(r);
+      ratioOut.textContent='orbit ≈ 10 m';
+      solid.set(Math.min(1,Math.pow(r/ORB,3))); // fraction of volume filled
+    }
+    ctlSlider({label:"Inflate nucleus (×)",min:1,max:5000,value:400,step:1,
+      fmt:v=>'×'+(v>=1000?(v/1000).toFixed(1)+'k':Math.round(v)),onInput:v=>{inflate=v;refresh();}});
+    const solid=ctlMeter('Solid matter in view');
+    const cloudBtn=ctlButton('◌ electron cloud: off',()=>{const on=!cloud;makeCloud(on);
+      cloudBtn.classList.toggle('on',on);cloudBtn.textContent='◌ electron cloud: '+(on?'on':'off');});
+    ctlButton('↯ true scale',()=>{inflate=1;refresh();
+      const s=controlsEl.querySelector('input[type=range]');if(s){s.value=1;const v=s.parentNode.querySelector('.val');if(v)v.textContent='×1';}});
+    refresh();
+    function update(dt,t){
+      const a=t*1.1;
+      e.position.set(Math.cos(a)*ORB,Math.sin(a)*ORB*Math.sin(1.15),Math.sin(a)*ORB*Math.cos(1.15));
+      tp.copyWithin(3,0,(TR-1)*3);tp[0]=e.position.x;tp[1]=e.position.y;tp[2]=e.position.z;
+      tg.attributes.position.needsUpdate=true;
+      nuc.rotation.y=t*0.4;
+      if(cloud)cloud.rotation.y=t*0.3;
+    }
+    return {update};
+  }
+});
+
+/* --- 3. PIEZOELECTRIC BONE ----------------------------------------------- */
+CONCEPTS.push({
+  title:"Piezoelectric Bone", dim:"PIEZO",
+  blurb:"Magnify a piece of bone and ordered crystals appear, embedded like jewels in webs of molecular strings. Apply an electric field and the crystal instantly changes length — it shrinks or stretches in response. Look closer and the atoms weave back and forth like a field of ripe wheat blown by the wind: acoustical energy flowing through the lattice in beautiful rhythm.",
+  cam:{theta:0.8,phi:0.95,radius:9,auto:true,autoSpeed:0.05,rmin:5,rmax:18,target:[0,0,0]},
+  build(g){
+    const n=4,sp=1.0,off=(n-1)*sp/2,nodes=[],grid={};
+    const sg=new THREE.SphereGeometry(0.15,14,14);
+    const sm=new THREE.MeshStandardMaterial({color:COL_CYAN,emissive:0x0a3a33,emissiveIntensity:.5,roughness:.35,metalness:.3});
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++)for(let k=0;k<n;k++){
+      const m=new THREE.Mesh(sg,sm);g.add(m);
+      nodes.push({m,bx:i*sp-off,by:j*sp-off,bz:k*sp-off,ph:(i+j+k)*0.6});grid[i+','+j+','+k]=nodes.length-1;
+    }
+    const bonds=[];
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++)for(let k=0;k<n;k++){
+      [[1,0,0],[0,1,0],[0,0,1]].forEach(d=>{const key=(i+d[0])+','+(j+d[1])+','+(k+d[2]);
+        if(grid[key]!==undefined)bonds.push([grid[i+','+j+','+k],grid[key]]);});
+    }
+    const bg=new THREE.BufferGeometry();const bp=new Float32Array(bonds.length*6);
+    bg.setAttribute('position',new THREE.BufferAttribute(bp,3));
+    g.add(new THREE.LineSegments(bg,new THREE.LineBasicMaterial({color:COL_CYAN,transparent:true,opacity:.22})));
+    // field arrows
+    const arrows=new THREE.Group();let showField=true;
+    const arrMat=new THREE.MeshBasicMaterial({color:COL_GOLD,transparent:true,opacity:.8});
+    [-1,1].forEach(s=>{const cone=new THREE.Mesh(new THREE.ConeGeometry(0.22,0.6,12),arrMat);
+      cone.position.set(0,s*3.0,0);cone.rotation.z=s>0?0:Math.PI;arrows.add(cone);
+      const shaft=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,1.4,8),arrMat);
+      shaft.position.set(0,s*2.2,0);arrows.add(shaft);});
+    g.add(arrows);
+    let field=0; // -1..1
+    const lenOut=ctlReadout('Crystal length');
+    function refreshLen(){const pct=(1+field*0.22)*100;lenOut.textContent=pct.toFixed(0)+'%';
+      arrows.scale.y=field>=0?1:-1;arrMat.color.setHex(field>=0?COL_GOLD:0x6fa8ff);
+      arrows.visible=showField&&Math.abs(field)>0.01;}
+    ctlSlider({label:"Electric field",min:-1,max:1,value:0,step:0.02,
+      fmt:v=>v>0?'+'+v.toFixed(2):v.toFixed(2),onInput:v=>{field=v;refreshLen();}});
+    const fBtn=ctlButton('↕ field arrows: on',()=>{showField=!showField;refreshLen();
+      fBtn.classList.toggle('on',showField);fBtn.textContent='↕ field arrows: '+(showField?'on':'off');});
+    fBtn.classList.add('on');
+    refreshLen();
+    function update(dt,t){
+      const stretch=1+field*0.22;
+      nodes.forEach(nd=>{
+        const sway=Math.sin(t*2.4 + nd.by*1.2 + nd.ph)*0.10;   // wheat in the wind
+        nd.m.position.set(nd.bx+sway, nd.by*stretch + Math.sin(t*3+nd.ph)*0.03, nd.bz+Math.cos(t*2.4+nd.ph)*0.06);
+      });
+      bonds.forEach((b,i)=>{const a=nodes[b[0]].m.position,c=nodes[b[1]].m.position;
+        bp[i*6]=a.x;bp[i*6+1]=a.y;bp[i*6+2]=a.z;bp[i*6+3]=c.x;bp[i*6+4]=c.y;bp[i*6+5]=c.z;});
+      bg.attributes.position.needsUpdate=true;
+    }
+    return {update};
+  }
+});
+
+/* --- 4. THE WEB OF FIELDS ------------------------------------------------ */
+CONCEPTS.push({
+  title:"The Web of Fields", dim:"COUPLED",
+  blurb:"Strip everything down and reality is an interlocked web of fields, each pulsating at its own rate yet in harmony with its neighbours. Disturb one and the irregularity spreads — this is disease, an organ beating off-key. But apply a strong harmonizing rhythm and the off-key parts are entrained back into tune. This, Bentov suggests, may be the principle behind psychic healing.",
+  cam:{theta:0.6,phi:0.7,radius:11,auto:true,autoSpeed:0.05,rmin:6,rmax:22,target:[0,0,0]},
+  build(g){
+    const G=8,sp=1.05,off=(G-1)*sp/2,nodes=[];
+    const sg=new THREE.SphereGeometry(0.17,14,14);
+    function idx(i,j){return i*G+j;}
+    for(let i=0;i<G;i++)for(let j=0;j<G;j++){
+      const m=new THREE.Mesh(sg,new THREE.MeshStandardMaterial({color:COL_CYAN,emissive:0x0a3a33,emissiveIntensity:.5,roughness:.4}));
+      m.position.set(i*sp-off,0,j*sp-off);g.add(m);
+      nodes.push({m,i,j,phi:Math.random()*TAU,w:1.7+(i+j-G)*0.01});
+    }
+    // bonds
+    const bonds=[];
+    for(let i=0;i<G;i++)for(let j=0;j<G;j++){
+      if(i<G-1)bonds.push([idx(i,j),idx(i+1,j)]);
+      if(j<G-1)bonds.push([idx(i,j),idx(i,j+1)]);
+    }
+    const bg=new THREE.BufferGeometry(),bp=new Float32Array(bonds.length*6);
+    bg.setAttribute('position',new THREE.BufferAttribute(bp,3));
+    g.add(new THREE.LineSegments(bg,new THREE.LineBasicMaterial({color:COL_CYAN,transparent:true,opacity:.16})));
+    // neighbour lists
+    nodes.forEach(nd=>{nd.nbr=[];});
+    bonds.forEach(b=>{nodes[b[0]].nbr.push(b[1]);nodes[b[1]].nbr.push(b[0]);});
+    let K=1.4;
+    const col=new THREE.Color(), cCool=new THREE.Color(COL_CYAN), cWarm=new THREE.Color(COL_GOLD);
+    function disturb(){
+      // scramble a random patch — an organ falling out of tune
+      const ci=Math.floor(Math.random()*G),cj=Math.floor(Math.random()*G);
+      nodes.forEach(nd=>{const d=Math.hypot(nd.i-ci,nd.j-cj);
+        if(d<2.6)nd.phi=Math.random()*TAU;});
+    }
+    ctlSlider({label:"Harmonizing rhythm",min:0,max:3.5,value:1.4,step:0.05,
+      fmt:v=>v.toFixed(2),onInput:v=>K=v});
+    ctlButton('⚡ disturb (go off-key)',()=>disturb());
+    ctlButton('⟲ scatter all',()=>nodes.forEach(nd=>nd.phi=Math.random()*TAU));
+    const meter=ctlMeter('Coherence');
+    function update(dt,t){
+      const h=Math.min(dt,0.05);
+      let sx=0,sy=0;nodes.forEach(nd=>{sx+=Math.cos(nd.phi);sy+=Math.sin(nd.phi);});
+      sx/=nodes.length;sy/=nodes.length;const R=Math.hypot(sx,sy),psi=Math.atan2(sy,sx);
+      nodes.forEach(nd=>{
+        let cpl=0;nd.nbr.forEach(k=>cpl+=Math.sin(nodes[k].phi-nd.phi));
+        nd.phi+=(nd.w + (K/nd.nbr.length)*cpl + 0.18*K*R*Math.sin(psi-nd.phi))*h;
+        const s=Math.sin(nd.phi);
+        nd.m.position.y=s*0.55;
+        // phase reads in the chapter's cyan↔gold palette — synced nodes share a hue, off-key ones split
+        col.copy(cCool).lerp(cWarm,0.5+0.5*Math.cos(nd.phi)).multiplyScalar(0.85+0.25*s);
+        nd.m.material.color.copy(col);nd.m.material.emissive.copy(col).multiplyScalar(0.3);
+      });
+      bonds.forEach((b,i)=>{const a=nodes[b[0]].m.position,c=nodes[b[1]].m.position;
+        bp[i*6]=a.x;bp[i*6+1]=a.y;bp[i*6+2]=a.z;bp[i*6+3]=c.x;bp[i*6+4]=c.y;bp[i*6+5]=c.z;});
+      bg.attributes.position.needsUpdate=true;
+      meter.set(R);
+    }
+    return {update};
+  }
+});
+
+/* --- 5. EARTH–IONOSPHERE CAPACITOR --------------------------------------- */
+CONCEPTS.push({
+  title:"Earth–Ionosphere", dim:"200 V/m",
+  blurb:"The planet wears a layer of charged particles — the ionosphere — about 80 km up. Positively charged above, negatively charged below, it forms a vast spherical capacitor with the Earth, and between them runs an even voltage gradient of roughly 200 volts per metre. Standing upright, your head sits some 400 volts 'above' your feet. This stiff electric field is the medium that couples every living body to the planet.",
+  cam:{theta:0.7,phi:1.0,radius:11,auto:true,autoSpeed:0.05,rmin:7,rmax:24,target:[0,0,0]},
+  build(g){
+    const ER=2.4,IR=3.7;
+    // --- procedural "blue marble" Earth (oceans, continents, ice caps) ---
+    const CONTINENTS=[
+      [[-168,65],[-158,71],[-130,70],[-115,69],[-100,70],[-90,68],[-82,63],[-78,55],[-82,46],[-70,47],[-66,44],[-70,41],[-75,35],[-81,25],[-97,18],[-105,23],[-110,29],[-117,32],[-124,40],[-124,48],[-130,55],[-145,60],[-160,59]], // N. America
+      [[-78,9],[-70,11],[-60,6],[-50,0],[-44,-3],[-35,-7],[-38,-15],[-48,-25],[-58,-34],[-66,-43],[-73,-52],[-75,-50],[-71,-40],[-71,-28],[-76,-16],[-81,-5],[-80,2]], // S. America
+      [[-16,15],[-9,30],[0,36],[10,37],[24,33],[33,31],[43,12],[51,12],[44,-2],[40,-15],[33,-26],[25,-34],[18,-35],[12,-18],[9,-2],[5,4],[-5,5],[-12,8]], // Africa
+      [[-10,36],[-2,44],[3,48],[0,52],[8,55],[24,60],[28,70],[45,68],[68,73],[90,75],[110,73],[130,72],[150,69],[170,67],[180,64],[170,60],[143,52],[140,46],[123,40],[121,33],[112,22],[105,18],[98,16],[92,21],[83,18],[78,9],[73,18],[58,26],[48,30],[42,38],[30,37],[16,38],[2,38]], // Eurasia
+      [[113,-22],[122,-17],[131,-12],[143,-13],[148,-20],[153,-28],[150,-37],[143,-39],[129,-32],[120,-34],[114,-30]], // Australia
+    ];
+    const ICE=[[[-46,60],[-30,61],[-20,68],[-22,76],[-32,82],[-46,83],[-58,80],[-52,72],[-48,65]]]; // Greenland
+    function makeEarthTexture(){
+      const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+      const og=x.createLinearGradient(0,0,0,H);
+      og.addColorStop(0,'#0c3358');og.addColorStop(.5,'#14538c');og.addColorStop(1,'#0c3358');
+      x.fillStyle=og;x.fillRect(0,0,W,H);
+      const proj=(lon,lat)=>[(lon+180)/360*W,(90-lat)/180*H];
+      const fillPoly=(poly,col)=>{x.beginPath();poly.forEach((p,i)=>{const q=proj(p[0],p[1]);i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]);});x.closePath();x.fillStyle=col;x.fill();};
+      x.lineJoin='round';
+      CONTINENTS.forEach(p=>{fillPoly(p,'#3f6e3c');});
+      // a sandy desert wash over N. Africa / Arabia for recognizability
+      x.save();x.globalAlpha=.5;fillPoly([[-12,16],[10,30],[35,30],[50,18],[40,12],[18,14],[0,14]],'#9a8a4e');x.restore();
+      // ice: poles + Greenland
+      x.fillStyle='#e6eef4';
+      x.fillRect(0,0,W,H*0.05); x.fillRect(0,H*0.94,W,H*0.06);
+      ICE.forEach(p=>fillPoly(p,'#e6eef4'));
+      const t=new THREE.CanvasTexture(c); if('SRGBColorSpace'in THREE)t.colorSpace=THREE.SRGBColorSpace; return t;
+    }
+    function makeCloudTexture(){
+      const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.clearRect(0,0,W,H);
+      for(let i=0;i<150;i++){const cx=Math.random()*W,cy=Math.random()*H,r=18+Math.random()*70;
+        const g2=x.createRadialGradient(cx,cy,0,cx,cy,r);
+        g2.addColorStop(0,'rgba(255,255,255,'+(0.16+Math.random()*0.22)+')');g2.addColorStop(1,'rgba(255,255,255,0)');
+        x.fillStyle=g2;x.beginPath();x.arc(cx,cy,r,0,TAU);x.fill();}
+      return new THREE.CanvasTexture(c);
+    }
+    const earth=new THREE.Mesh(new THREE.SphereGeometry(ER,64,48),
+      new THREE.MeshStandardMaterial({map:makeEarthTexture(),roughness:.88,metalness:.04,emissive:0x0b1f38,emissiveIntensity:.28}));
+    earth.rotation.z=0.41; g.add(earth);   // ~23.5° axial tilt
+    const clouds=new THREE.Mesh(new THREE.SphereGeometry(ER*1.012,48,36),
+      new THREE.MeshStandardMaterial({map:makeCloudTexture(),transparent:true,opacity:.9,depthWrite:false,roughness:1}));
+    clouds.rotation.z=0.41; g.add(clouds);
+    // soft atmosphere rim-glow
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(ER*1.06,48,36),
+      new THREE.MeshBasicMaterial({color:0x6fb1ff,transparent:true,opacity:.12,side:THREE.BackSide})));
+    // ionosphere shell
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(IR,40,28),
+      new THREE.MeshBasicMaterial({color:COL_GOLD,wireframe:true,transparent:true,opacity:.18})));
+    // radial field lines + flowing charge dots
+    const NL=40,flows=[];
+    const dirs=[];
+    for(let i=0;i<NL;i++){const t=Math.random()*TAU,ph=Math.acos(2*Math.random()-1);
+      dirs.push(new THREE.Vector3(Math.sin(ph)*Math.cos(t),Math.cos(ph),Math.sin(ph)*Math.sin(t)));}
+    const lp=[];dirs.forEach(d=>{lp.push(d.x*ER,d.y*ER,d.z*ER,d.x*IR,d.y*IR,d.z*IR);});
+    const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.Float32BufferAttribute(lp,3));
+    const fieldLines=new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:COL_CYAN,transparent:true,opacity:.18}));
+    g.add(fieldLines);
+    const ND=NL,dg=new THREE.BufferGeometry(),dp=new Float32Array(ND*3);
+    dg.setAttribute('position',new THREE.BufferAttribute(dp,3));
+    const dots=new THREE.Points(dg,new THREE.PointsMaterial({color:0xffe6a8,size:0.13,sizeAttenuation:true,transparent:true,opacity:.9}));
+    g.add(dots);
+    // sensor marker that rises through the gradient
+    const sensor=new THREE.Mesh(new THREE.SphereGeometry(0.12,14,14),
+      new THREE.MeshBasicMaterial({color:COL_GOLD}));
+    const up=new THREE.Vector3(0,1,0);
+    g.add(sensor);
+    const lab=makeLabel("+ + +  IONOSPHERE  + + +",COL_GOLD,512);lab.position.set(0,IR+0.7,0);lab.scale.set(4,0.6,1);g.add(lab);
+    const lab2=makeLabel("− − −  EARTH  − − −",0x6fa8ff,512);lab2.position.set(0,-ER-0.7,0);lab2.scale.set(3.4,0.55,1);g.add(lab2);
+    let alt=200;let showLines=true;
+    const vOut=ctlReadout('Potential');
+    function refresh(){vOut.textContent=(alt*200).toLocaleString()+' V';   // 200 V per metre of altitude
+      const h=ER + (alt/2000)*(IR-ER);  // map 0..2000 m onto the gap, visually
+      sensor.position.copy(up).multiplyScalar(h);
+      fieldLines.visible=showLines;}
+    ctlSlider({label:"Sensor altitude (m)",min:0,max:2000,value:200,step:10,
+      fmt:v=>v+' m',onInput:v=>{alt=v;refresh();}});
+    const lBtn=ctlButton('↯ field lines: on',()=>{showLines=!showLines;refresh();
+      lBtn.classList.toggle('on',showLines);lBtn.textContent='↯ field lines: '+(showLines?'on':'off');});
+    lBtn.classList.add('on');
+    refresh();
+    function update(dt,t){
+      const u=(t*0.25)%1;
+      for(let i=0;i<ND;i++){const d=dirs[i];const r=ER+((u+i*0.013)%1)*(IR-ER);
+        dp[i*3]=d.x*r;dp[i*3+1]=d.y*r;dp[i*3+2]=d.z*r;}
+      dg.attributes.position.needsUpdate=true;
+      earth.rotation.y=t*0.06; clouds.rotation.y=t*0.078;
+      sensor.material.color.setHex(0xffe6a8);
+      sensor.scale.setScalar(1+Math.sin(t*4)*0.15);
+    }
+    return {update};
+  }
+});
+
+/* --- 6. THE STIFF JELLY -------------------------------------------------- */
+CONCEPTS.push({
+  title:"The Stiff Jelly", dim:"COUPLING",
+  blurb:"Picture the planet's electrostatic field as a bowl of stiff jelly with a few raisins embedded in it. Poke one raisin and all the others quiver too — they are well coupled to the jelly, and no raisin can move without the others feeling it. Living bodies are those raisins. Every motion we make is transmitted through the field, far and wide around the planet. Poke a raisin and turn up the coupling.",
+  cam:{theta:0.8,phi:0.85,radius:11,auto:true,autoSpeed:0.05,rmin:7,rmax:22,target:[0,0,0]},
+  build(g){
+    const BX=6,BY=2.6,BZ=5;
+    // jelly box
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(BX,BY,BZ),
+      new THREE.MeshStandardMaterial({color:0x3a8f7e,transparent:true,opacity:.10,roughness:.2,metalness:.1,side:THREE.DoubleSide})));
+    g.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(BX,BY,BZ)),
+      new THREE.LineBasicMaterial({color:COL_CYAN,transparent:true,opacity:.45})));
+    // jelly medium points
+    const NP=1600,jg=new THREE.BufferGeometry(),jp=new Float32Array(NP*3),jb=new Float32Array(NP*3);
+    for(let i=0;i<NP;i++){const x=(Math.random()-.5)*BX,y=(Math.random()-.5)*BY,z=(Math.random()-.5)*BZ;
+      jb[i*3]=x;jb[i*3+1]=y;jb[i*3+2]=z;jp[i*3]=x;jp[i*3+1]=y;jp[i*3+2]=z;}
+    jg.setAttribute('position',new THREE.BufferAttribute(jp,3));
+    g.add(new THREE.Points(jg,new THREE.PointsMaterial({color:0x6fd9c4,size:0.05,sizeAttenuation:true,transparent:true,opacity:.5})));
+    // raisins
+    const RP=[[-2.1,0,-1.4],[2.0,0,1.3],[0.1,0,-1.8],[1.4,0,-0.5],[-1.5,0,1.6]];
+    const raisins=RP.map(p=>{const m=new THREE.Mesh(new THREE.SphereGeometry(0.28,16,16),
+      new THREE.MeshStandardMaterial({color:0x7a3b6a,emissive:0x2a0f24,emissiveIntensity:.5,roughness:.5}));
+      m.position.set(p[0],p[1],p[2]);g.add(m);return {m,bx:p[0],by:p[1],bz:p[2]};});
+    let coupling=0.7,src=0,te=-1;
+    const c=2.4,k=2.4,w=4.5;
+    function poke(){src=(src+1)%raisins.length;te=0;}
+    function waveAt(x,z){
+      if(te<0)return 0;
+      const s=raisins[src];const r=Math.hypot(x-s.bx,z-s.bz),reach=c*te;
+      if(r>reach)return 0;
+      let gt=(reach-r)/0.8;if(gt>1)gt=1;gt=gt*gt*(3-2*gt);
+      const damp=Math.exp(-r*(1.1-coupling));   // poor coupling → fast decay with distance
+      return Math.sin(k*r-w*te)*gt*damp*Math.exp(-te*0.4)*(0.5+coupling);
+    }
+    ctlSlider({label:"Coupling strength",min:0.1,max:1.0,value:0.7,step:0.02,
+      fmt:v=>v.toFixed(2),onInput:v=>{coupling=v;}});
+    ctlButton('☞ poke a raisin',()=>poke());
+    const meter=ctlMeter('Field coupling');
+    function update(dt,t){
+      if(te>=0){te+=Math.min(dt,0.05);if(te>3.2)te=-1;}
+      for(let i=0;i<NP;i++){const x=jb[i*3],z=jb[i*3+2];
+        jp[i*3+1]=jb[i*3+1]+waveAt(x,z)*0.5;}
+      jg.attributes.position.needsUpdate=true;
+      let maxd=0;
+      raisins.forEach((r,i)=>{const d=waveAt(r.bx,r.bz);
+        r.m.position.y=r.by+d*0.9;
+        r.m.material.emissiveIntensity=0.5+Math.abs(d)*1.5;
+        if(i!==src)maxd=Math.max(maxd,Math.abs(d));});
+      meter.set(Math.min(1,coupling*0.6+maxd*1.2));
+    }
+    return {update};
+  }
+});
+
+/* --- 7. PLANETARY RESONANCE ---------------------------------------------- */
+CONCEPTS.push({
+  title:"Planetary Resonance", dim:"7 Hz",
+  blurb:"The Earth–ionosphere cavity rings at about 7.5 cycles per second; the body's micromotion sits at 6.8–7.5 Hz — a tuned resonant system waiting to lock. At that frequency the wavelength is about 40,000 km, the planet's own girth, so the signal circles the globe in roughly one-seventh of a second, passing through metal, concrete and flesh alike. Tune your body to the cavity and watch meditators everywhere entrain into one shared pulse.",
+  cam:{theta:0.7,phi:0.95,radius:11,auto:true,autoSpeed:0.06,rmin:7,rmax:22,target:[0,0,0]},
+  build(g){
+    const ER=2.3;
+    // --- procedural "blue marble" Earth (matches Concept 05) ---
+    const CONTINENTS=[
+      [[-168,65],[-158,71],[-130,70],[-115,69],[-100,70],[-90,68],[-82,63],[-78,55],[-82,46],[-70,47],[-66,44],[-70,41],[-75,35],[-81,25],[-97,18],[-105,23],[-110,29],[-117,32],[-124,40],[-124,48],[-130,55],[-145,60],[-160,59]], // N. America
+      [[-78,9],[-70,11],[-60,6],[-50,0],[-44,-3],[-35,-7],[-38,-15],[-48,-25],[-58,-34],[-66,-43],[-73,-52],[-75,-50],[-71,-40],[-71,-28],[-76,-16],[-81,-5],[-80,2]], // S. America
+      [[-16,15],[-9,30],[0,36],[10,37],[24,33],[33,31],[43,12],[51,12],[44,-2],[40,-15],[33,-26],[25,-34],[18,-35],[12,-18],[9,-2],[5,4],[-5,5],[-12,8]], // Africa
+      [[-10,36],[-2,44],[3,48],[0,52],[8,55],[24,60],[28,70],[45,68],[68,73],[90,75],[110,73],[130,72],[150,69],[170,67],[180,64],[170,60],[143,52],[140,46],[123,40],[121,33],[112,22],[105,18],[98,16],[92,21],[83,18],[78,9],[73,18],[58,26],[48,30],[42,38],[30,37],[16,38],[2,38]], // Eurasia
+      [[113,-22],[122,-17],[131,-12],[143,-13],[148,-20],[153,-28],[150,-37],[143,-39],[129,-32],[120,-34],[114,-30]], // Australia
+    ];
+    const ICE=[[[-46,60],[-30,61],[-20,68],[-22,76],[-32,82],[-46,83],[-58,80],[-52,72],[-48,65]]]; // Greenland
+    function makeEarthTexture(){
+      const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+      const og=x.createLinearGradient(0,0,0,H);
+      og.addColorStop(0,'#0c3358');og.addColorStop(.5,'#14538c');og.addColorStop(1,'#0c3358');
+      x.fillStyle=og;x.fillRect(0,0,W,H);
+      const proj=(lon,lat)=>[(lon+180)/360*W,(90-lat)/180*H];
+      const fillPoly=(poly,col)=>{x.beginPath();poly.forEach((p,i)=>{const q=proj(p[0],p[1]);i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]);});x.closePath();x.fillStyle=col;x.fill();};
+      x.lineJoin='round';
+      CONTINENTS.forEach(p=>{fillPoly(p,'#3f6e3c');});
+      x.save();x.globalAlpha=.5;fillPoly([[-12,16],[10,30],[35,30],[50,18],[40,12],[18,14],[0,14]],'#9a8a4e');x.restore();
+      x.fillStyle='#e6eef4';
+      x.fillRect(0,0,W,H*0.05); x.fillRect(0,H*0.94,W,H*0.06);
+      ICE.forEach(p=>fillPoly(p,'#e6eef4'));
+      const t=new THREE.CanvasTexture(c); if('SRGBColorSpace'in THREE)t.colorSpace=THREE.SRGBColorSpace; return t;
+    }
+    function makeCloudTexture(){
+      const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.clearRect(0,0,W,H);
+      for(let i=0;i<150;i++){const cx=Math.random()*W,cy=Math.random()*H,r=18+Math.random()*70;
+        const g2=x.createRadialGradient(cx,cy,0,cx,cy,r);
+        g2.addColorStop(0,'rgba(255,255,255,'+(0.16+Math.random()*0.22)+')');g2.addColorStop(1,'rgba(255,255,255,0)');
+        x.fillStyle=g2;x.beginPath();x.arc(cx,cy,r,0,TAU);x.fill();}
+      return new THREE.CanvasTexture(c);
+    }
+    const earth=new THREE.Mesh(new THREE.SphereGeometry(ER,64,48),
+      new THREE.MeshStandardMaterial({map:makeEarthTexture(),roughness:.88,metalness:.04,emissive:0x0b1f38,emissiveIntensity:.28}));
+    earth.rotation.z=0.41; g.add(earth);   // ~23.5° axial tilt
+    const clouds=new THREE.Mesh(new THREE.SphereGeometry(ER*1.012,48,36),
+      new THREE.MeshStandardMaterial({map:makeCloudTexture(),transparent:true,opacity:.9,depthWrite:false,roughness:1}));
+    clouds.rotation.z=0.41; g.add(clouds);
+    // soft atmosphere rim-glow
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(ER*1.06,48,36),
+      new THREE.MeshBasicMaterial({color:0x6fb1ff,transparent:true,opacity:.12,side:THREE.BackSide})));
+    // wave wrapping the globe once (n=1, λ = planet girth)
+    const SEG=240,wg=new THREE.BufferGeometry(),wp=new Float32Array((SEG+1)*3);
+    wg.setAttribute('position',new THREE.BufferAttribute(wp,3));
+    const waveLine=new THREE.Line(wg,new THREE.LineBasicMaterial({color:COL_CYAN,transparent:true,opacity:.9}));
+    g.add(waveLine);
+    // meditators on the surface
+    const med=[];
+    for(let i=0;i<7;i++){const t=i/7*TAU,ph=0.6+Math.random()*1.9;
+      const d=new THREE.Vector3(Math.sin(ph)*Math.cos(t),Math.cos(ph),Math.sin(ph)*Math.sin(t));
+      const m=new THREE.Mesh(new THREE.SphereGeometry(0.13,14,14),
+        new THREE.MeshBasicMaterial({color:COL_GOLD}));
+      m.position.copy(d).multiplyScalar(ER+0.05);g.add(m);
+      // little upward beam
+      const bg=new THREE.BufferGeometry();bg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
+      const beam=new THREE.Line(bg,new THREE.LineBasicMaterial({color:COL_GOLD,transparent:true,opacity:.5}));
+      g.add(beam);
+      med.push({m,d,beam,bg,ph:Math.random()*TAU});
+    }
+    let fBody=7.0,fCav=7.5;
+    function resonance(){const s=0.5;return Math.exp(-Math.pow(fBody-fCav,2)/(2*s*s));}
+    ctlSlider({label:"Body micromotion (Hz)",min:6.0,max:8.0,value:7.0,step:0.05,
+      fmt:v=>v.toFixed(2)+' Hz',onInput:v=>fBody=v});
+    ctlSlider({label:"Cavity (Hz)",min:7.0,max:8.0,value:7.5,step:0.05,
+      fmt:v=>v.toFixed(2)+' Hz',onInput:v=>fCav=v});
+    const meter=ctlMeter('Resonance');
+    const out=ctlReadout('When locked');
+    function update(dt,t){
+      const R=resonance();
+      earth.rotation.y=t*0.06; clouds.rotation.y=t*0.078;
+      const w=fBody*0.9;
+      const amp=0.15+R*0.85;
+      // wave wrapping the equatorial great circle: XZ ring with a radial bulge + vertical ripple
+      for(let i=0;i<=SEG;i++){const a=i/SEG*TAU;const rr=ER+0.28+Math.sin(a - t*w)*amp*0.6;
+        wp[i*3]=Math.cos(a)*rr;wp[i*3+1]=Math.sin(a - t*w)*amp*0.5;wp[i*3+2]=Math.sin(a)*rr;}
+      wg.attributes.position.needsUpdate=true;
+      waveLine.material.color.setHex(R>0.7?0x8ff0dd:COL_CYAN);
+      waveLine.material.opacity=0.4+R*0.6;
+      med.forEach(o=>{
+        const pulse=0.5+0.5*Math.sin(t*w + (R>0.6?0:o.ph)*(1-R)); // sync as R→1
+        o.m.scale.setScalar(0.8+pulse*0.9*(0.4+R));
+        o.m.material.color.setHex(R>0.6?0x9ff0dd:COL_GOLD);
+        const len=(0.3+R*1.4)*pulse;
+        const a=o.bg.attributes.position.array;
+        a[0]=o.d.x*(ER+0.05);a[1]=o.d.y*(ER+0.05);a[2]=o.d.z*(ER+0.05);
+        a[3]=o.d.x*(ER+0.05+len);a[4]=o.d.y*(ER+0.05+len);a[5]=o.d.z*(ER+0.05+len);
+        o.bg.attributes.position.needsUpdate=true;
+        o.beam.material.opacity=0.2+R*0.6;
+      });
+      meter.set(R);
+      out.textContent=R>0.85?'λ ≈ 40,000 km':(R>0.5?'nearly tuned':'off resonance');
+    }
+    return {update};
+  }
+});
+
+/* ============================================================= ★ REFLECTION */
+CONCEPTS.push({
+  star:true,
+  title:"A Theological Perspective",
+  dim:"∞",
+  reflection:
+    "Chapter 2 leaves us with a strange and beautiful claim: nothing moves alone. Every body is a raisin in the same stiff jelly; every motion is transmitted, far and wide, through the one field that couples us all.\n\n"+
+    "Now hold that thought and look at the Tawaf. Millions circle the Kaaba as one — one direction, one rhythm, one voice — and fall in prostration together. If a single raisin's quiver is felt across the planet, what is the magnitude of millions moving in coherence?\n\n"+
+    "Imagine it: not noise but signal, not scattered but synchronized — a standing wave raised by human hands. It ripples through the atmosphere, circles the Earth in a fraction of a second, and need not stop there. Across the cosmos, and perhaps into dimensions we were never built to perceive, the coherent act of the many may carry further than we can measure.",
+  cam:{theta:0.62,phi:0.92,radius:10,auto:true,autoSpeed:0.04,rmin:5,rmax:60,target:[0,-2.2,0]},
+  build(g){
+    let reach=0, reachTarget=0, riseDwell=0, pilgrims=0.55, sync=0.7, rising=false;
+
+    /* ---------- Tableau A: the Kaaba + Tawaf crowd ---------- */
+    const A=new THREE.Group(); g.add(A);
+    const cubeMat=new THREE.MeshStandardMaterial({color:0x0a0a0c,emissive:0x0c0c0e,emissiveIntensity:.35,roughness:.85,metalness:.15});
+    const kCube=new THREE.Mesh(new THREE.BoxGeometry(1.7,1.95,1.7),cubeMat); A.add(kCube);
+    A.add(new THREE.LineSegments(new THREE.EdgesGeometry(kCube.geometry),
+      new THREE.LineBasicMaterial({color:COL_GOLD,transparent:true,opacity:.28})));
+    const goldMat=new THREE.MeshStandardMaterial({color:COL_GOLD,emissive:0x5a3d10,emissiveIntensity:.5,roughness:.4,metalness:.6});
+    const band=new THREE.Mesh(new THREE.BoxGeometry(1.76,0.24,1.76),goldMat); band.position.y=0.5; A.add(band);
+    const door=new THREE.Mesh(new THREE.PlaneGeometry(0.42,0.82),goldMat); door.position.set(0,-0.18,0.861); A.add(door);
+    A.add(new THREE.Mesh(new THREE.SphereGeometry(2.1,24,18),
+      new THREE.MeshBasicMaterial({color:COL_GOLD,transparent:true,opacity:.05,side:THREE.BackSide})));
+    const NMAX=14000, cgeo=new THREE.BufferGeometry(), cpos=new Float32Array(NMAX*3), ccol=new Float32Array(NMAX*3), cdat=[];
+    // base "person" colour (warm cream) + faint speed tints to lerp toward when scattered
+    const CREAM=[0.957,0.902,0.769], WARM=[0.945,0.620,0.235], COOL=[0.310,0.886,0.835];
+    for(let i=0;i<NMAX;i++){ const bnd=Math.pow(Math.random(),1.6); const radius=2.3+bnd*5.4; const ang=Math.random()*TAU;
+      const fn=Math.random();                 // 0 = slow walker, 1 = fast walker
+      const pace=0.55+fn*1.25;                 // individual circling pace (the synced variable)
+      const baseSpeed=(0.16+(1.8/radius)*0.10)*pace;   // own angular speed around the Kaaba
+      // tint by speed: slower → warm gold, faster → cool cyan (clearly visible, still near cream)
+      const sh=(fn-0.5)*2, b=0.45, end=sh>=0?COOL:WARM, m=Math.abs(sh)*b;
+      const tint=[CREAM[0]*(1-m)+end[0]*m, CREAM[1]*(1-m)+end[1]*m, CREAM[2]*(1-m)+end[2]*m];
+      cdat.push({radius,ang,baseSpeed,phase:Math.random()*TAU,tint});
+      cpos[i*3]=Math.cos(ang)*radius; cpos[i*3+1]=0; cpos[i*3+2]=Math.sin(ang)*radius; }
+    cgeo.setAttribute('position',new THREE.BufferAttribute(cpos,3));
+    cgeo.setAttribute('color',new THREE.BufferAttribute(ccol,3));
+    // recolour the crowd for a given synchrony: tints stay readable across the dial,
+    // collapsing to uniform cream only as we approach "as one" (steep curve)
+    function recolorCrowd(){ const k=sync*sync*sync;
+      for(let i=0;i<NMAX;i++){ const tn=cdat[i].tint;
+        ccol[i*3]  =tn[0]*(1-k)+CREAM[0]*k;
+        ccol[i*3+1]=tn[1]*(1-k)+CREAM[1]*k;
+        ccol[i*3+2]=tn[2]*(1-k)+CREAM[2]*k; }
+      cgeo.attributes.color.needsUpdate=true; }
+    recolorCrowd();
+    const crowd=new THREE.Points(cgeo,new THREE.PointsMaterial({vertexColors:true,size:0.062,sizeAttenuation:true,transparent:true,opacity:.92}));
+    A.add(crowd);
+    // resonance ripples — flat rings spreading outward across the ground plane
+    const shells=[];
+    for(let i=0;i<7;i++){ const m=new THREE.Mesh(new THREE.RingGeometry(0.965,1,80),
+        new THREE.MeshBasicMaterial({color:i%2?COL_CYAN:COL_GOLD,transparent:true,opacity:0,side:THREE.DoubleSide}));
+      m.rotation.x=-Math.PI/2; A.add(m); shells.push({m,ph:i/7}); }
+
+    /* ---------- Tableau B: the Earth (blue marble + ionosphere) ---------- */
+    const B=new THREE.Group(); B.visible=false; g.add(B);
+    const ER=6.0;
+    function earthTex(){ const W=512,H=256,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+      x.fillStyle='#10487e';x.fillRect(0,0,W,H);
+      x.fillStyle='#3f6e3c';
+      [[-100,42,58,28],[-62,-18,34,40],[18,8,52,46],[120,-26,34,22],[64,55,40,18]].forEach(([lon,lat,w,h])=>{
+        const px=(lon+180)/360*W,py=(90-lat)/180*H;x.beginPath();x.ellipse(px,py,w,h,0,0,TAU);x.fill();});
+      x.fillStyle='#e6eef4';x.fillRect(0,0,W,H*0.07);x.fillRect(0,H*0.93,W,H*0.07);
+      const t=new THREE.CanvasTexture(c); if('SRGBColorSpace'in THREE)t.colorSpace=THREE.SRGBColorSpace; return t; }
+    const earth=new THREE.Mesh(new THREE.SphereGeometry(ER,48,36),
+      new THREE.MeshStandardMaterial({map:earthTex(),roughness:.9,metalness:.04,emissive:0x0b1f38,emissiveIntensity:.25}));
+    earth.rotation.z=0.41; B.add(earth);
+    B.add(new THREE.Mesh(new THREE.SphereGeometry(ER*1.05,40,28),
+      new THREE.MeshBasicMaterial({color:0x6fb1ff,transparent:true,opacity:.10,side:THREE.BackSide})));
+    B.add(new THREE.Mesh(new THREE.SphereGeometry(ER*1.20,36,24),
+      new THREE.MeshBasicMaterial({color:COL_GOLD,wireframe:true,transparent:true,opacity:.10})));
+    const mecca=new THREE.Mesh(new THREE.SphereGeometry(0.16,12,10),
+      new THREE.MeshBasicMaterial({color:COL_GOLD}));
+    // place on the Arabian landmass and parent to the Earth so it rotates WITH the
+    // texture (z is negated to match Three's sphere-UV → geographic-longitude mapping)
+    const mlat=21.4*Math.PI/180, mlon=39.8*Math.PI/180, mR=ER*1.01;
+    mecca.position.set(mR*Math.cos(mlat)*Math.cos(mlon),mR*Math.sin(mlat),-mR*Math.cos(mlat)*Math.sin(mlon));
+    earth.add(mecca);
+    const eShells=[];
+    for(let i=0;i<5;i++){ const m=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),
+        new THREE.MeshBasicMaterial({color:COL_CYAN,wireframe:true,transparent:true,opacity:0}));
+      m.position.copy(mecca.position); earth.add(m); eShells.push({m,ph:i/5}); }
+
+    /* ---------- Tableau C: the Cosmos (a true Earth, waves into space, an orbiting Moon) ---------- */
+    const C=new THREE.Group(); C.visible=false; g.add(C);
+    const CER=1.3;
+    const cEarth=new THREE.Mesh(new THREE.SphereGeometry(CER,48,36),
+      new THREE.MeshStandardMaterial({map:earthTex(),roughness:.9,metalness:.04,emissive:0x0b1f38,emissiveIntensity:.3}));
+    cEarth.rotation.z=0.41; C.add(cEarth);
+    C.add(new THREE.Mesh(new THREE.SphereGeometry(CER*1.18,28,20),
+      new THREE.MeshBasicMaterial({color:0x6fb1ff,transparent:true,opacity:.12,side:THREE.BackSide})));
+    const cShells=[];
+    for(let i=0;i<5;i++){ const m=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),
+        new THREE.MeshBasicMaterial({color:i%2?COL_CYAN:COL_GOLD,wireframe:true,transparent:true,opacity:0}));
+      C.add(m); cShells.push({m,ph:i/5}); }
+    // a small cratered Moon on a tilted orbit
+    function moonTex(){ const W=256,H=128,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+      x.fillStyle='#9aa0ad';x.fillRect(0,0,W,H);
+      for(let i=0;i<60;i++){const cx=Math.random()*W,cy=Math.random()*H,r=2+Math.random()*9,g=120+Math.random()*70;
+        x.fillStyle='rgba('+(g-18)+','+(g-14)+','+(g)+',0.55)';x.beginPath();x.arc(cx,cy,r,0,TAU);x.fill();}
+      const t=new THREE.CanvasTexture(c); if('SRGBColorSpace'in THREE)t.colorSpace=THREE.SRGBColorSpace; return t; }
+    const moon=new THREE.Mesh(new THREE.SphereGeometry(0.62,32,24),
+      new THREE.MeshStandardMaterial({map:moonTex(),roughness:1,metalness:0,emissive:0x23272f,emissiveIntensity:.16}));
+    moon.add(new THREE.Mesh(new THREE.SphereGeometry(0.62*1.35,24,18),
+      new THREE.MeshBasicMaterial({color:0x9fb0c8,transparent:true,opacity:.06,side:THREE.BackSide})));
+    C.add(moon);
+    const ORB=4.4, OINC=0.34;
+    // faint orbit path
+    const opts=[]; for(let i=0;i<=160;i++){const a=i/160*TAU; opts.push(Math.cos(a)*ORB,-Math.sin(a)*ORB*Math.sin(OINC),Math.sin(a)*ORB*Math.cos(OINC)); }
+    const og=new THREE.BufferGeometry(); og.setAttribute('position',new THREE.Float32BufferAttribute(opts,3));
+    C.add(new THREE.LineLoop(og,new THREE.LineBasicMaterial({color:0x6fb1ff,transparent:true,opacity:.10})));
+    // The Moon is not a source — it is a relay: it catches Earth's resonance and re-launches
+    // it onward from its FAR side, extended and strengthened. These are directional wavefronts
+    // that travel away from Earth (deep amber = the carried signal), not a field of its own.
+    const EXT_COL=0xffa23a;
+    const extWaves=[];
+    for(let i=0;i<6;i++){ const m=new THREE.Mesh(new THREE.RingGeometry(0.9,1.0,72),
+        new THREE.MeshBasicMaterial({color:EXT_COL,transparent:true,opacity:0,side:THREE.DoubleSide,
+          blending:THREE.AdditiveBlending,depthWrite:false}));
+      C.add(m); extWaves.push({m,ph:i/6}); }
+    // a faint cyan "catch" ring on the near side, where Earth's wave meets the Moon
+    const moonCatch=new THREE.Mesh(new THREE.RingGeometry(0.62,0.74,48),
+      new THREE.MeshBasicMaterial({color:COL_CYAN,transparent:true,opacity:0,side:THREE.DoubleSide,
+        blending:THREE.AdditiveBlending,depthWrite:false}));
+    C.add(moonCatch);
+    // reusable temporaries for the relay direction (avoid per-frame allocation)
+    const _mDir=new THREE.Vector3(), _mQuat=new THREE.Quaternion(),
+          _zAxis=new THREE.Vector3(0,0,1), _mPos=new THREE.Vector3();
+
+    /* ---------- Tableau D: Beyond (a 4-D hypercube projected to 3-D) ---------- */
+    const D=new THREE.Group(); D.visible=false; D.scale.setScalar(6.0); g.add(D);
+    const v4=[]; for(let i=0;i<16;i++) v4.push([(i&1)?1:-1,(i&2)?1:-1,(i&4)?1:-1,(i&8)?1:-1]);
+    const e4=[]; for(let i=0;i<16;i++)for(let j=i+1;j<16;j++){let d=0;for(let k=0;k<4;k++)if(v4[i][k]!==v4[j][k])d++;if(d===1)e4.push([i,j]);}
+    const tessGeo=new THREE.BufferGeometry(), tessPos=new Float32Array(e4.length*2*3);
+    tessGeo.setAttribute('position',new THREE.BufferAttribute(tessPos,3));
+    D.add(new THREE.LineSegments(tessGeo,new THREE.LineBasicMaterial({color:COL_CYAN,transparent:true,opacity:.0})));
+    // The cosmos cell — the cube of the hypercube that holds our universe: the 8 vertices with
+    // w=-1 (indices 0..7). We fill only this one cell; the rest of the form stays bare wireframe.
+    // As the hypercube turns in 4-D this cell swells from the small inner cube to the large outer
+    // one and back — inside becoming outside — so "inside" and "outside" are only our 3-D shadow.
+    const cubeFaceIdx=[0,1,3,0,3,2, 4,5,7,4,7,6, 0,1,5,0,5,4, 2,3,7,2,7,6, 0,2,6,0,6,4, 1,3,7,1,7,5];
+    function makeCell(color){
+      const geo=new THREE.BufferGeometry();
+      geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(24),3));
+      geo.setIndex(cubeFaceIdx);
+      const mesh=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color,transparent:true,opacity:0,
+        side:THREE.DoubleSide,depthWrite:false}));
+      mesh.frustumCulled=false; return mesh; }
+    const cosmosCell=makeCell(COL_CYAN);   // our observable cosmos — the one FILLED cell of the form
+    D.add(cosmosCell);                     // the rest of the hypercube stays bare wireframe: the beyond
+    // A sparse galaxy of specks living INSIDE the cosmos cell. Generated as 4-D points on the
+    // w=-1 cell, so they ride the very same rotation+projection as the cube — they fill the small
+    // inner cube, then swell into the large outer one as the form turns inside-out. Illustrative,
+    // not literal: it makes the enclosure legible without pretending "our realm = the small box".
+    // A miniature universe inside the cosmos cell that runs a Big-Bang cycle: born from one bright
+    // point, galaxies ignite in turn while the field expands to fill the cube, then it all rushes
+    // back to the singularity and bangs again. Colours run hot→cool with cosmic time (early galaxies
+    // blue-white, later ones gold-rose). Every point lives in the w=-1 cell's local coords, so the
+    // whole expanding universe also rides the 4-D inside-out turn.
+    const star4=[], starCol=[], starBirth=[];
+    const _gn=new THREE.Vector3(), _gu=new THREE.Vector3(), _gv=new THREE.Vector3(), _gt=new THREE.Vector3();
+    const sphere=()=>{ const a=Math.random()*TAU,z=Math.random()*2-1,s=Math.sqrt(1-z*z); return [Math.cos(a)*s,Math.sin(a)*s,z]; };
+    const cl=v=>v<0?0:v>1?1:v;
+    const star=(x,y,z,r,g,b,birth)=>{ star4.push([x,y,z,-1]); starCol.push(r,g,b); starBirth.push(birth); };
+    // a varied cosmic palette so galaxies read as distinctly coloured clouds, not one uniform haze
+    const GAL_COLORS=[[0.35,0.95,0.92],[0.45,0.60,1.0],[0.72,0.50,1.0],[1.0,0.50,0.72],
+                      [1.0,0.82,0.45],[1.0,0.55,0.38],[0.55,0.95,0.62],[0.78,0.88,1.0]];
+    const NGAL=13;
+    for(let gi=0;gi<NGAL;gi++){
+      const gb=Math.pow(gi/NGAL,0.8)*0.22;                         // birth fraction — galaxies ignite during the burst
+      const R=0.12+Math.random()*0.20, lim=1-R-0.04;
+      const cx=(Math.random()*2-1)*lim, cy=(Math.random()*2-1)*lim, cz=(Math.random()*2-1)*lim;
+      const nb=sphere(); _gn.set(nb[0],nb[1],nb[2]);                // random disk normal → random orientation
+      _gt.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5); _gu.copy(_gt).cross(_gn).normalize(); _gv.copy(_gn).cross(_gu);
+      const arms=2+Math.round(Math.random()), wind=2.0+Math.random()*1.6, ph=Math.random()*TAU, nd=120+Math.floor(Math.random()*140);
+      const bc=GAL_COLORS[(gi*5+3)%GAL_COLORS.length];             // step around the wheel so neighbours differ
+      const tc=[cl(bc[0]+(Math.random()-0.5)*0.12), cl(bc[1]+(Math.random()-0.5)*0.12), cl(bc[2]+(Math.random()-0.5)*0.12)];
+      for(let i=0;i<nd*0.22;i++){ const rr=R*0.16*Math.pow(Math.random(),0.5), d=sphere();   // bright core, hue pushed toward white-hot
+        star(cx+d[0]*rr, cy+d[1]*rr, cz+d[2]*rr, tc[0]*0.78+0.22,tc[1]*0.78+0.22,tc[2]*0.78+0.22, gb); }
+      for(let i=0;i<nd;i++){ const rr=R*Math.pow(Math.random(),0.7), arm=Math.floor(Math.random()*arms);  // spiral arms hold the galaxy's hue
+        const th=ph+arm*(TAU/arms)+(rr/R)*wind*TAU+(Math.random()-0.5)*0.6, v=0.7+Math.random()*0.4;
+        const dx=Math.cos(th)*rr, dy=Math.sin(th)*rr, dz=(Math.random()-0.5)*R*0.07;
+        star(cx+_gu.x*dx+_gv.x*dy+_gn.x*dz, cy+_gu.y*dx+_gv.y*dy+_gn.y*dz, cz+_gu.z*dx+_gv.z*dy+_gn.z*dz,
+          cl(tc[0]*v), cl(tc[1]*v), cl(tc[2]*v), gb+0.02+Math.random()*0.06); }
+    }
+    for(let i=0;i<520;i++){ const fb=GAL_COLORS[(Math.random()*GAL_COLORS.length)|0], f=0.22+Math.random()*0.28;   // faint coloured field galaxies
+      star(Math.random()*2-1,Math.random()*2-1,Math.random()*2-1, fb[0]*f,fb[1]*f,fb[2]*f, Math.random()*0.22); }
+    const NSTAR=star4.length;
+    const starGeo=new THREE.BufferGeometry();
+    starGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(NSTAR*3),3));
+    starGeo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(starCol),3));
+    const starField=new THREE.Points(starGeo,new THREE.PointsMaterial({vertexColors:true,size:0.34,
+      sizeAttenuation:true,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));
+    starField.frustumCulled=false; D.add(starField);
+    let bbT=0; const BB_PERIOD=15;   // seconds per Big-Bang→crunch cycle; resets to a singularity on arrival
+
+    const labA=makeLabel("THE TAWAF",COL_GOLD,4); labA.position.set(0,2.4,0); A.add(labA);
+    const labB=makeLabel("EARTH",COL_CYAN,3); labB.position.set(0,ER+1.6,0); B.add(labB);
+    const labC=makeLabel("COSMOS",COL_CYAN,3); labC.position.set(0,2.2,0); C.add(labC);
+    const labD=makeLabel("BEYOND",COL_GOLD,3); labD.position.set(0,3.4,0); D.add(labD);
+
+    [A,B,C,D].forEach(T=>regOpacity(T));
+
+    const RADII=[10,32,24,22];
+    // exclusive smoothstep crossfade: each tableau is visible only within ±0.5 of its own stop and
+    // fades fully to nothing by the midpoint — so two scenes never overlap-blend into a tangle.
+    function fadeK(r,i){ let k=1-2*Math.abs(r-i); if(k<=0)return 0; if(k>=1)return 1; return k*k*(3-2*k); }
+    function applyReach(r){ reach=r; reachTarget=r;
+      const T=[A,B,C,D];
+      T.forEach((grp,i)=>{ const k=fadeK(r,i); grp.visible=k>0.002; setOpacity(grp,k); });
+      const ri=Math.min(2,Math.floor(r)), f=r-ri;
+      cam.radius=RADII[ri]*(1-f)+RADII[ri+1]*f;
+      cam.target.y=-2.2*Math.max(0,1-r); // lift the framing above the panel at the Tawaf stage; centre once we ascend
+    }
+    applyReach(0);
+
+    // four fixed stops to perceive — not a continuous slider; the view eases cleanly between them
+    const REACH=['the Tawaf','the Earth','the Cosmos','beyond'];
+    const reachFmt=v=>REACH[Math.max(0,Math.min(3,Math.round(v)))];
+    const reachSlider=ctlSlider({label:'Reach',min:0,max:3,value:0,step:1,fmt:reachFmt,
+      onInput:v=>{rising=false;reachTarget=Math.round(v);}});
+    ctlSlider({label:'Pilgrims',min:0,max:1,value:pilgrims,step:0.01,
+      fmt:v=>v<0.34?'thousands':v<0.7?'hundreds of thousands':'millions',
+      onInput:v=>pilgrims=v});
+    ctlSlider({label:'Synchrony',min:0,max:1,value:sync,step:0.01,
+      fmt:v=>v<0.34?'scattered':v<0.7?'gathering':'as one',
+      onInput:v=>{sync=v;recolorCrowd();}});
+    ctlButton('⤒ auto-rise',()=>{ rising=!rising; if(rising && reach>=2.99){reach=0;reachTarget=0;} });
+
+    return {update(dt,t){
+      // auto-rise climbs the stops one at a time, dwelling at each so the level can be perceived
+      if(rising && Math.abs(reach-reachTarget)<0.02){
+        riseDwell+=dt;
+        if(riseDwell>1.8){ if(reachTarget>=3){rising=false;} else {reachTarget+=1;} riseDwell=0; }
+      }
+      // ease the framing toward the selected stop — this is the smooth transition animation
+      if(rising || Math.abs(reachTarget-reach)>0.0012){
+        reach += (reachTarget-reach)*Math.min(1,dt*3.0);
+        if(Math.abs(reachTarget-reach)<0.0012) reach=reachTarget;
+        const ri=Math.min(2,Math.floor(reach)), f=reach-ri;
+        cam.radius=RADII[ri]*(1-f)+RADII[ri+1]*f;
+        cam.target.y=-2.2*Math.max(0,1-reach);
+        if(reachSlider){ const rv=Math.round(reach); if(+reachSlider.value!==rv){reachSlider.value=rv;
+          const vs=reachSlider.parentNode.querySelector('.val'); if(vs)vs.textContent=reachFmt(rv);} }
+      }
+      [A,B,C,D].forEach((grp,i)=>{ grp.visible=fadeK(reach,i)>0.002; });
+      const pos=cgeo.attributes.position.array;
+      const count=Math.floor(900+pilgrims*(NMAX-900)); cgeo.setDrawRange(0,count);
+      const COMMON_S=0.30;   // the shared pace everyone locks to when "as one"
+      for(let i=0;i<count;i++){ const d=cdat[i];
+        // circling pace converges to a common speed as synchrony rises (the synced variable)
+        const es=d.baseSpeed*(1-sync)+COMMON_S*sync; d.ang+=es*dt;
+        // gentle uniform bob for life only — not a controlled variable, same for all
+        const yv=Math.sin(t*1.1+d.phase)*0.04;
+        pos[i*3]=Math.cos(d.ang)*d.radius; pos[i*3+1]=yv; pos[i*3+2]=Math.sin(d.ang)*d.radius; }
+      cgeo.attributes.position.needsUpdate=true;
+      shells.forEach((s,i)=>{ const rr=((t*0.22+s.ph)%1), R=1.6+rr*7.5; s.m.scale.setScalar(R);
+        s.m.material.userData.op0=(0.03+0.18*sync)*(1-rr); });
+      eShells.forEach((s,i)=>{ const rr=((t*0.20+s.ph)%1), R=0.5+rr*9; s.m.scale.setScalar(R);
+        s.m.material.userData.op0=(0.04+0.16*sync)*(1-rr); });
+      earth.rotation.y=t*0.05;
+      cEarth.rotation.y=t*0.05;
+      cShells.forEach((s,i)=>{ const rr=((t*0.16+s.ph)%1), R=0.6+rr*8.5; s.m.scale.setScalar(R);
+        s.m.material.userData.op0=(0.03+0.13*sync)*(1-rr); });
+      // Moon: orbit the Earth, then RELAY its resonance onward from the far side — not its own field.
+      { const a=t*0.22;
+        moon.position.set(Math.cos(a)*ORB,-Math.sin(a)*ORB*Math.sin(OINC),Math.sin(a)*ORB*Math.cos(OINC));
+        moon.rotation.y=t*0.10;
+        _mDir.copy(moon.position).normalize();             // Earth → Moon direction
+        _mQuat.setFromUnitVectors(_zAxis,_mDir);           // orient wavefronts across that axis
+        const strength=0.18+0.55*sync;                     // coherence makes the carried signal stronger
+        // directional wavefronts leaving the Moon's FAR side, expanding into a cone as they travel
+        extWaves.forEach(s=>{ const rr=((t*0.42+s.ph)%1);
+          _mPos.copy(moon.position).addScaledVector(_mDir,0.62+rr*3.4); // start at far edge, travel outward
+          s.m.position.copy(_mPos); s.m.quaternion.copy(_mQuat);
+          s.m.scale.setScalar(0.35+rr*2.1);
+          s.m.material.userData.op0=strength*Math.sin(Math.PI*rr); }); // swell mid-flight, then disperse
+        // the near side glows softly as Earth's wave arrives and is "caught"
+        _mPos.copy(moon.position).addScaledVector(_mDir,-0.66);
+        moonCatch.position.copy(_mPos); moonCatch.quaternion.copy(_mQuat);
+        moonCatch.material.userData.op0=(0.12+0.30*sync)*(0.5+0.5*Math.sin(t*1.6)); }
+      const aw=t*0.4, bw=t*0.27, P=[];
+      for(let i=0;i<16;i++){ let x=v4[i][0],y=v4[i][1],z=v4[i][2],w=v4[i][3];
+        let x2=x*Math.cos(aw)-w*Math.sin(aw), w2=x*Math.sin(aw)+w*Math.cos(aw);
+        let y2=y*Math.cos(bw)-w2*Math.sin(bw), w3=y*Math.sin(bw)+w2*Math.cos(bw);
+        const k=2/(3-w3); P.push([x2*k,y2*k,z*k]); }
+      const tp=tessGeo.attributes.position.array;
+      e4.forEach((e,i)=>{ const a=P[e[0]],b=P[e[1]];
+        tp[i*6]=a[0];tp[i*6+1]=a[1];tp[i*6+2]=a[2]; tp[i*6+3]=b[0];tp[i*6+4]=b[1];tp[i*6+5]=b[2]; });
+      tessGeo.attributes.position.needsUpdate=true;
+      // skin the cosmos cell onto its projected vertices (P[0..7] = the w=-1 cell)
+      const cf=cosmosCell.geometry.attributes.position.array;
+      for(let j=0;j<8;j++){ const pc=P[j]; cf[j*3]=pc[0];cf[j*3+1]=pc[1];cf[j*3+2]=pc[2]; }
+      cosmosCell.geometry.attributes.position.needsUpdate=true;
+      // Big-Bang cycle: advance only while the Beyond cell is on screen, so each arrival is born from
+      // a fresh singularity. E expands the universe 0→1 then crunches it back; each star hatches in
+      // after its own birth fraction, so galaxies appear one after another.
+      if(D.visible) bbT+=dt; else bbT=0;
+      const u=(bbT/BB_PERIOD)%1, ez=x=>x*x*(3-2*x);
+      // fast burst → long bright life → crunch back to the point
+      const E = u<0.16 ? ez(u/0.16) : u<0.80 ? 1 : 1-ez((u-0.80)/0.20);
+      // project the galaxy through the SAME 4-D rotation so it rides the cosmos cell's inside-out turn
+      const sp=starGeo.attributes.position.array;
+      for(let i=0;i<NSTAR;i++){ const s=star4[i];
+        let h=(u-starBirth[i])/0.05; h=h<0?0:h>1?1:h; const f=E*(h*h*(3-2*h));   // expand outward from the centre
+        const lx=s[0]*f, ly=s[1]*f, lz=s[2]*f;
+        const sx2=lx*Math.cos(aw)-s[3]*Math.sin(aw), sw2=lx*Math.sin(aw)+s[3]*Math.cos(aw);
+        const sy2=ly*Math.cos(bw)-sw2*Math.sin(bw), sw3=ly*Math.sin(bw)+sw2*Math.cos(bw);
+        const sk=2/(3-sw3); sp[i*3]=sx2*sk; sp[i*3+1]=sy2*sk; sp[i*3+2]=lz*sk; }
+      starGeo.attributes.position.needsUpdate=true;
+      const flash = u<0.05 ? (1-u/0.05)*0.5 : 0;   // a bright flash at the moment of the bang
+      starField.material.userData.op0=0.34+0.60*E+flash;
+      D.children[0].material.userData.op0=0.65+0.25*Math.sin(t*1.5);
+      cosmosCell.material.userData.op0=0.04+0.05*(0.5+0.5*Math.sin(t*0.8));  // a soft breathing glass wall
+      const T=[A,B,C,D]; T.forEach((grp,i)=>{ if(grp.visible) setOpacity(grp,fadeK(reach,i)); });
+    }};
+  }
+});
+
+/* ============================================================= scene switch */
+let activeUpdate=null, activeDispose=null;
+function loadConcept(idx){
+  const c=CONCEPTS[idx];
+  if(activeDispose){try{activeDispose();}catch(e){}} activeDispose=null;
+  clearGroup(root); clearControls();
+  const pIdxEl=document.getElementById('pIdx');
+  let __n=0; for(let k=0;k<=idx;k++){ if(!CONCEPTS[k].star) __n++; }
+  pIdxEl.textContent = c.star ? '★' : String(__n).padStart(2,'0');
+  pIdxEl.classList.toggle('star', !!c.star);
+  document.getElementById('pTitle').textContent=c.title;
+  const pDim=document.getElementById('pDim');
+  pDim.textContent=c.dim||''; pDim.style.display=c.dim?'inline-block':'none';
+  const pBlurbEl=document.getElementById('pBlurb');
+  document.getElementById('panel').classList.toggle('reflect', !!c.reflection);
+  if(c.reflection){
+    pBlurbEl.classList.add('reflection');
+    pBlurbEl.innerHTML='<span class="rhead">✦ A personal reflection</span>'+
+      c.reflection.split('\n\n').map(p=>'<p>'+p.trim()+'</p>').join('');
+  } else {
+    pBlurbEl.classList.remove('reflection');
+    pBlurbEl.textContent=c.blurb;
+  }
+  [...document.querySelectorAll('.nav-item')].forEach((b,i)=>b.classList.toggle('active',i===idx));
+  const cc=c.cam||{};
+  cam.theta=cc.theta!=null?cc.theta:0.7;
+  cam.phi=cc.phi!=null?cc.phi:1.05;
+  cam.radius=(cc.radius!=null?cc.radius:9)*1.12;
+  cam.auto=cc.auto!=null?cc.auto:true;
+  cam.autoSpeed=cc.autoSpeed!=null?cc.autoSpeed:0.05;
+  cam.rmin=cc.rmin!=null?cc.rmin:3; cam.rmax=cc.rmax!=null?cc.rmax:30;
+  cam.target.set(...(cc.target||[0,0,0]));
+  idle=0;
+  const inst=c.build(root);
+  activeUpdate=inst&&inst.update?inst.update:null;
+  activeDispose=inst&&inst.dispose?inst.dispose:null;
+}
+
+/* nav build */
+const navEl=document.getElementById('nav');
+let __dispNum=0;
+CONCEPTS.forEach((c,i)=>{
+  const b=document.createElement('button');b.className='nav-item';
+  const num = c.star ? '★' : String(++__dispNum).padStart(2,'0');
+  b.innerHTML='<span class="num'+(c.star?' star':'')+'">'+num+'</span><span>'+c.title+'</span>'+(c.dim?'<span class="dim">'+c.dim+'</span>':'');
+  b.addEventListener('click',()=>loadConcept(i));
+  navEl.appendChild(b);
+});
+
+/* ---- in-page guided tour, with synced narration + ElevenLabs transcript export ----
+   Each beat fires a visual action, then holds for as long as its narration takes to speak.
+   The narration is the timing source: per-beat duration is estimated from word count
+   (~156 wpm), which also produces the .srt for captions/sync. Provide a voiceover mp3
+   (via the "attach voice" button or ?audio=file.mp3) to switch to AUDIO-FOLLOW mode, where
+   the visuals track the real audio's playback time instead of the estimate. */
+const panelEl=document.getElementById('panel'), panelToggle=document.getElementById('panelToggle');
+panelToggle.onclick=()=>{const c=panelEl.classList.toggle('collapsed');
+  panelToggle.textContent=c?'▴':'▾'; panelToggle.title=c?'Show panel':'Hide panel';};
+
+// tour action helpers (module scope so the beat list below can reference them)
+const sc=i=>navEl.children[i].click();
+const tap=txt=>{const el=[...controlsEl.querySelectorAll('.chip')].find(e=>e.textContent.includes(txt)); if(el)el.click();};
+const sl=(i,v)=>{const s=controlsEl.querySelectorAll('input[type=range]')[i]; if(s){s.value=v;s.dispatchEvent(new Event('input',{bubbles:true}));}};
+
+// The narration. `concept` switches the scene; `act` performs an interaction. Voice matches
+// the book's reflective register — written to be spoken aloud, one breath per beat.
+const TOUR_BEATS=[
+  {concept:0, say:"Imagine a microscope powerful enough to magnify a billion times — and turn it on a scrap of living flesh."},
+  {act:()=>tap('auto-dive'), say:"Watch the solid world fall apart. Muscle resolves into fibres; the fibres into long coiled molecules; the molecules into a lattice of trembling atoms. Press deeper, and even the atom thins away — its shell dissolving to vacuum, its nucleus to a faint pulsation — until matter is gone, and only restless, empty space remains, threaded with oscillating fields."},
+  {concept:1, say:"Hold a single atom still. Almost all of it is void."},
+  {act:()=>tap('electron cloud'), say:"Here is the electron — not a speck, but a haze of probability, smeared into a shell around the centre."},
+  {act:()=>tap('true scale'), say:"And here is the truth of scale. Were the nucleus a millimetre across, the electron would wander some ten metres away. Your solid hand is very nearly empty."},
+  {concept:2, say:"Now the bone within that hand. Magnified, it shows ordered crystals, set like jewels in strands of molecule."},
+  {act:()=>sl(0,0.9), say:"Press it, and something strange happens — the crystal answers with a current. Squeeze the bone, and it speaks in electricity."},
+  {act:()=>sl(0,-0.9), say:"Reverse the field, and it changes length in reply. The atoms sway back and forth like wheat in the wind — sound flowing through the lattice in rhythm."},
+  {concept:3, say:"Step back, and the substance falls away entirely. What remains is a web of fields, each pulsing at its own rate, yet in harmony with its neighbours."},
+  {act:()=>tap('disturb'), say:"Disturb one, and the disorder spreads — an organ beating off-key, the body fallen out of tune."},
+  {act:()=>sl(0,3.2), say:"But lay a strong, steady rhythm over the whole, and the stray notes are drawn back into key. Bentov saw in this the quiet principle behind healing."},
+  {concept:4, say:"Widen the view to the whole planet. Eighty kilometres up floats a skin of charged particles — the ionosphere."},
+  {act:()=>sl(0,2000), say:"Positive above, negative below, and the Earth between them: a vast spherical capacitor, charged and waiting."},
+  {act:()=>sl(0,200), say:"Through that gap runs a steady gradient — some two hundred volts for every metre you rise. This is the field in which every living body stands."},
+  {concept:5, say:"Picture that field as a bowl of stiff jelly, with a few raisins set inside it."},
+  {act:()=>tap('poke'), say:"Poke a single raisin, and all the others quiver. None can move without the rest of them feeling it."},
+  {act:()=>sl(0,1.0), say:"We are those raisins. Every motion we make travels outward through the field, far and wide around the planet."},
+  {concept:6, say:"And the planet itself is ringing. The cavity between Earth and ionosphere hums near seven cycles a second."},
+  {act:()=>sl(0,6.0), say:"The body's own faint micromotion sits at almost the same frequency — a system tuned, and waiting to lock."},
+  {act:()=>sl(0,7.5), say:"At that pitch the wave is forty thousand kilometres long — the girth of the Earth — and circles the globe in a seventh of a second, through metal, stone and flesh alike."},
+  {concept:7, say:"So nothing moves alone. Every body is a raisin in the same stiff jelly; every motion is carried through the one field that couples us all."},
+  {act:()=>sl(2,1.0), say:"Now hold that thought, and look at the Tawaf — millions circling as one: one direction, one rhythm, one voice."},
+  {act:()=>tap('auto-rise'), say:"If a single raisin's quiver is felt across the planet, what of millions moving in coherence? A standing wave, raised by human hands — rippling through the air, around the Earth, and onward, into dimensions we were never built to perceive."},
+];
+
+const WPS=2.6, PAUSE=0.55, MINB=2.6;   // words/sec, breath between beats, minimum beat length
+function beatTimes(){ let t=0; const out=[];
+  for(const b of TOUR_BEATS){ const w=(b.say||'').trim().split(/\s+/).filter(Boolean).length;
+    const spoken=Math.max(MINB, w/WPS); out.push({start:t,spoken,end:t+spoken,beat:b}); t+=spoken+PAUSE; }
+  out.total=t; return out; }
+
+let tourRunning=false, tourAbort=false;
+// the narration is baked into the repo; the tour auto-plays it and syncs the visuals to it
+let tourAudioURL=new URLSearchParams(location.search).get('audio')||'narration.mp3';
+// ?record → capture the WebGL canvas + narration into ONE synced file (no screen recorder,
+// no UI chrome, no cursor in frame). Recording is bound to the guided tour: click to start.
+// (REC was detected at renderer construction so the canvas could be made opaque.)
+const RECORD=REC;
+if(RECORD){ const s=document.createElement('style');
+  s.textContent='html,body,#app,canvas{cursor:none!important}'; document.head.appendChild(s); }
+// exact per-beat start times (seconds), baked from the ElevenLabs voiceover by __gen_narration.py.
+// null until narration.mp3 is generated → the tour then falls back to estimated word-timing.
+let TOUR_CUES=[0.0, 6.815, 31.044, 35.154, 41.342, 51.13, 58.537, 67.315, 76.904, 86.866, 93.635, 103.213, 110.376, 117.806, 126.897, 132.18, 138.241, 144.951, 152.242, 159.382, 169.633, 178.399, 185.852];/*__CUES__*/
+const fire=b=>{ if(b.concept!=null) sc(b.concept); if(b.act) b.act(); };
+// interruptible wait: resolves the instant the tour is aborted, so Stop responds immediately
+const waitAbortable=ms=>new Promise(res=>{ let el=0; const step=80;
+  const id=setInterval(()=>{ el+=step; if(tourAbort||el>=ms){clearInterval(id);res();} },step); });
+
+async function playEstimated(times){
+  for(const c of times){ if(tourAbort)return; fire(c.beat); await waitAbortable((c.spoken+PAUSE)*1000); }
+}
+function playAudioFollow(times,audio){
+  return new Promise(res=>{
+    let started=false, done=false;
+    const finish=()=>{ if(!done){ done=true; res(); } };
+    // if the mp3 is missing or autoplay is blocked, run the tour silently on estimated timing
+    const fallback=()=>{ if(started||done) return; started=true; try{audio.pause();}catch(e){} playEstimated(times).then(finish); };
+    audio.addEventListener('error',fallback,{once:true});
+    const go=()=>{
+      if(started||done) return; started=true;
+      const useCues=Array.isArray(TOUR_CUES)&&TOUR_CUES.length===times.length;   // exact baked timestamps
+      const scale=(!useCues&&audio.duration&&isFinite(audio.duration)&&times.total>0)?audio.duration/times.total:1;
+      const cueAt=i=>useCues?TOUR_CUES[i]:times[i].start*scale;
+      let idx=0;
+      const tick=()=>{
+        if(tourAbort){ audio.pause(); return finish(); }
+        const ct=audio.currentTime;
+        while(idx<times.length && ct>=cueAt(idx)){ fire(times[idx].beat); idx++; }
+        if(audio.ended || (idx>=times.length && ct>=(audio.duration||0)-0.05)) return finish();
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+    if(audio.readyState>=1) go(); else audio.addEventListener('loadedmetadata',go,{once:true});
+    audio.play().catch(fallback);
+  });
+}
+// ---- canvas + narration recorder (only active under ?record) ----
+const rec=(function(){
+  let mr=null, chunks=[], actx=null, prevPR=null;
+  // prefer hardware-encoded H.264 (smooth + no conversion), then VP8 (light), then VP9 (heavy)
+  const pickMime=()=>['video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4;codecs=avc1.4d4028','video/mp4',
+    'video/webm;codecs=vp8,opus','video/webm;codecs=vp9,opus','video/webm']
+    .find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m))||'';
+  function start(audio){
+    if(mr) return;
+    try{
+      // cap the captured buffer to ~1080p so the encoder can hold 60fps
+      // (retina is 2x = 4x the pixels → real-time encode falls behind → dropped frames/speckle)
+      prevPR=renderer.getPixelRatio();
+      renderer.setPixelRatio(Math.min(prevPR, Math.max(1, 1080/Math.max(1,app.clientHeight))));
+      resize();                                                     // apply the new buffer size before capturing
+      const vstream=renderer.domElement.captureStream(60);          // the canvas pixels, live
+      actx=new (window.AudioContext||window.webkitAudioContext)();
+      if(actx.state==='suspended') actx.resume();
+      const src=actx.createMediaElementSource(audio);
+      const dest=actx.createMediaStreamDestination();
+      src.connect(actx.destination);                                // you still hear it
+      src.connect(dest);                                            // and it gets recorded
+      const stream=new MediaStream([...vstream.getVideoTracks(), ...dest.stream.getAudioTracks()]);
+      const mime=pickMime(); chunks=[];
+      mr=new MediaRecorder(stream, Object.assign({videoBitsPerSecond:12e6}, mime?{mimeType:mime}:{}));
+      mr.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
+      mr.onstop=()=>{
+        const type=(mr&&mr.mimeType)||'video/webm';
+        const ext=type.indexOf('mp4')>=0?'mp4':'webm';
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(new Blob(chunks,{type}));
+        a.download='chapter2-tour.'+ext; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+        try{ if(actx) actx.close(); }catch(e){}
+        if(prevPR!=null){ renderer.setPixelRatio(prevPR); resize(); }  // restore full-res interactive view
+        mr=null; actx=null; chunks=[]; prevPR=null; console.log('[record] saved chapter2-tour.'+ext);
+      };
+      mr.start(); console.log('[record] recording… '+(mime||'default codec'));
+    }catch(e){ console.warn('[record] could not start:', e); mr=null; }
+  }
+  function stop(){ if(mr && mr.state!=='inactive'){ try{mr.stop();}catch(e){} } }
+  return {start,stop};
+})();
+
+async function runGuidedTour(){
+  if(tourRunning){ tourAbort=true; return; }
+  tourRunning=true; tourAbort=false;
+  const wasOpen=!panelEl.classList.contains('collapsed');
+  if(wasOpen){ panelEl.classList.add('collapsed'); panelToggle.textContent='▴'; }  // give the visuals the screen
+  tourBtn.textContent='● touring · stop';
+  const times=beatTimes();
+  let audio=null;
+  try{
+    if(tourAudioURL){
+      audio=new Audio(tourAudioURL);
+      if(RECORD) rec.start(audio);            // start capture right before playback → exact-length clip
+      await playAudioFollow(times,audio);
+    }
+    else { await playEstimated(times); }
+  }catch(e){}
+  if(audio){ try{audio.pause();}catch(e){} }
+  // switch off any auto-dive / auto-rise still running in the current scene
+  [...controlsEl.querySelectorAll('.chip')].forEach(c=>{ if(/diving|rising/i.test(c.textContent)) c.click(); });
+  // hold the recording ~3s past the narration so the closing visual can breathe
+  // (silent tail; aborts early if Stop is pressed). then flush + auto-download.
+  if(RECORD){ if(!tourAbort) await waitAbortable(3000); rec.stop(); }
+  // leave the panel hidden so the final visual can be reflected on undisturbed
+  // (the ▴ toggle remains available to bring it back manually)
+  tourRunning=false; tourAbort=false; tourBtn.textContent='▶ Guided tour';
+}
+
+// ---- guided-tour button (top-right) ----
+const tourBtn=document.createElement('button');
+Object.assign(tourBtn.style,{position:'fixed',top:'74px',right:'28px',zIndex:7,
+  font:'500 10px/1 "IBM Plex Mono",monospace',letterSpacing:'.16em',textTransform:'uppercase',
+  padding:'8px 12px',borderRadius:'8px',border:'1px solid var(--line)',
+  background:'rgba(10,14,26,.6)',color:'var(--ink)',cursor:'pointer',backdropFilter:'blur(10px)'});
+tourBtn.textContent='▶ Guided tour';
+tourBtn.onclick=runGuidedTour;
+app.appendChild(tourBtn);
+
+if(/[?&]tour\b/.test(location.search)) setTimeout(()=>runGuidedTour(),800);
+
+/* ============================================================= loop */
+function resize(){
+  const w=app.clientWidth,h=app.clientHeight;
+  renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
+}
+window.addEventListener('resize',resize);
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),0.05);
+  const t=clock.getElapsedTime();
+  idle+=dt; if(idle>4 && !dragging) cam.auto=true;
+  if(cam.auto) cam.theta += cam.autoSpeed*dt;
+  applyCam();
+  if(scene.userData.stars) scene.userData.stars.rotation.y += dt*0.006;
+  if(activeUpdate) activeUpdate(dt,t);
+  renderer.render(scene,camera);
+}
+
+resize();
+loadConcept(0);
+document.getElementById('loader').style.display='none';
+animate();
+})();
+</script>
+</body>
+</html>

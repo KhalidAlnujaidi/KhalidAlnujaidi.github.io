@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Stalking the Wild Pendulum — Interactive Edition</title>
+<meta name="description" content="Itzhak Bentov's Stalking the Wild Pendulum, chapter by chapter, as interactive 3-D visualizations you can manipulate. By Khalid Alnujaidi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070a14; --ink:#ece6d6; --muted:#7d879c; --cyan:#4fe6cd;
+    --cyan-dim:#2c8a7d; --gold:#e7b257; --line:rgba(236,230,214,.10);
+    --panel:rgba(10,14,26,.62); --serif:'Cormorant Garamond',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);
+    -webkit-font-smoothing:antialiased;min-height:100%}
+  body{background:
+      radial-gradient(1200px 700px at 80% -10%, rgba(231,178,87,.10), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(79,230,205,.08), transparent 55%),
+      var(--bg);
+    padding:clamp(2rem,7vw,7rem) clamp(1.2rem,6vw,6rem);line-height:1.6}
+  .wrap{max-width:920px;margin:0 auto}
+  .kicker{font-size:11px;letter-spacing:.34em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:1.6rem}
+  h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.4rem,6.5vw,4.4rem);
+    line-height:1.04;letter-spacing:.01em;margin-bottom:.4rem}
+  h1 .sub{display:block;font-style:italic;color:var(--muted);
+    font-size:clamp(1.1rem,2.6vw,1.6rem);margin-top:.7rem;letter-spacing:0}
+  .lede{max-width:62ch;color:#c6c2b6;font-size:14.5px;margin:1.8rem 0 .4rem}
+  .byline{color:var(--muted);font-size:12px;letter-spacing:.04em;margin-bottom:3rem}
+  .byline a{color:var(--cyan);text-decoration:none}
+  .byline a:hover{text-decoration:underline}
+
+  .chapters{display:grid;gap:1.1rem}
+  .chapter{display:block;text-decoration:none;color:inherit;
+    border:1px solid var(--line);border-radius:14px;padding:1.6rem 1.7rem;
+    background:var(--panel);transition:border-color .2s,transform .2s,background .2s}
+  .chapter:hover{border-color:rgba(231,178,87,.45);transform:translateY(-2px);
+    background:rgba(14,19,33,.8)}
+  .ch-top{display:flex;align-items:baseline;gap:.9rem;margin-bottom:.5rem}
+  .ch-num{font-family:var(--serif);font-size:1.5rem;color:var(--gold);line-height:1}
+  .ch-tag{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--cyan-dim);border:1px solid var(--line);border-radius:999px;
+    padding:.28em .7em}
+  .ch-title{font-family:var(--serif);font-size:1.9rem;line-height:1.15;margin-bottom:.5rem}
+  .ch-desc{color:#b9b4a8;font-size:13px;max-width:64ch}
+  .ch-go{display:inline-flex;align-items:center;gap:.4em;margin-top:1rem;
+    color:var(--cyan);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase}
+  .chapter:hover .ch-go .arr{transform:translateX(3px)}
+  .arr{transition:transform .2s}
+
+  .chapter.soon{opacity:.5;cursor:default;pointer-events:none}
+  .chapter.soon:hover{transform:none;border-color:var(--line);background:var(--panel)}
+
+  footer{margin-top:3.2rem;padding-top:1.6rem;border-top:1px solid var(--line);
+    color:var(--muted);font-size:11.5px;letter-spacing:.03em}
+  footer a{color:var(--cyan);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+  .note{margin-top:.6rem;color:#6b7488}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="kicker">Interactive Edition</div>
+    <h1>Stalking the Wild Pendulum
+      <span class="sub">Itzhak Bentov — on the mechanics of consciousness</span>
+    </h1>
+    <p class="lede">Bentov argued that reality is vibration, resonance, and coupled
+      fields — matter mostly empty space threaded with oscillating energy, bodies as
+      coupled oscillators in one planetary medium. Those ideas are spatial and dynamic,
+      so here each chapter is a small museum of <em>interactive concepts</em>: drag a
+      slider, orbit the scene, and watch the abstraction become something you can feel.</p>
+    <p class="byline">Built &amp; visualized by <a href="../../index.html">Khalid Alnujaidi</a></p>
+
+    <div class="chapters">
+      <a class="chapter" href="chp1.html">
+        <div class="ch-top"><span class="ch-num">01</span>
+          <span class="ch-tag">6 concepts · interactive</span></div>
+        <div class="ch-title">Sound, Waves &amp; Vibration</div>
+        <div class="ch-desc">Standing waves, a Chladni plate, a crystal in a box,
+          interference, beat frequencies, and rhythm entrainment — the chapter's wave
+          mechanics made tactile.</div>
+        <span class="ch-go">Open chapter <span class="arr">→</span></span>
+      </a>
+
+      <a class="chapter" href="chp2.html">
+        <div class="ch-top"><span class="ch-num">02</span>
+          <span class="ch-tag">7 concepts · ★ reflection · narrated</span></div>
+        <div class="ch-title">A Look Through a Supermicroscope</div>
+        <div class="ch-desc">Dive from a human arm down to oscillating quantum fields,
+          inflate the hollow atom, flex piezoelectric bone, tune coupled fields, and
+          feel the Earth–ionosphere cavity — closing with a personal reflection: the
+          Tawaf as resonance enacted at cosmic scale. Includes a guided, narrated tour.</div>
+        <span class="ch-go">Open chapter <span class="arr">→</span></span>
+      </a>
+
+      <div class="chapter soon">
+        <div class="ch-top"><span class="ch-num">03</span>
+          <span class="ch-tag">in progress</span></div>
+        <div class="ch-title">Coming next</div>
+        <div class="ch-desc">The series continues — another chapter poured through the
+          same engine.</div>
+      </div>
+    </div>
+
+    <footer>
+      After Itzhak Bentov, <em>Stalking the Wild Pendulum: On the Mechanics of
+      Consciousness</em>. These are original interactive interpretations for study and
+      reflection. ·
+      <a href="../../index.html">← Back to portfolio</a>
+      <div class="note">The making-of (engine, narration, and recording pipeline) lives in
+        <code>/process</code>.</div>
+    </footer>
+  </div>
+</body>
+</html>

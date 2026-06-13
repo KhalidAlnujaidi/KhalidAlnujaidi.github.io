@@ -1,0 +1,229 @@
+/* ══════════════════════════════════════════════════════════
+   Khalid Alnujaidi — Shared Project Page Styles
+   ══════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #111010;
+  --ink-muted: #6b6760;
+  --ink-faint: #b8b4ae;
+  --paper: #f9f7f4;
+  --paper-alt: #f2efe9;
+  --rule: #e2ddd7;
+  --link: #2a5caa;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.7;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── Top bar ── */
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  padding: 1rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topbar-back {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 12px; color: var(--ink-muted);
+  transition: color 0.2s;
+}
+.topbar-back:hover { color: var(--ink); }
+.topbar-back .arrow { font-size: 13px; transition: transform 0.2s; }
+.topbar-back:hover .arrow { transform: translateX(-2px); }
+.topbar-logo {
+  width: 18px; height: 18px; background: var(--ink);
+  border-radius: 2px; display: block;
+}
+
+/* ── Hero ── */
+.hero {
+  max-width: 780px; margin: 0 auto;
+  padding: 5rem 3rem 3.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.hero-label {
+  display: flex; align-items: center; gap: 0.75rem;
+  font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-faint);
+  margin-bottom: 1.5rem; flex-wrap: wrap;
+}
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(40px, 6vw, 64px);
+  line-height: 1.02; letter-spacing: -0.02em;
+  color: var(--ink); margin-bottom: 1.25rem;
+}
+.hero-subtitle {
+  font-size: 17px; color: var(--ink-muted);
+  line-height: 1.7; max-width: 560px; font-weight: 300;
+  margin-bottom: 2rem;
+}
+
+/* ── Badges ── */
+.badge-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  border-radius: 2px; padding: 3px 9px;
+  font-size: 9px; letter-spacing: 0.1em;
+}
+.badge-blue { background: #e8f0fb; border: 1px solid #b5cef0; color: #1a4a8a; }
+.badge-green { background: #e6f4ed; border: 1px solid #a8d8bc; color: #1a5c38; }
+.badge-gold { background: #fdf3e3; border: 1px solid #f0d89a; color: #8a6a1a; }
+.dot { width: 5px; height: 5px; border-radius: 50%; }
+.badge-blue .dot { background: #2a5caa; }
+.badge-green .dot { background: #2a7a4b; }
+.badge-gold .dot { background: #c8911a; }
+
+.spotlight-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #fdf3e3; border: 1px solid #f0d89a;
+  border-radius: 2px; padding: 3px 9px;
+  font-size: 9px; letter-spacing: 0.1em; color: #8a6a1a;
+}
+.spotlight-dot { width: 5px; height: 5px; border-radius: 50%; background: #c8911a; }
+
+/* ── Confidential notice ── */
+.confidential-notice {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  font-size: 12px; color: var(--ink-faint); line-height: 1.6;
+  padding: 0.85rem 1rem;
+  background: var(--paper-alt); border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+
+/* ── CTA row ── */
+.cta-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 9px 18px;
+  border-radius: 2px; border: 1px solid;
+  transition: background 0.2s, color 0.2s; cursor: pointer;
+  font-family: var(--sans);
+}
+.btn-primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn-primary:hover { background: #2a2a2a; }
+.btn-secondary { background: transparent; color: var(--ink-muted); border-color: var(--rule); }
+.btn-secondary:hover { background: var(--paper-alt); color: var(--ink); }
+
+/* ── Meta strip ── */
+.meta-strip {
+  max-width: 780px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--rule);
+}
+.meta-cell {
+  padding: 1.5rem 3rem;
+  border-right: 1px solid var(--rule);
+}
+.meta-cell:first-child { padding-left: 3rem; }
+.meta-cell:last-child { border-right: none; }
+.meta-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.3rem; }
+.meta-value { font-size: 13px; color: var(--ink); font-weight: 400; }
+
+/* ── Content ── */
+.content {
+  max-width: 780px; margin: 0 auto;
+  padding: 0 3rem;
+}
+.content-section { padding: 3rem 0; border-bottom: 1px solid var(--rule); }
+.content-section:last-child { border-bottom: none; }
+.content-section h2 {
+  font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-faint);
+  margin-bottom: 1.5rem;
+}
+
+.prose {
+  font-size: 15px; color: var(--ink-muted);
+  line-height: 1.8; font-weight: 300;
+  max-width: 600px;
+}
+.prose p { margin-bottom: 1rem; }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--ink); font-weight: 500; }
+.prose a { color: var(--link); border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+.prose a:hover { border-bottom-color: var(--link); }
+
+/* ── Feature grid ── */
+.feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+.feature-cell { background: var(--paper); padding: 1.25rem 1.5rem; }
+.feature-icon { font-size: 18px; margin-bottom: 0.5rem; }
+.feature-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 0.25rem; }
+.feature-desc { font-size: 12px; color: var(--ink-muted); line-height: 1.6; }
+
+/* ── Tech stack ── */
+.stack-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.stack-tag {
+  font-size: 11px; padding: 4px 12px;
+  border: 1px solid var(--rule); border-radius: 2px;
+  color: var(--ink-muted); background: var(--paper-alt);
+}
+
+/* ── Impact ── */
+.impact-row { display: flex; gap: 3rem; flex-wrap: wrap; }
+.impact-item { display: flex; flex-direction: column; }
+.impact-num { font-family: var(--serif); font-size: 36px; color: var(--ink); line-height: 1; margin-bottom: 0.25rem; }
+.impact-label { font-size: 11px; color: var(--ink-faint); letter-spacing: 0.04em; }
+
+/* ── Tweet card ── */
+.tweet-card {
+  background: var(--paper-alt); border: 1px solid var(--rule);
+  border-radius: 3px; padding: 1.5rem 1.75rem;
+  max-width: 480px;
+}
+.tweet-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+.tweet-avatar { width: 36px; height: 36px; border-radius: 50%; background: #1d9bf0; display: flex; align-items: center; justify-content: center; }
+.tweet-tf { font-size: 14px; color: #fff; font-weight: 700; }
+.tweet-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+.tweet-handle { font-size: 11px; color: var(--ink-faint); }
+.tweet-body { font-size: 13px; color: var(--ink-muted); line-height: 1.65; margin-bottom: 0.75rem; }
+.tweet-link { font-size: 11px; color: var(--link); letter-spacing: 0.04em; }
+.tweet-link:hover { text-decoration: underline; }
+
+/* ── Project footer ── */
+.project-footer {
+  max-width: 780px; margin: 0 auto;
+  padding: 2.5rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--rule);
+}
+.footer-copy { font-size: 11px; color: var(--ink-faint); }
+.footer-back {
+  font-size: 12px; color: var(--ink-faint);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  transition: color 0.2s;
+}
+.footer-back:hover { color: var(--ink-muted); }
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-label    { animation: fadeUp 0.45s ease both 0.05s; }
+.hero-title    { animation: fadeUp 0.55s ease both 0.15s; }
+.hero-subtitle { animation: fadeUp 0.55s ease both 0.25s; }
+.cta-row       { animation: fadeUp 0.45s ease both 0.35s; }
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .topbar { padding: 1rem 1.25rem; }
+  .hero { padding: 3rem 1.25rem 2.5rem; }
+  .meta-strip { grid-template-columns: 1fr 1fr; }
+  .meta-cell { padding: 1.25rem; }
+  .content { padding: 0 1.25rem; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .project-footer { padding: 1.75rem 1.25rem; flex-direction: column; gap: 0.75rem; }
+}
