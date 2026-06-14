@@ -6,7 +6,15 @@
     <description>Deep-dive essays on system architecture, computer vision, embedded hardware, and autonomous AI orchestration.</description>
     <language>en</language>
     <atom:link href="https://khalidalnujaidi.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Sat, 13 Jun 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 14 Jun 2026 00:00:00 +0000</lastBuildDate>
+
+    <item>
+      <title>Holy Addresses: A Thought Experiment in Sacred Space</title>
+      <link>https://khalidalnujaidi.github.io/essays/holy-addresses.html</link>
+      <guid>https://khalidalnujaidi.github.io/essays/holy-addresses.html</guid>
+      <description>A thought experiment in sacred space.</description>
+      <pubDate>Sun, 14 Jun 2026 00:00:00 +0000</pubDate>
+    </item>
 
     <item>
       <title>Stalking the Wild Pendulum: Continuous Fields and Time in N-Dimensional Space</title>
