@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DIY Mini-Supercomputer — Khalid Alnujaidi</title>
+  <meta name="description" content="One USB stick that turns any old PC or laptop into a node in a self-healing k3s cluster. Recycling retired hardware into a private compute cluster with offline autoinstall, Tailscale mesh, and one-command joins." />
+  <meta property="og:title" content="DIY Mini-Supercomputer — Khalid Alnujaidi" />
+  <meta property="og:description" content="Recycle old PCs and laptops into a private compute cluster: one reusable USB image, offline Ubuntu autoinstall, Tailscale mesh, one-command k3s joins." />
+  <meta property="og:type" content="article" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+
+  <!-- Topbar -->
+  <nav class="topbar">
+    <a href="../index.html" class="topbar-back">
+      <span class="arrow">←</span> Khalid Alnujaidi
+    </a>
+    <a href="../index.html" class="topbar-logo"></a>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-label">
+      <span>Open Source · 2026</span>
+      <span class="spotlight-badge"><span class="spotlight-dot"></span> Homelab Infrastructure</span>
+    </div>
+    <h1 class="hero-title">DIY Mini-Supercomputer</h1>
+    <p class="hero-subtitle">
+      One USB stick that turns any retired PC or laptop into a node in a private Kubernetes cluster. Plug it in, walk away, and a few minutes later the machine is part of one pooled compute fabric — a practical, satisfying way to recycle old hardware instead of landfilling it.
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/KhalidAlnujaidi/diy-mini-supercomputer" target="_blank" rel="noopener" class="btn btn-primary">
+        View on GitHub ↗
+      </a>
+      <a href="https://github.com/KhalidAlnujaidi/diy-mini-supercomputer/blob/main/THE-BUILD.md" target="_blank" rel="noopener" class="btn btn-secondary">
+        Read the build guide ↗
+      </a>
+    </div>
+  </div>
+
+  <!-- Meta strip -->
+  <div class="meta-strip">
+    <div class="meta-cell">
+      <div class="meta-label">Year</div>
+      <div class="meta-value">2026</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Category</div>
+      <div class="meta-value">Open Source · Infra</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Cluster</div>
+      <div class="meta-value">52 vCPU · 82 GB</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Domain</div>
+      <div class="meta-value">Distributed Systems</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Background -->
+    <div class="content-section">
+      <h2>Background</h2>
+      <div class="prose">
+        <p>
+          Most of us have a drawer or shelf of machines that are too good to throw away and too slow to use alone — a retired work laptop, a mini-PC, an old desktop. Individually they're e-waste in waiting. Pooled together, they're a genuinely useful private cloud.
+        </p>
+        <p>
+          The goal was a single, reusable provisioning artifact: build <strong>one</strong> USB stick, then provision <strong>any</strong> number of machines with it — no per-device clicking through installers, no bespoke setup. Flash once, reuse forever. The result is a self-serve way to turn heterogeneous, recycled hardware into a single Kubernetes cluster you control from anywhere.
+        </p>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="content-section">
+      <h2>How it works</h2>
+      <div class="feature-grid">
+        <div class="feature-cell">
+          <div class="feature-icon">⬡</div>
+          <div class="feature-title">One reusable image</div>
+          <div class="feature-desc">The official Ubuntu 24.04 ISO is remastered (xorriso) into an unattended autoinstall image. Every machine installs itself identically, zero prompts.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">◈</div>
+          <div class="feature-title">Fully offline install</div>
+          <div class="feature-desc">The OS install needs no network at all. Anything network-dependent is deferred to first boot, so even Wi-Fi-only laptops provision cleanly.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">◎</div>
+          <div class="feature-title">Tailscale mesh</div>
+          <div class="feature-desc">Each node auto-joins a private mesh VPN on boot with a baked auth key, so it's reachable at a stable address regardless of flaky home networking.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">▦</div>
+          <div class="feature-title">One-command join</div>
+          <div class="feature-desc">A fresh node becomes a cluster member with a single <code>k3s-join nodeN</code> — which also names the node and wires it to the control-plane.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">◇</div>
+          <div class="feature-title">Clone-safe identity</div>
+          <div class="feature-desc">Fresh machine-id on every shutdown, unique throwaway hostnames, DHCP instead of baked static IPs — so the same image never collides across machines.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">◐</div>
+          <div class="feature-title">Laptops welcome</div>
+          <div class="feature-desc">Wi-Fi credentials baked in (2.4 + 5 GHz), lid-close suspend disabled — so an old laptop runs happily as a headless server node.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tech stack -->
+    <div class="content-section">
+      <h2>Built with</h2>
+      <div class="stack-list">
+        <span class="stack-tag">k3s (Kubernetes)</span>
+        <span class="stack-tag">Ubuntu 24.04 autoinstall</span>
+        <span class="stack-tag">cloud-init</span>
+        <span class="stack-tag">xorriso</span>
+        <span class="stack-tag">Tailscale</span>
+        <span class="stack-tag">netplan</span>
+        <span class="stack-tag">systemd</span>
+        <span class="stack-tag">Bash</span>
+      </div>
+    </div>
+
+    <!-- The cluster -->
+    <div class="content-section">
+      <h2>The cluster it built</h2>
+      <div class="impact-row" style="margin-bottom: 2rem;">
+        <div class="impact-item">
+          <span class="impact-num">52</span>
+          <span class="impact-label">vCPUs pooled</span>
+        </div>
+        <div class="impact-item">
+          <span class="impact-num">82&nbsp;GB</span>
+          <span class="impact-label">RAM</span>
+        </div>
+        <div class="impact-item">
+          <span class="impact-num">3.2&nbsp;TB</span>
+          <span class="impact-label">storage</span>
+        </div>
+        <div class="impact-item">
+          <span class="impact-num">4</span>
+          <span class="impact-label">nodes, 1 cluster</span>
+        </div>
+      </div>
+      <div class="prose">
+        <p>
+          A Ryzen 7 9700X workstation as the control-plane, three Intel i5 mini-PCs as workers — all stitched into one k3s cluster over Tailscale, each one provisioned from the same USB stick in minutes. Adding the next machine is now trivial: flash, boot, join.
+        </p>
+      </div>
+    </div>
+
+    <!-- Why it matters -->
+    <div class="content-section">
+      <h2>Why it matters</h2>
+      <div class="prose">
+        <p>
+          Beyond the compute, the project is a template for <strong>sustainable hardware reuse</strong>: a documented, reproducible path from a pile of mismatched, retired machines to a working private cluster — using only free tools and a weekend. The full build, including every bug fought and fixed along the way, is written up as an open guide for anyone to follow.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="project-footer">
+    <span class="footer-copy">© 2026 Khalid Alnujaidi</span>
+    <a href="../index.html" class="footer-back">← Back to portfolio</a>
+  </div>
+
+</body>
+</html>
