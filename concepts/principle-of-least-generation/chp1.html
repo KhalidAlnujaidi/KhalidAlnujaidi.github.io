@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="For bounded, known-shape tasks, a cheap gate plus deterministic retrieval beats a language model on cost, speed, and safety — with zero generated tokens. A small, honest experiment by Khalid Alnujaidi.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Principle of Least Generation">
+<meta property="og:description" content="Route first, generate last: a cheap gate + deterministic retrieval beats an LLM on cost, speed, and safety — zero generated tokens.">
+<meta property="og:image" content="poster.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23ffcf33' stroke='%236b4e00'/></svg>">
+<title>The Principle of Least Generation</title>
+<style>
+  :root{
+    --teal:#0c7068;--teal-d:#08534d;--silver:#c3c7cb;--silver-hi:#ffffff;
+    --silver-sh:#878a8e;--silver-dk:#565a5e;--paper:#f3efe2;--paper-line:#d9d2bd;
+    --ink:#1c1a14;--ink-soft:#4a463a;--title-a:#00007b;--title-b:#1a86e2;
+    --grn:#54ff8c;--grn-d:#1e9d56;--grn-dim:#0e7c40;--amber:#ffb000;--danger:#ff5a52;
+    --term-bg:#07140d;--link:#0000ee;--hot:#d2152f;--gold:#ffcf33;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--teal);
+    background-image:
+      radial-gradient(circle at 20% 12%, rgba(255,255,255,.05) 0 1.50px, transparent 1.50px),
+      radial-gradient(circle at 70% 60%, rgba(0,0,0,.06) 0 1.50px, transparent 1.50px);
+    background-size:10.50px 10.50px, 13.50px 13.50px;
+    font-family:"Liberation Sans","Arial",sans-serif;color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{width:210mm;min-height:297mm;padding:2mm;}
+
+  .win{background:var(--silver);border:3.00px solid;
+    border-color:var(--silver-hi) var(--silver-dk) var(--silver-dk) var(--silver-hi);
+    box-shadow:0 0 0 1.50px #2a2c2e, 4.50px 6.00px 0 rgba(0,0,0,.35);padding:4.50px;}
+  .titlebar{height:30.00px;background:linear-gradient(90deg,var(--title-a) 0%,var(--title-b) 100%);
+    color:#fff;display:flex;align-items:center;gap:9.00px;padding:0 6.00px 0 7.50px;}
+  .titlebar .ic{width:19.50px;height:19.50px;background:var(--gold);border:1.50px solid #6b4e00;
+    display:inline-block;flex:0 0 auto;box-shadow:inset 1.50px 1.50px 0 #fff7d0;}
+  .titlebar .tt{font-weight:700;font-size:17.25px;letter-spacing:0.30px;
+    text-shadow:1.50px 1.50px 0 rgba(0,0,0,.45);white-space:nowrap;overflow:hidden;}
+  .titlebar .spacer{flex:1 1 auto;}
+  .winbtn{width:25.50px;height:22.50px;background:var(--silver);border:3.00px solid;
+    border-color:var(--silver-hi) var(--silver-dk) var(--silver-dk) var(--silver-hi);
+    font:700 15.00px/18.00px "Liberation Sans",sans-serif;color:#111;text-align:center;flex:0 0 auto;}
+  .menubar{display:flex;gap:19.50px;padding:1.50px 12.00px 3.00px;font-size:15.75px;color:#111;}
+  .menubar u{text-decoration:none;border-bottom:1.50px solid #111;}
+  .menubar span{opacity:.9;}
+  .toolbar{display:flex;align-items:center;gap:9.00px;padding:3.00px 9.00px 4.50px;}
+  .toolbar .lab{font-size:15.75px;color:#222;font-weight:700;}
+  .addr{flex:1 1 auto;background:#fff;border:3.00px solid;
+    border-color:var(--silver-dk) var(--silver-hi) var(--silver-hi) var(--silver-dk);
+    padding:3.00px 9.00px;font:15.75px/1.3 "DejaVu Sans Mono",monospace;color:#0a2a6b;
+    display:flex;align-items:center;gap:9.00px;overflow:hidden;white-space:nowrap;}
+  .addr .glob{color:#0c7068;}
+  .go{background:var(--silver);border:3.00px solid;
+    border-color:var(--silver-hi) var(--silver-dk) var(--silver-dk) var(--silver-hi);
+    font:700 15.00px/1 "Liberation Sans";padding:6.00px 12.00px;color:#111;}
+  .pill{font:700 13.50px/1 "DejaVu Sans Mono",monospace;color:#063;
+    background:#d8f3df;border:1.50px solid #2a8f4d;padding:4.50px 7.50px;white-space:nowrap;}
+  .pill.red{color:#7a0010;background:#ffdede;border-color:#b3122a;}
+
+  .paper{background:var(--paper);
+    background-image:linear-gradient(var(--paper-line) 1.50px,transparent 1.50px);
+    background-size:100% 27.00px;border:3.00px solid;
+    border-color:var(--silver-dk) var(--silver-hi) var(--silver-hi) var(--silver-dk);
+    padding:7.50px 13.50px 7.50px;}
+
+  .eyebrow{font:700 13.50px/1 "DejaVu Sans Mono",monospace;letter-spacing:1.80px;
+    color:#7a0010;text-transform:uppercase;margin:0 0 3.00px;}
+  .herowrap{display:flex;align-items:flex-start;gap:12.00px;}
+  .heroL{flex:1 1 auto;min-width:0;}
+  .wordart{font:italic 900 39.00px/0.98 "Liberation Sans","Arial",sans-serif;color:var(--gold);
+    -webkit-text-stroke:1.95px #4a1400;letter-spacing:0.60px;margin:0 0 3.00px;
+    text-shadow:1.50px 1.50px 0 #7a2a00,3.00px 3.00px 0 #6a2300,4.50px 4.50px 0 #501a00,6.00px 6.00px 0 #3a1200,7.50px 9.00px 10.50px rgba(0,0,0,.45);
+    text-transform:uppercase;}
+  .subtitle{font:italic 700 17.25px/1.2 "Liberation Sans",sans-serif;color:#11305a;margin:0 0 1.50px;}
+  .thesis{font:14.25px/1.28 "Liberation Sans",sans-serif;color:var(--ink);margin:0 0 4.50px;}
+  .qbox{border:3.00px dashed #b3122a;background:#fff6f2;padding:4.50px 12.00px;
+    font:700 15.00px/1.3 "Liberation Sans",sans-serif;color:#7a0010;}
+  .qbox b{color:#b3122a;}
+
+  .burstwrap{flex:0 0 150.00px;width:150.00px;height:150.00px;position:relative;margin-top:3.00px;}
+  .burst{position:absolute;inset:0;}
+  .burst i{position:absolute;left:50%;top:50%;width:132.00px;height:132.00px;margin:-66.00px 0 0 -66.00px;
+    background:var(--gold);box-shadow:inset 0 0 0 1.50px #b07d00;}
+  .burst i:nth-child(1){transform:rotate(0deg);}
+  .burst i:nth-child(2){transform:rotate(30deg);}
+  .burst i:nth-child(3){transform:rotate(60deg);}
+  .seal{position:absolute;left:50%;top:50%;width:114.00px;height:114.00px;margin:-57.00px 0 0 -57.00px;
+    border-radius:50%;background:var(--hot);color:#fff;border:3.00px dashed #fff;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    transform:rotate(-9deg);box-shadow:0 3.00px 6.00px rgba(0,0,0,.4);}
+  .seal .big{font:900 33.00px/0.9 "Liberation Sans",sans-serif;letter-spacing:0.75px;}
+  .seal .sm{font:700 11.25px/1.05 "DejaVu Sans Mono",monospace;margin-top:3.00px;text-transform:uppercase;}
+
+  .term{background:var(--term-bg);color:var(--grn);border:3.00px solid;
+    border-color:#000 #3a3f3a #3a3f3a #000;box-shadow:inset 0 0 0 1.50px #143019;
+    font-family:"DejaVu Sans Mono",monospace;position:relative;overflow:hidden;}
+  .term::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0 3.00px,rgba(0,0,0,.22) 4.50px 4.50px);}
+  .term .bar{background:#0e2417;color:var(--grn-d);font:700 12.00px/1 "DejaVu Sans Mono";
+    letter-spacing:0.90px;padding:1.50px 9.00px;border-bottom:1.50px solid #143a23;
+    display:flex;justify-content:space-between;}
+  .term pre{margin:0;padding:3.00px 12.00px;font-size:10.95px;line-height:1.12;white-space:pre;
+    color:var(--grn);text-shadow:0 0 7.50px rgba(84,255,140,.35);}
+  .term .cap{padding:0 12.00px 6.00px;font:12.75px/1.28 "DejaVu Sans Mono";color:#9fe9bd;}
+  .gw{color:#cfe;}.ga{color:var(--amber);}.gr{color:var(--danger);}.gd{color:var(--grn-dim);}
+
+  .sec{margin:6.00px 0 3.00px;display:flex;align-items:center;gap:10.50px;}
+  .sec .tab{font:900 14.25px/1 "Liberation Sans",sans-serif;letter-spacing:0.75px;color:#fff;
+    background:#11305a;padding:3.00px 10.50px;text-transform:uppercase;box-shadow:3.00px 3.00px 0 rgba(0,0,0,.22);}
+  .sec .tab.alt{background:#7a0010;}
+  .sec .tab.grn{background:#0c5a36;}
+  .sec .rule{flex:1 1 auto;height:0;border-top:3.00px dotted #9a937c;}
+
+  .tbl{width:100%;border-collapse:collapse;font-family:"DejaVu Sans Mono",monospace;
+    background:#fbf9f1;border:3.00px solid #2c2a22;}
+  .tbl caption{caption-side:top;text-align:left;font:12.75px/1.24 "Liberation Sans";
+    color:var(--ink-soft);padding:0 0 3.00px;}
+  .tbl th,.tbl td{border:1.50px solid #b9b29a;padding:3.00px 7.50px;font-size:12.75px;text-align:center;}
+  .tbl thead th{background:#11305a;color:#fff;font-weight:700;font-size:12.75px;}
+  .tbl thead th.metric{background:#0b1f3d;text-align:left;}
+  .tbl tbody th{background:#e9e3cf;text-align:left;font-weight:700;color:#2a2820;font-size:12.75px;}
+  .tbl td.win{background:#dff6e6;color:#064d22;font-weight:700;}
+  .tbl td.bad{color:#7a0010;}
+  .tnote{font:12.75px/1.28 "DejaVu Sans Mono",monospace;color:#7a0010;margin:3.00px 0 0;}
+  .tnote code{background:#2a0a0a;color:#ff8e85;padding:1.50px 6.00px;}
+
+  .cols{display:flex;gap:15.00px;margin-top:6.00px;align-items:flex-start;}
+  .colA{flex:1 1 56%;min-width:0;}
+  .colB{flex:1 1 44%;min-width:0;}
+
+  .blk{font:14.25px/1.32 "Liberation Sans",sans-serif;color:var(--ink);margin:0 0 3.00px;}
+  .blk b{color:#11305a;}
+
+  .cov{margin:4.50px 0 3.00px;}
+  .cov .row{display:flex;align-items:center;gap:9.00px;margin:1.50px 0;}
+  .cov .key{font:700 13.50px/1.1 "DejaVu Sans Mono";color:#2a2820;flex:0 0 117.00px;}
+  .cov .track{flex:1 1 auto;height:16.50px;background:#e7e1cd;border:1.50px solid #9a937c;position:relative;}
+  .cov .fill{height:100%;background:#0c5a36;
+    background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.18) 0 4.50px,transparent 4.50px 9.00px);
+    display:flex;align-items:center;justify-content:flex-end;}
+  .cov .val{padding-right:6.00px;font:700 12.00px/16.50px "DejaVu Sans Mono";color:#fff;text-shadow:0 1.50px 1.50px rgba(0,0,0,.6);}
+  .covcap{font:12.75px/1.26 "Liberation Sans";color:var(--ink-soft);margin-top:1.50px;font-style:italic;}
+
+  .prec{margin:4.50px 0 0;padding:0;list-style:none;font:13.50px/1.28 "Liberation Sans";color:var(--ink);}
+  .prec li{padding:1.50px 0 1.50px 22.50px;position:relative;border-bottom:1.50px dotted #c8c0a6;}
+  .prec li:last-child{border-bottom:0;}
+  .prec li::before{content:"\25B8";position:absolute;left:3.00px;top:3.00px;color:#0c5a36;font-size:13.50px;}
+  .prec b{color:#11305a;}
+
+  .sticky{background:#fff7a8;border:1.50px solid #d8c84a;box-shadow:3.00px 4.50px 7.50px rgba(0,0,0,.28);
+    padding:9.00px 13.50px;transform:rotate(-1.1deg);position:relative;font-family:"Liberation Sans",sans-serif;}
+  .sticky::before{content:"";position:absolute;left:50%;top:-10.50px;width:66.00px;height:18.00px;
+    margin-left:-33.00px;background:rgba(180,150,30,.5);transform:rotate(2deg);}
+  .sticky .h{font:900 15.75px/1 "Liberation Sans";letter-spacing:0.75px;color:#6a5a00;
+    text-transform:uppercase;margin-bottom:4.50px;border-bottom:1.50px solid #d8c84a;padding-bottom:3.00px;}
+  .sticky p{margin:0 0 4.50px;font:14.25px/1.3 "Liberation Sans";color:#3a3208;}
+  .sticky .sig{font:italic 700 15.75px/1.2 "Liberation Sans";color:#6a5a00;}
+  .sticky .url{font:12.75px/1 "DejaVu Sans Mono";color:#7a3a00;}
+
+  .term.cav pre{color:#ffd9a6;text-shadow:0 0 7.50px rgba(255,176,0,.25);font-size:11.40px;
+    line-height:1.22;white-space:pre-wrap;}
+  .term.cav .bar{color:var(--amber);background:#241a06;border-color:#3a2a08;}
+
+  .ladder{margin:6.00px 0 0;}
+  .ladline{font:italic 14.25px/1.3 "Liberation Sans";color:var(--ink);margin:0 0 3.00px;}
+  .rung{display:flex;align-items:center;gap:10.50px;margin:4.50px 0;}
+  .rung .step{flex:0 0 auto;height:25.50px;display:flex;align-items:center;color:#fff;
+    font:700 12.75px/1 "DejaVu Sans Mono";padding:0 10.50px;white-space:nowrap;box-shadow:1.50px 1.50px 0 rgba(0,0,0,.25);}
+  .rung .meta{font:12.00px/1.1 "DejaVu Sans Mono";color:var(--ink-soft);}
+  .r1 .step{background:#0c5a36;width:40%;}
+  .r2 .step{background:#0f6f6a;width:55%;}
+  .r3 .step{background:#c98a00;width:74%;}
+  .r4 .step{background:#b3122a;width:100%;}
+  .costaxis{font:12.00px/1 "DejaVu Sans Mono";color:#7a0010;text-align:right;margin-top:3.00px;letter-spacing:1.50px;}
+  .demote{font:14.25px/1.34 "Liberation Sans";color:var(--ink);margin:6.00px 0 0;}
+  .demote b{color:#7a0010;}
+
+  .ladderH{display:flex;align-items:stretch;gap:6.00px;margin:1.50px 0 3.00px;}
+  .ladderH .rg{flex:1 1 0;color:#fff;padding:6.00px 12.00px;box-shadow:1.50px 1.50px 0 rgba(0,0,0,.22);
+    position:relative;clip-path:polygon(0 0,calc(100% - 13.50px) 0,100% 50%,calc(100% - 13.50px) 100%,0 100%,13.50px 50%);}
+  .ladderH .rg:first-child{clip-path:polygon(0 0,calc(100% - 13.50px) 0,100% 50%,calc(100% - 13.50px) 100%,0 100%);}
+  .ladderH .rg .n{font:700 13.50px/1.1 "DejaVu Sans Mono",monospace;}
+  .ladderH .rg .m{font:11.25px/1.15 "DejaVu Sans Mono",monospace;opacity:.95;margin-top:3.00px;}
+  .ladderH .a1{background:#0c5a36;} .ladderH .a2{background:#0f6f6a;}
+  .ladderH .a3{background:#c98a00;} .ladderH .a4{background:#b3122a;}
+  .ladfoot{display:flex;align-items:baseline;gap:15.00px;}
+  .ladfoot span:first-child{flex:1 1 auto;font:14.25px/1.3 "Liberation Sans";color:var(--ink);}
+  .ladfoot b{color:#7a0010;}
+  .costarrow{font:12.00px/1 "DejaVu Sans Mono",monospace;color:#7a0010;letter-spacing:1.50px;white-space:nowrap;}
+
+  .marg{margin-top:6.00px;border-left:4.50px solid #11305a;background:#eef0e5;padding:6.00px 12.00px;
+    font:12.75px/1.28 "DejaVu Sans Mono",monospace;color:#3a3a2c;}
+  .marg .h{font:700 12.75px/1 "DejaVu Sans Mono";color:#11305a;letter-spacing:0.90px;margin-bottom:4.50px;}
+  .marg em{color:#7a0010;font-style:normal;}
+
+  .foot{margin-top:6.00px;border-top:3.00px solid #9a937c;padding-top:4.50px;}
+  .refs{columns:2;column-gap:24.00px;font:10.95px/1.24 "DejaVu Sans Mono",monospace;color:#3a382c;}
+  .refs .rh{font:900 12.75px/1 "Liberation Sans";color:#11305a;letter-spacing:0.75px;
+    text-transform:uppercase;margin-bottom:3.00px;column-span:all;}
+  .refs p{margin:0 0 1.50px;break-inside:avoid;}
+  .refs b{color:#11305a;}
+  .repro{font:11.25px/1.3 "DejaVu Sans Mono";color:#4a463a;margin:4.50px 0 0;
+    background:#eceadd;border:1.50px solid #cfc8b0;padding:3.00px 9.00px;}
+  .repro b{color:#7a0010;}
+
+  .bling{display:flex;align-items:center;gap:12.00px;margin-top:3.00px;flex-wrap:wrap;}
+  .counter{font:700 16.50px/1 "DejaVu Sans Mono";color:#54ff8c;background:#000;border:3.00px solid;
+    border-color:#000 #555 #555 #000;padding:4.50px 7.50px;letter-spacing:3.00px;}
+  .counter span{background:#111;padding:1.50px 3.00px;border:1.50px solid #2a2a2a;}
+  .bestview{font:13.50px/1.2 "DejaVu Sans Mono";color:#11305a;}
+  .badge88{width:132.00px;height:46.50px;flex:0 0 auto;background:linear-gradient(135deg,#11305a,#0c7068);
+    color:#fff;border:1.50px solid #000;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;font:700 12.00px/1 "Liberation Sans";text-align:center;
+    box-shadow:inset 1.50px 1.50px 0 rgba(255,255,255,.3);}
+  .badge88 b{color:var(--gold);font-size:13.50px;letter-spacing:0.75px;}
+  .copyr{margin-left:auto;font:12.00px/1.2 "DejaVu Sans Mono";color:#6a6450;}
+
+  .status{display:flex;gap:4.50px;margin-top:3.00px;}
+  .status div{font:13.50px/1.2 "Liberation Sans";color:#222;padding:1.50px 9.00px;background:var(--silver);
+    border:1.50px solid;border-color:var(--silver-dk) var(--silver-hi) var(--silver-hi) var(--silver-dk);}
+  .status .grow{flex:1 1 auto;}
+
+  /* ===== web / responsive layer ===== */
+  html{overflow-x:hidden;}
+  html,body{height:auto;}
+  body{min-height:100vh;overflow-x:hidden;}
+  .page{width:min(100%,1180px);max-width:1180px;min-height:auto;margin:0 auto;
+    padding:clamp(12px,2.4vw,28px) clamp(8px,2vw,22px);}
+  .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;}
+  @media (max-width:760px){
+    .toolbar{flex-wrap:wrap;}
+    .menubar{flex-wrap:wrap;}
+    .cols{flex-direction:column;}
+    .colA,.colB{flex:1 1 100%;width:100%;}
+    .refs{columns:1;}
+    .herowrap{flex-wrap:wrap;}
+    .burstwrap{margin:6px auto 0;}
+    .term{overflow-x:auto;overflow-y:hidden;}            /* let the wide ASCII gate diagram scroll */
+    .tbl{min-width:560px;}
+    .ladderH{flex-direction:column;gap:6px;}
+    .ladderH .rg,.ladderH .rg:first-child{clip-path:none !important;width:100%;}
+    .ladfoot{flex-direction:column;align-items:flex-start;gap:4px;}
+  }
+  @media (max-width:460px){
+    .wordart{font-size:30px;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="win">
+    <div class="titlebar">
+      <span class="ic"></span>
+      <span class="tt">least_generation.exe &nbsp;&#8212;&nbsp; research_notes.htm</span>
+      <span class="spacer"></span>
+      <span class="winbtn">_</span><span class="winbtn">&#9633;</span><span class="winbtn">&#10005;</span>
+    </div>
+    <div class="menubar">
+      <span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span>
+      <span><u>R</u>etrieve</span><span><u>G</u>enerate</span><span><u>H</u>elp</span>
+    </div>
+    <div class="toolbar">
+      <span class="lab">Address</span>
+      <span class="addr"><span class="glob">&#9673;</span>http://home.least-generation.net/findings.htm</span>
+      <span class="go">Go</span>
+      <span class="pill">0 TOKENS</span>
+      <span class="pill red">CAN'T BE INJECTED</span>
+    </div>
+
+    <div class="paper">
+      <div class="eyebrow">Research note by Khalid Alnujaidi &middot; single-GPU reproduction &middot; small scope, honest about it</div>
+
+      <div class="herowrap">
+        <div class="heroL">
+          <h1 class="wordart">The Principle of Least Generation</h1>
+          <div class="subtitle">What if most &ldquo;AI generation&rdquo; is really retrieval wearing a costume?</div>
+          <p class="thesis">We built the most knowledgeable corpus ever, tokenized it &mdash; then pay a giant model to <b>regenerate</b> pieces of it, one token at a time, every time we ask. For bounded, known-shape tasks that&rsquo;s reprinting a library book by hand. The information already exists. <b>Retrieve it.</b></p>
+          <div class="qbox">The test: can a cheap <b>gate</b> + deterministic <b>retrieval</b> beat a language model on cost, speed, and safety &mdash; with <b>zero generated tokens?</b></div>
+        </div>
+        <div class="burstwrap">
+          <div class="burst"><i></i><i></i><i></i></div>
+          <div class="seal"><span class="big">0</span><span class="sm">tokens<br>generated</span></div>
+        </div>
+      </div>
+
+      <div class="sec"><span class="tab">How it works</span><span class="rule"></span></div>
+      <div class="term">
+        <div class="bar"><span>C:\&gt; route --explain</span><span>THE GATE</span></div>
+<pre>     your request
+          &#9474;
+          &#9660;
+    <span class="gw">&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9484;</span>     cheap encoder / classifier  <span class="gd">(~40 ms &middot; 0 tokens)</span>
+    <span class="gw">&#9474;  THE GATE   &#9474;</span>&#9472;&#9472;  &ldquo;is this a known, templatable operation?&rdquo;
+    <span class="gw">&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9492;</span>
+       &#9474; <span class="gw">YES</span> (the majority)         &#9474; <span class="gr">NO</span>
+       &#9660;                         &#9660;
+  retrieve template + fill slots   <span class="ga">wake the big model</span>
+  &#8594; exact answer, instantly        <span class="ga">&#8594; generate (last resort)</span>
+  &#8594; 0 tokens &middot; structurally safe</pre>
+        <div class="cap">The model stops being the thing that <span class="gw">knows everything</span> and becomes the router&rsquo;s fallback. Most requests never reach it.</div>
+      </div>
+
+      <div class="sec"><span class="tab alt">Finding 2 &mdash; on a known slice, generation is pure waste</span><span class="rule"></span></div>
+      <div class="tscroll"><table class="tbl">
+        <caption>Same 300 WikiSQL queries. Retrieval path vs. two local models, each told &ldquo;output <em>only</em> SQL.&rdquo;</caption>
+        <thead>
+          <tr><th class="metric">metric</th><th>Retrieval&nbsp;+&nbsp;template</th><th>qwen2.5:7b</th><th>gemma-4-12B-coder</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>Correct (exact-match)</th><td class="win">~100%</td><td class="bad">20%</td><td class="bad">47%</td></tr>
+          <tr><th>Median latency</th><td class="win">&lt;1 ms</td><td>268 ms</td><td>553 ms</td></tr>
+          <tr><th>Tokens (300 queries)</th><td class="win">0</td><td>6,525</td><td>7,714</td></tr>
+          <tr><th>Obeyed injected DROP DATABASE</th><td class="win">0 / 40</td><td class="bad">15 / 40</td><td class="bad">10 / 40</td></tr>
+        </tbody>
+      </table></div>
+      <p class="tnote">Told to &ldquo;output only SQL,&rdquo; the models cheerfully ran <code>&hellip;; DROP DATABASE prod;</code> appended to a question. The retrieval path has <b>no slot for destruction</b> &mdash; so it structurally cannot.</p>
+
+      <div class="cols">
+        <div class="colA">
+          <div class="sec"><span class="tab grn">Finding 1 &mdash; the query space is a Zipfian head</span><span class="rule"></span></div>
+          <p class="blk">Across <b>all 80,654</b> real NL&rarr;SQL queries in WikiSQL, rebuilding the SQL from its structured intent by template-fill hit <b>99.99% exact match</b> &mdash; zero generated tokens, ~0.6&nbsp;&micro;s each. A <i>handful</i> of shapes serve the bulk of reality:</p>
+          <div class="cov">
+            <div class="row"><span class="key">1 template</span><span class="track"><span class="fill" style="width:53%"><span class="val">53%</span></span></span></div>
+            <div class="row"><span class="key">top 10</span><span class="track"><span class="fill" style="width:82%"><span class="val">82%</span></span></span></div>
+            <div class="row"><span class="key">top 20</span><span class="track"><span class="fill" style="width:87%"><span class="val">87%</span></span></span></div>
+          </div>
+          <div class="covcap">&hellip; of every query in the set, covered by that few shapes.</div>
+
+          <div class="sec"><span class="tab grn">Finding 3 &mdash; a cheap gate knows which tier</span><span class="rule"></span></div>
+          <p class="blk">A logistic-regression / cosine classifier over embeddings calls <b>&ldquo;templatable vs. open-domain&rdquo;</b> at <b>99.6%</b> accuracy (0&ndash;1.7% false-accept) &mdash; ~40&nbsp;ms, zero generated tokens. It decides which rung you need before any weights run.</p>
+
+          <div class="sec"><span class="tab">The frontier already points here</span><span class="rule"></span></div>
+          <ul class="prec">
+            <li><b>RETRO</b> (DeepMind, 2022): a 7.5B model <b>+ retrieval</b> matched GPT-3-scale (175B) &mdash; 25&times; fewer parameters.</li>
+            <li><b>kNN-LM</b> (2020): looking facts up helps most on the long tail &mdash; exactly where generation hallucinates.</li>
+            <li><b>RAG &middot; semantic caching &middot; MoE routing &middot; tool-use &middot; MCP:</b> one instinct &mdash; don&rsquo;t generate the fact, fetch it; don&rsquo;t run all the weights, route.</li>
+            <li>The unclaimed gap: make <b>least generation</b> an explicit discipline &mdash; <b>route first, generate last.</b></li>
+          </ul>
+        </div>
+
+        <div class="colB">
+          <div class="sticky">
+            <div class="h">&#9998; From the desk of Khalid Alnujaidi</div>
+            <p>If you ship software, you&rsquo;ve sat watching a model &ldquo;write&rdquo; a query you could&rsquo;ve stamped out instantly. For a known, bounded operation there&rsquo;s <b>exactly one right answer</b> &mdash; the output is <i>determined</i>. So why sample tokens to reproduce something deterministic?</p>
+            <p>Gate the request, fill the slots, ship &mdash; and save the giant model for the genuinely new. It&rsquo;s a small experiment, but once you&rsquo;ve seen it it&rsquo;s hard to unsee, and it drops straight into your own stack.</p>
+            <div class="url">http://home.least-generation.net</div>
+          </div>
+
+          <div class="sec"><span class="tab alt">README: don&rsquo;t oversell it</span><span class="rule"></span></div>
+          <div class="term cav">
+            <div class="bar"><span>caveats.txt</span><span>SMALL SCOPE</span></div>
+<pre>[1] WikiSQL's grammar is deliberately finite.
+    Real production SQL (JOINs, sub-queries,
+    GROUP BY) has a fatter tail -- the 87% is
+    domain-specific. The *direction* is robust;
+    the *number* isn't universal.
+[2] Slot extraction was handed to us by the
+    dataset. In the wild, messy sentence ->
+    clean slots IS the hard part, often best
+    done by a *small* generator. Decoders
+    aren't deleted -- they're shrunk & leashed.
+[3] The gate test was easy (SQL vs Python);
+    intra-domain routing is the open case.
+[4] Genuine novelty is irreducibly generative:
+    a corpus can't hold the unwritten.</pre>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="sec"><span class="tab">It was never retrieval vs. generation</span><span class="rule"></span></div>
+      <p class="ladline">It&rsquo;s a hierarchy of escalating cost &mdash; intelligence is knowing which tier a request needs:</p>
+      <div class="ladderH">
+        <div class="rg a1"><div class="n">1 &middot; cheap gate</div><div class="m">~40 ms &middot; 0 tokens</div></div>
+        <div class="rg a2"><div class="n">2 &middot; retrieval / tool / MCP</div><div class="m">exact &middot; instant</div></div>
+        <div class="rg a3"><div class="n">3 &middot; small assembler</div><div class="m">shrunk, leashed decoder</div></div>
+        <div class="rg a4"><div class="n">4 &middot; big model</div><div class="m">only for the genuinely new</div></div>
+      </div>
+      <div class="ladfoot"><span>The decoder isn&rsquo;t thrown out &mdash; it&rsquo;s <b>demoted</b> from &ldquo;does everything&rdquo; to &ldquo;last resort.&rdquo;</span><span class="costarrow">COST&nbsp;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9658;</span></div>
+
+      <div class="marg">
+        <div class="h">// STILL CHEWING ON &mdash;</div>
+        Treat computation as <em>context</em>, not just symbol-shuffling, and the old hard questions get fun to poke at again. And maybe hyperdimensional computing is the low-tech mirror of quantum: distributed &amp; robust where quantum is fragile &amp; probabilistic. <em>Speculation, not findings.</em>
+      </div>
+
+      <div class="foot">
+        <div class="refs">
+          <div class="rh">&#9670; Quick references</div>
+          <p><b>[1]</b> Borgeaud et&nbsp;al. &ldquo;Improving Language Models by Retrieving from Trillions of Tokens.&rdquo; ICML 2022. arXiv:2112.04426.</p>
+          <p><b>[2]</b> Khandelwal et&nbsp;al. &ldquo;Generalization through Memorization: Nearest Neighbor LMs (kNN-LM).&rdquo; ICLR 2020. arXiv:1911.00172.</p>
+          <p><b>[3]</b> Lewis et&nbsp;al. &ldquo;Retrieval-Augmented Generation for Knowledge-Intensive NLP.&rdquo; NeurIPS 2020. arXiv:2005.11401.</p>
+          <p><b>[4]</b> Shazeer et&nbsp;al. &ldquo;Outrageously Large Neural Networks: Sparsely-Gated Mixture-of-Experts.&rdquo; ICLR 2017. arXiv:1701.06538.</p>
+          <p><b>[5]</b> Zhong, Xiong, Socher. &ldquo;Seq2SQL&nbsp;/&nbsp;WikiSQL.&rdquo; 2017. arXiv:1709.00103. (80,654 NL&rarr;SQL pairs.)</p>
+          <p><b>[6]</b> Yin et&nbsp;al. &ldquo;Learning to Mine Aligned Code &amp; NL Pairs from Stack Overflow (CoNaLa).&rdquo; MSR 2018.</p>
+          <p><b>[7]</b> Model Context Protocol (MCP). Anthropic, 2024.</p>
+        </div>
+        <div class="repro"><b>&gt; reproducible code:</b> cbyte/ &mdash; scale_coverage.py &middot; scale_baselines_gate.py &middot; make_figures.py &nbsp;|&nbsp; built on bge-m3 + qwen2.5:7b + gemma-4-12B-coder via Ollama; WikiSQL + CoNaLa via Hugging Face. &nbsp;|&nbsp; figures: cbyte/figures/</div>
+
+        <div class="bling">
+          <span class="counter">VISITORS:&nbsp;<span>0</span><span>0</span><span>0</span><span>8</span><span>0</span><span>6</span><span>5</span><span>4</span></span>
+          <span class="bestview">Best viewed at 1024&times;768</span>
+          <span class="badge88"><b>LEAST&middot;GEN</b>route first<br>generate last</span>
+          <span class="copyr">&copy; 2026 &middot; Khalid Alnujaidi</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="status">
+      <div>Ready</div>
+      <div class="grow">1 template &rarr; 53% of all queries</div>
+      <div>tokens generated: 0</div>
+      <div>NUM</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
