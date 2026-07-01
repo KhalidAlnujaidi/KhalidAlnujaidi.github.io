@@ -6,7 +6,15 @@
     <description>Deep-dive essays on system architecture, computer vision, embedded hardware, and autonomous AI orchestration.</description>
     <language>en</language>
     <atom:link href="https://khalidalnujaidi.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Wed, 17 Jun 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 21 Jul 2026 00:00:00 +0000</lastBuildDate>
+
+    <item>
+      <title>The Architecture of "Residual State" in Agentic AI</title>
+      <link>https://khalidalnujaidi.github.io/essays/residual-state.html</link>
+      <guid>https://khalidalnujaidi.github.io/essays/residual-state.html</guid>
+      <description>How stateless language models simulate statefulness to perform continuous, long-horizon tasks — the engineered workaround behind every capable agent.</description>
+      <pubDate>Tue, 21 Jul 2026 00:00:00 +0000</pubDate>
+    </item>
 
     <item>
       <title>The Address &amp; the Direction: A Geometry of the Divine</title>
