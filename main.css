@@ -261,6 +261,11 @@ article.essay h3 {
   color: var(--ink-muted);
 }
 article.essay p { margin: 0 0 1.05rem; }
+article.essay ul, article.essay ol {
+  margin: 0 0 1.05rem;
+  padding-left: 1.5rem;
+}
+article.essay li { margin-bottom: 0.4rem; }
 article.essay blockquote {
   margin: 1.2rem 0;
   padding: 0.2rem 0 0.2rem 1rem;
@@ -286,6 +291,26 @@ article.essay pre {
   margin: 1.2rem 0;
 }
 article.essay pre code { background: none; padding: 0; font-size: inherit; }
+article.essay table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.2rem 0;
+  font-size: 0.88rem;
+}
+article.essay th, article.essay td {
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+article.essay th {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--ink-muted);
+  border-bottom: 2px solid var(--rule);
+}
 
 .backlink {
   font-family: var(--mono);
@@ -307,4 +332,6 @@ article.essay pre code { background: none; padding: 0; font-size: inherit; }
   .wrap { padding: 2.25rem 1.15rem 3rem; }
   ul.stream > li { flex-direction: column; gap: 0.1rem; }
   .date { flex-basis: auto; }
+  article.essay table { font-size: 0.78rem; }
+  article.essay th, article.essay td { padding: 0.4rem 0.4rem; }
 }

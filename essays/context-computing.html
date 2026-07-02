@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Context Computing: A Process-Theoretic Model of Computation over Learned Semantic State Spaces — Khalid Alnujaidi</title>
+  <meta name="description" content="Context Computing: a computational framework where states are distributions over learned semantic vectors, operations redistribute probability mass, and outputs are task-conditioned projections to single meanings.">
+  <meta name="author" content="Khalid Alnujaidi">
+  <meta property="og:title" content="Context Computing: A Process-Theoretic Model of Computation over Learned Semantic State Spaces">
+  <meta property="og:description" content="A computational framework where states are distributions over learned semantic vectors — a distinct paradigm enabled by modern embedding models.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://khalidalnujaidi.github.io/essays/context-computing.html">
+  <link rel="alternate" type="application/rss+xml" title="Khalid Alnujaidi — Essays" href="/feed.xml">
+  <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+<div class="wrap">
+  <a class="backlink" href="/">&larr; Khalid Alnujaidi</a>
+
+  <article class="essay">
+    <p class="meta">2026&middot;07 &nbsp;//&nbsp; Theory</p>
+    <h1>Context Computing: A Process-Theoretic Model of Computation over Learned Semantic State Spaces</h1>
+
+    <blockquote>
+      <strong>Abstract.</strong> Context Computing (CC) is a computational framework in which states are distributions over high-dimensional semantic vectors, operations redistribute probability mass over candidate interpretations, and outputs are task-conditioned projections to single meanings. CC is presented as a distinct computational paradigm enabled by modern embedding models, which encode the Zipfian statistical structure of human intent into vector geometry. The theory is situated relative to existing computation paradigms, with connections drawn to categorical quantum mechanics and semantic information theory, and the formal and empirical work needed to establish CC's boundaries is identified.
+    </blockquote>
+
+    <h2>1. Definition</h2>
+
+    <p>A <em>context</em> is a pair (V, P) where V = {v&#8321;, &hellip;, v&#8345;} &sub; &#8477;<sup>d</sup> are candidate vectors in a learned embedding space and P = {p&#8321;, &hellip;, p&#8345;} is a probability distribution over them. Three operations define computation under CC:</p>
+
+    <ul>
+      <li><code>c_byte</code> &mdash; <em>context expansion</em>: grows V by adding candidates, increasing uncertainty.</li>
+      <li><code>c_gate</code> &mdash; <em>context transformation</em>: applies a map f: &#8477;<sup>d</sup> &rarr; &#8477;<sup>d</sup> that redistributes probability mass.</li>
+      <li><code>c_bit</code> &mdash; <em>context collapse</em>: projects (V, P) to a single output v* via argmax, sampling, or thresholding.</li>
+    </ul>
+
+    <p>The system maintains non-determinism during computation (multiple candidates alive) and resolves to deterministic output at endpoints.</p>
+
+    <h2>2. Relationship to Existing Paradigms</h2>
+
+    <p>CC is not claimed to <em>contain</em> digital, analog, and quantum computation as strict projections. Rather, all four paradigms can be modeled as process theories (in the sense of Coecke &amp; Kissinger 2017) over different state spaces and admissible transformations:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Paradigm</th>
+          <th>State space</th>
+          <th>Transformations</th>
+          <th>Readout</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Digital</td>
+          <td>{0,1}<sup>n</sup></td>
+          <td>Boolean gates</td>
+          <td>Direct readout</td>
+        </tr>
+        <tr>
+          <td>Analog</td>
+          <td>&#8477;<sup>1</sup></td>
+          <td>Continuous dynamics</td>
+          <td>Threshold</td>
+        </tr>
+        <tr>
+          <td>Quantum</td>
+          <td>&#8450;<sup>n</sup></td>
+          <td>Unitary maps, CP maps</td>
+          <td>Born measurement</td>
+        </tr>
+        <tr>
+          <td>Context</td>
+          <td>&#8477;<sup>d</sup> (learned)</td>
+          <td>Learned transformations</td>
+          <td>Semantic collapse</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Categorical quantum mechanics (Abramsky &amp; Coecke 2004) and generalized probabilistic theories (Hardy 2001, Chiribella et al. 2011) provide the formal framework for this unification. Hyperdimensional computing (Kanerva; survey by Frady et al. 2021) demonstrates that Boolean logic can be embedded in high-dimensional vector spaces, supporting a representation-level connection. The stricter claim &mdash; that CC <em>computationally contains</em> quantum computing &mdash; is not asserted and would require proof of complexity-class containment (CC &supe; BQP), which remains open.</p>
+
+    <h2>3. The Zipfian Substrate</h2>
+
+    <p>Human interaction data follows heavy-tailed, approximately Zipfian distributions across multiple domains: word frequencies (Zipf 1949, Piantadosi 2014), command usage (Carroll &amp; Rosson 1986), search queries (Baeza-Yates et al.), and dialogue (ACM IUI 2020).</p>
+
+    <p>Modern embedding models trained on this data encode this structure geometrically:</p>
+
+    <ul>
+      <li>Contextual representations exhibit anisotropy correlated with frequency (Gao et al. 2019, Ethayarajh 2019).</li>
+      <li>Zipfian whitening improves downstream performance (NeurIPS 2024).</li>
+      <li>Semantic breadth exhibits Zipfian patterns: frequent words are generic, rare words specific (Zipfian regularities in non-point representations, ScienceDirect 2021).</li>
+    </ul>
+
+    <p>For a Zipf distribution with s &asymp; 1 over N types, the effective vocabulary under the participation-ratio definition scales as N<sub>eff</sub> &asymp; (6/&pi;<sup>2</sup>)(ln N)<sup>2</sup> &mdash; polylogarithmic in N. This implies that the navigable structure of intent space is vastly smaller than the theoretical vocabulary, making semantic navigation tractable. This tractability is offered as an explanation for why CC was not practical before large-scale embedding models: prior substrates (one-hot encodings, analog quantities, complex amplitudes) did not encode the statistical structure of human meaning.</p>
+
+    <h2>4. Internal Non-Determinism and Output Determinism</h2>
+
+    <p>CC maintains a distribution over candidate interpretations during computation and collapses to a single output at endpoints. This parallels &mdash; but is not equivalent to &mdash; quantum measurement. The disanalogy is important: classical probability distributions over &#8477;<sup>d</sup> are classical mixtures fully described by classical probability theory. They lack interference, contextuality (in the Kochen&ndash;Specker sense), and non-classical correlations. The quantum cognition literature (Busemeyer &amp; Bruza 2012, van Rijsbergen 2004, Aerts et al.) uses Hilbert-space formalisms to model cognition, suggesting the analogy is heuristically productive, though no formal equivalence is claimed.</p>
+
+    <p>The collapse dynamics &mdash; how and when non-determinism resolves &mdash; remain the central open question in the theory. Candidate mechanisms include task-conditioned argmax, sampling with temperature, and learned attention-based reranking. Formalizing this requires specifying the readout mechanism and its relationship to measurement theory.</p>
+
+    <h2>5. Semantic Information and Scaling</h2>
+
+    <p>Shannon information theory deliberately excludes semantics (Shannon 1948). Semantic information theory (Bar-Hillel &amp; Carnap 1953, Floridi 2004, Kolchinsky &amp; Wolpert 2018) defines information relative to truth, utility, task relevance, or agent viability. CC operates in this semantic regime: the relevant uncertainty is not over symbols but over <em>meanings</em>.</p>
+
+    <p>Neural scaling laws (Kaplan et al. 2020, Hoffmann et al. 2022) show that semantic acquisition scales as a power law in parameters and data &mdash; distinct from Shannon channel capacity. Emerging work on &ldquo;quantum semantic communications&rdquo; (2024) replaces channel capacity with topological distance between meaning clusters in latent space. CC's scaling properties are proposed for analysis within this semantic information-theoretic framework, rather than as a replacement for Shannon theory.</p>
+
+    <h2>6. Open Problems</h2>
+
+    <ol>
+      <li><strong>Complexity class.</strong> Define CC's complexity class relative to BQP, BPP, and P. Is CC &sube; BPP? Does it capture problems outside P?</li>
+      <li><strong>Born rule.</strong> Specify which CC axioms could substitute for Gleason's noncontextuality or Zurek's envariance. Without complex phase structure, it remains unclear why L<sup>2</sup> normalization would emerge.</li>
+      <li><strong>Contextuality.</strong> Test whether CC's collapse exhibits Kochen&ndash;Specker contextuality &mdash; the defining feature separating quantum from classical probability.</li>
+      <li><strong>Intent as latent variable.</strong> All Zipfian evidence to date is for behavioral proxies (words, queries, commands), not intent directly. Experiments are needed to test whether latent intent distributions are genuinely Zipfian.</li>
+      <li><strong>Falsifiable predictions.</strong> Predictions generated from CC should be testable on interaction logs &mdash; e.g., that effective vocabulary scaling follows (ln N)<sup>2</sup> rather than N, or that collapse dynamics exhibit power-law residence times in attractor regions.</li>
+    </ol>
+  </article>
+
+  <footer>
+    <a href="/feed.xml">[RSS Feed]</a>
+    <span class="sep">/</span>
+    <a href="https://github.com/KhalidAlnujaidi">GitHub</a>
+    <span class="sep">/</span>
+    <a href="mailto:khalidnujaidi@gmail.com">khalidnujaidi@gmail.com</a>
+  </footer>
+</div>
+</body>
+</html>
