@@ -6,7 +6,15 @@
     <description>Deep-dive essays on system architecture, computer vision, embedded hardware, and autonomous AI orchestration.</description>
     <language>en</language>
     <atom:link href="https://khalidalnujaidi.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <lastBuildDate>Tue, 21 Jul 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 26 Jul 2026 00:00:00 +0000</lastBuildDate>
+
+    <item>
+      <title>LeastGen — 95% Fewer Tokens, 0ms Latency</title>
+      <link>https://khalidalnujaidi.github.io/projects/leastgen.html</link>
+      <guid>https://khalidalnujaidi.github.io/projects/leastgen.html</guid>
+      <description>Route 95.1% of coding agent queries to local cache at 0ms latency with two VRAM-pinned specialized models (3B Planner + 4B Executor). Saves 715M tokens on a single GPU, zero cloud dependency.</description>
+      <pubDate>Sat, 26 Jul 2026 00:00:00 +0000</pubDate>
+    </item>
 
     <item>
       <title>Context Computing: A Process-Theoretic Model of Computation over Learned Semantic State Spaces</title>

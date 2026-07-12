@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeastGen — 95% Fewer Tokens, 0ms Latency — Khalid Alnujaidi</title>
+  <meta name="description" content="A high-performance local inference optimizer and context-governance framework for autonomous AI coding agents. Routes 95.1% of agent traffic to local cache at 0ms latency, saving 715M tokens — using two specialized 1:1 VRAM-pinned models (3B Planner + 4B Executor)." />
+  <meta property="og:title" content="LeastGen — 95% Fewer Tokens, 0ms Latency" />
+  <meta property="og:description" content="Route 95.1% of agent queries to local cache at 0ms latency with two specialized 1:1 VRAM-pinned models. 715M tokens saved on a single GPU." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://khalidalnujaidi.github.io/projects/leastgen.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+
+  <!-- Topbar -->
+  <nav class="topbar">
+    <a href="../index.html" class="topbar-back">
+      <span class="arrow">←</span> Khalid Alnujaidi
+    </a>
+    <a href="../index.html" class="topbar-logo"></a>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-label">
+      <span>Open Source · 2026</span>
+      <span class="spotlight-badge"><span class="spotlight-dot"></span> Inference Optimization</span>
+    </div>
+    <h1 class="hero-title">LeastGen</h1>
+    <p class="hero-subtitle">
+      <strong>What if your AI agent spent 95% less on inference — and nobody noticed?</strong>
+      Most of what an autonomous agent "generates" is repeated boilerplate: git status checks, directory listings, system info queries. LeastGen caches the structure, routes the rest to two specialized local models pinned permanently in VRAM, and cuts 715 million tokens from the bill. The agent works exactly the same. The difference is invisible — except in your cost column.
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/KhalidAlnujaidi/leastgen" target="_blank" rel="noopener" class="btn btn-primary">
+        View on GitHub ↗
+      </a>
+      <a href="../concepts/principle-of-least-generation/index.html" target="_blank" rel="noopener" class="btn btn-secondary">
+        Read the research series ↗
+      </a>
+    </div>
+  </div>
+
+  <!-- Meta strip -->
+  <div class="meta-strip">
+    <div class="meta-cell">
+      <div class="meta-label">Year</div>
+      <div class="meta-value">2026</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Category</div>
+      <div class="meta-value">Open Source · Infra</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Cache Hit Rate</div>
+      <div class="meta-value">95.1%</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Tokens Saved</div>
+      <div class="meta-value">715M</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Background -->
+    <div class="content-section">
+      <h2>Background</h2>
+      <div class="prose">
+        <p>
+          Autonomous AI coding agents have a dirty secret: most of their "reasoning" is actually expensive context repetition. Every turn, they re-send the project structure, the git status, the operating environment — information that was already available, just written in slightly different words. This is <strong>Agentic Context Inflation</strong>, and it's the dominant cost driver in agentic workflows.
+        </p>
+        <p>
+          LeastGen is the architecture that solves this. It sits between the agent and the inference provider as a transparent proxy, learns the structural patterns of agentic loops, and serves 95.1% of requests from local cache at 0ms latency — <strong>zero generated tokens, zero API cost</strong>. For the remaining 4.9% that genuinely need novel output, it routes to a pair of specialized local models pinned permanently in a single GPU.
+        </p>
+        <p>
+          The project is the operational implementation of the <a href="../concepts/principle-of-least-generation/index.html">Principle of Least Generation</a>: <em>route first, generate last</em>. Only reach for generation when nothing cheaper can answer the question.
+        </p>
+      </div>
+    </div>
+
+    <!-- Architecture -->
+    <div class="content-section">
+      <h2>System architecture</h2>
+      <div class="prose">
+        <p>The system introduces a transparent, zero-configuration proxy layer into the agent stack:</p>
+      </div>
+      <div class="feature-grid" style="margin-top: 1rem;">
+        <div class="feature-cell">
+          <div class="feature-icon">⬡</div>
+          <div class="feature-title">LLM Gate Proxy</div>
+          <div class="feature-desc">Listens on port 8766 and intercepts every agent-to-provider request. Instead of exact-match caching, it uses <strong>loose template induction</strong> — hashing the <em>structure</em> (roles and normalized instructions) of incoming prompts, not the literal text. Repetitive agent loops (git commands, directory checks) replay cached responses locally in 0ms.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">◈</div>
+          <div class="feature-title">Multi-Turn Safety Gate</div>
+          <div class="feature-desc">Detects multi-turn conversational loops and dynamically bypasses template caching, routing to live inference when the agent is in an active back-and-forth dialogue. Prevents loop hijacking while keeping the cache active for independent turns.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">◎</div>
+          <div class="feature-title">1:1 VRAM-Pinned Models</div>
+          <div class="feature-desc">Two specialized, pruned local models — a <strong>3B Planner</strong> for step-by-step reasoning and tool selection, and a <strong>4B Executor</strong> for syntax-perfect code generation — both locked in GPU VRAM concurrently via <code>keep_alive: -1</code>. Zero model-swapping latency on a single RTX A4500 (20 GB).</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">▦</div>
+          <div class="feature-title">Path-Aware Context Isolation</div>
+          <div class="feature-desc">A shell-level and parser-level routing wrapper that maps the agent's memory to the developer's working directory. Converts paths into unique flat profile namespaces, ensuring different codebases never share state. Detects git repos and spins up isolated worktrees to prevent parallel agents from corrupting active files.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">◇</div>
+          <div class="feature-title">Task Specialization Synergy</div>
+          <div class="feature-desc">The Planner (3B) runs at lightspeed because it doesn't carry heavy coding weights — it just plans. The Executor (4B) wastes zero tokens on conversational filler — it outputs pure code. The proxy filters boilerplate in 0ms; when novel work is needed, the pinned models fire instantly.</div>
+        </div>
+        <div class="feature-cell">
+          <div class="feature-icon">◐</div>
+          <div class="feature-title">Concurrent HTTP Server</div>
+          <div class="feature-desc">Built on a threaded Python HTTP server to handle concurrent agent and dashboard requests without socket timeouts or blocking. A live panel exposes the cache hit rate, savings, and recent request log for real-time monitoring.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Architecture Diagram -->
+    <div class="content-section">
+      <h2>Data flow</h2>
+      <div class="prose">
+        <pre style="background: var(--paper-alt); border: 1px solid var(--rule); border-radius: 3px; padding: 1.25rem; font-size: 12px; line-height: 1.6; overflow-x: auto; font-family: 'DM Mono', ui-monospace, monospace; color: var(--ink-muted);">
+                            [Developer Workspace]
+                                      │
+                       (Auto-Profile & Git Worktree)
+                                      ▼
+                             [Hermes Agent CLI]
+                                      │
+                           (Standard OpenAI Client)
+                                      ▼
+                        [LeastGen LLM Gate Proxy] ──(95.1% Hit)──► [Local SSD Cache]
+                         (llm_gate.py: Port 8766)                  (0ms / $0 cost)
+                                      │
+                                 (Cache Miss)
+                                      ▼
+                       [1:1 VRAM-Pinned Model Engine]
+                        (RTX A4500 GPU: keep_alive = -1)
+                        ├── Layer 1: 3B Planner (Thinking)
+                        └── Layer 2: 4B Executor (Coding)
+        </pre>
+      </div>
+    </div>
+
+    <!-- The key insight -->
+    <div class="content-section">
+      <h2>The key insight: not just any LLM works</h2>
+      <div class="prose">
+        <p>
+          Why not just use a single general-purpose model? Three reasons:
+        </p>
+        <p>
+          <strong>VRAM capacity.</strong> A single 32B or 70B model would either exceed the 20 GB of your typical workstation GPU or page-swap itself into unusability. By splitting the work across <strong>pruned, specialized 1:1 models (3B + 4B)</strong>, both fit in VRAM concurrently at <code>keep_alive: -1</code>. There is no model-loading overhead — ever.
+        </p>
+        <p>
+          <strong>Task specialization compounds.</strong> The 3B Planner sheds all code-generation weights to focus purely on step-by-step logic and tool selection. The 4B Executor sheds all "thinking" patterns to focus purely on syntax-perfect code output. Neither wastes parameters — or tokens — on what the other does. This division of labour means each model punches well above its weight class.
+        </p>
+        <p>
+          <strong>The proxy is the multiplier.</strong> The cache handles the boring, repetitive structure of agentic workflows. When the agent needs to write novel code or make a decision, the pinned models respond immediately. The two optimizations multiply: one eliminates latency from repetition, the other eliminates latency from model loading.
+        </p>
+      </div>
+    </div>
+
+    <!-- Quantified metrics -->
+    <div class="content-section">
+      <h2>Live production metrics</h2>
+      <div class="impact-row" style="margin-bottom: 2rem;">
+        <div class="impact-item">
+          <span class="impact-num">95.1%</span>
+          <span class="impact-label">cache hit rate</span>
+        </div>
+        <div class="impact-item">
+          <span class="impact-num">715M</span>
+          <span class="impact-label">tokens saved</span>
+        </div>
+        <div class="impact-item">
+          <span class="impact-num">$35.63</span>
+          <span class="impact-label">API costs avoided</span>
+        </div>
+        <div class="impact-item">
+          <span class="impact-num">2,772</span>
+          <span class="impact-label">requests processed</span>
+        </div>
+      </div>
+      <div class="prose">
+        <p>
+          All figures recorded live on a single RTX A4500 workstation over <strong>2,772 sequential agent executions</strong>. Of those, <strong>2,637</strong> were resolved from local cache — zero GPU, zero network, zero cost. The remaining 135 novel requests were handled by the VRAM-pinned 3B/4B pipeline at a total spend of just <strong>$1.45</strong>.
+        </p>
+        <p>
+          The cache hit rate holds across diverse workloads: SQL generation (84%), Claude Code agent traces (67%), and general Hermes agent loops (54%). The structured nature of agentic tool-use means the ceiling is high and the pattern generalizes — more template induction coverage pushes the rate higher with zero architectural changes.
+        </p>
+      </div>
+    </div>
+
+    <!-- Context isolation -->
+    <div class="content-section">
+      <h2>Workspace governance</h2>
+      <div class="prose">
+        <p>
+          A practical problem LeastGen also solves: <strong>context contamination</strong>. Running multiple agent sessions from the same terminal means they share memory, SQLite databases, and state — leading to catastrophic cross-project pollution.
+        </p>
+        <p>
+          LeastGen's path-aware isolation automatically slugifies directory paths (e.g., <code>~/projects/app/src</code> → <code>projects-app-src</code>) and creates unique flat namespaces for each. It detects git repositories and spins up sessions inside isolated git worktrees — so parallel agents working on different branches never touch the same files. The result: a single terminal agent becomes a <strong>decentralized fleet of isolated project managers</strong>, each with its own context, memory, and working tree.
+        </p>
+      </div>
+    </div>
+
+    <!-- Stack -->
+    <div class="content-section">
+      <h2>Built with</h2>
+      <div class="stack-list">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">Ollama / llama.cpp</span>
+        <span class="stack-tag">Hermes Agent</span>
+        <span class="stack-tag">OpenAI-compatible API</span>
+        <span class="stack-tag">Threaded HTTP Server</span>
+        <span class="stack-tag">Template Induction Hashing</span>
+        <span class="stack-tag">Git Worktrees</span>
+        <span class="stack-tag">RTX A4500 (20 GB)</span>
+        <span class="stack-tag">3B Planner + 4B Executor</span>
+      </div>
+    </div>
+
+    <!-- Why it matters -->
+    <div class="content-section">
+      <h2>Why it matters</h2>
+      <div class="prose">
+        <p>
+          The AI industry has been optimizing for <em>smarter</em> models. LeastGen asks a different question: <strong>how much of what we're generating was already knowable?</strong> The answer — 95% — suggests that the next order-of-magnitude gain in agent efficiency won't come from a better LLM. It will come from not using an LLM at all for the boring bits.
+        </p>
+        <p>
+          Every agentic workflow has a fat tail of repetitive structure. LeastGen shows that a cheap proxy, a hash function, and two small models can clip that tail — on one GPU, with zero cloud dependency, for about the price of a coffee per thousand executions. The principle generalizes to any structured, tool-using agent: <strong>route first, generate last</strong>.
+        </p>
+      </div>
+    </div>
+
+    <!-- Closing -->
+    <div class="content-section">
+      <h2>How much of your agent's work is cacheable?</h2>
+      <div class="prose">
+        <p>
+          If you run an autonomous coding agent — Hermes, Claude Code, Codex, or any OpenAI-compatible tool — you're paying for every turn. But not every turn deserves a model call. LeastGen is a single Python file, a proxy redirect, and two small Ollama models. You can deploy it in an afternoon and watch the cache hit rate climb.
+        </p>
+        <p>
+          <strong>What's your agent doing that it's already done before — and how much would you save by never generating it again?</strong>
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="project-footer">
+    <span class="footer-copy">© 2026 Khalid Alnujaidi</span>
+    <a href="../index.html" class="footer-back">← Back to portfolio</a>
+  </div>
+
+</body>
+</html>
