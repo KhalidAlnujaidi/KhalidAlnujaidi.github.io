@@ -60,6 +60,26 @@
   .chapter.soon{opacity:.5;cursor:default;pointer-events:none}
   .chapter.soon:hover{transform:none;border-color:var(--line);background:var(--panel)}
 
+  /* Project teaser card at the end */
+  .project-teaser{display:block;text-decoration:none;color:inherit;
+    border:2px solid rgba(231,178,87,.35);border-radius:14px;padding:1.8rem 1.7rem;
+    background:rgba(231,178,87,.06);transition:border-color .2s,transform .2s,background .2s;
+    margin-top:.8rem}
+  .project-teaser:hover{border-color:var(--gold);transform:translateY(-2px);
+    background:rgba(231,178,87,.10)}
+  .project-teaser .ch-top{display:flex;align-items:baseline;gap:.9rem;margin-bottom:.6rem}
+  .project-teaser .ch-num{font-family:var(--serif);font-size:1.5rem;color:var(--gold);line-height:1}
+  .project-teaser .ch-tag{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--gold);border:1px solid rgba(231,178,87,.4);border-radius:999px;
+    padding:.28em .7em}
+  .project-teaser .ch-title{font-family:var(--serif);font-size:2rem;line-height:1.15;
+    margin-bottom:.5rem;color:var(--gold);font-weight:600}
+  .project-teaser .ch-desc{color:#b9b4a8;font-size:13px;max-width:64ch}
+  .project-teaser .ch-desc strong{color:var(--ink)}
+  .project-teaser .ch-go{display:inline-flex;align-items:center;gap:.4em;margin-top:.8rem;
+    color:var(--cyan);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase}
+  .project-teaser:hover .ch-go .arr{transform:translateX(3px)}
+
   footer{margin-top:3.2rem;padding-top:1.6rem;border-top:1px solid var(--line);
     color:var(--muted);font-size:11.5px;letter-spacing:.03em}
   footer a{color:var(--cyan);text-decoration:none}
@@ -106,15 +126,23 @@
           experiment plan is published; the findings are pending.</div>
         <span class="ch-go">Read the plan <span class="arr">→</span></span>
       </a>
-
-      <a class="chapter" href="conclution.html">
-              <div class="ch-top"><span class="ch-num">03</span>
-                <span class="ch-tag" style="color:var(--gold);border-color:rgba(231,178,87,.4)">conclusion · live system</span></div>
-              <div class="ch-title" style="font-weight:700;color:var(--gold)">From Hypothesis to Production</div>
-              <div class="ch-desc"><strong>95.1% cache hit rate, 715M tokens saved, live on a single GPU.</strong> Chapter 01's principle, Chapter 02's architecture — now running as LeastGen, a transparent inference optimizer for autonomous coding agents. This is the conclusion of the series and the system that proves it at scale.</div>
-              <span class="ch-go">Read the conclusion <span class="arr">→</span></span>
-            </a>
     </div>
+
+    <!-- Project teaser — replaces old chp3 conclusion link -->
+    <a class="project-teaser" href="../../projects/leastgen.html">
+      <div class="ch-top">
+        <span class="ch-num">→</span>
+        <span class="ch-tag">now launching · open source</span>
+      </div>
+      <div class="ch-title">LeastGen &mdash; The Production System</div>
+      <div class="ch-desc">
+        The principle, proven at scale. <strong>95.1% cache hit rate, 715M tokens saved, zero cloud dependency &mdash; live on a single GPU.</strong>
+        The two-chapter series that started this research pipeline has grown into a transparent inference optimizer for autonomous agents,
+        routing 95% of requests from local cache at 0ms latency. The full project page, including architecture, live metrics, and deployment guide,
+        is now available. The next chapter of this work is no longer a research note &mdash; it's a product.
+      </div>
+      <span class="ch-go">View the project <span class="arr">→</span></span>
+    </a>
 
     <footer>
       Original experiments and write-ups for study and discussion. Measurements are
